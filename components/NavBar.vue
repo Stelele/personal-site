@@ -1,19 +1,19 @@
 <template>
   <div class="navbar bg-base-100">
       <div class="flex-1">
-        <a class="btn btn-ghost text-xl">daisyUI</a>
+        <NuxtLink to="/" class="btn btn-ghost text-xl">daisyUI</NuxtLink>
       </div>
       <div class="flex-none">
         <ul class="menu menu-horizontal px-1">
-          <li><a>Link</a></li>
+          <li><NuxtLink to="/Blog">Blog</NuxtLink></li>
           <li>
             <details>
               <summary>
-                Parent
+                Projects
               </summary>
               <ul class="p-2 bg-base-100 rounded-t-none">
-                <li><a>Link 1</a></li>
-                <li><a>Link 2</a></li>
+                <li><NuxtLink to="/projects/Games">Games</NuxtLink></li>
+                <li><NuxtLink to="/projects/WebApps">Web Apps</NuxtLink></li>
               </ul>
             </details>
           </li>
