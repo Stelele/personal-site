@@ -48,7 +48,7 @@ defineExpose({ setVisibility })
 const emit = defineEmits(['onOgroupSelected'])
 
 interface Prop {
-    details: Array<{
+    details?: Array<{
         iconOn: string[]
         iconOff: string[]
         title: string
