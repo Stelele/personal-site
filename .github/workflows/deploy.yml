@@ -27,11 +27,10 @@ jobs:
 
       - name: Deploy to separate repository
         env:
-          DEPLOY_REPO: git@github.com:Stelele/personal-site-build.git
           DEPLOY_BRANCH: main
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PAT: ${{ secrets.PAT }}
         run: |
-          git clone $DEPLOY_REPO out
+          git clone https://$PAT@github.com/Stelele/personal-site-build.git out
           cp -R dist/* out/
           cd out
           git config --global user.email "giftmugweni@gmail.com"
