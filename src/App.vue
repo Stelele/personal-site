@@ -1,8 +1,18 @@
 <template>
-  <h1>Hello world</h1>
+  <div class="mockup-browser bg-base-200 flex flex-col min-h-[100vh]">
+    <div class="mockup-browser-toolbar">
+      <div class=" input">https://giftmugweni.com</div>
+    </div>
+    <div class="flex flex-grow bg-base-100">
+      <SideBar ref="sideBar" />
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { RouterView } from 'vue-router';
+import { ref } from 'vue';
+import SideBar from './components/SideBar.vue';
+
+const sideBar = ref<InstanceType<typeof SideBar>>()
 
 </script>
