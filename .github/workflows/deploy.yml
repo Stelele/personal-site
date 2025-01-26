@@ -27,7 +27,7 @@ jobs:
 
       - name: Deploy to separate repository
         env:
-          DEPLOY_REPO: https://github.com/Stelele/personal-site-build
+          DEPLOY_REPO: 'https://github.com/Stelele/personal-site-build'
           DEPLOY_BRANCH: main
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
