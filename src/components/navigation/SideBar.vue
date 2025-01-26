@@ -16,10 +16,10 @@
                     </div>
                 </div>
                 <div class="bg-base-200 col-span-5 flex-grow p-4 min-h-full">
-                    <details open v-for="detail, idx in props.details">
+                    <details :open="idx === 0" v-for="detail, idx in props.details">
                         <summary class="group hover:cursor-pointer items-center" @click="toggleChecked(`swap-${idx}`)">
                             <div class="swap mt-3 h-fit">
-                                <input :id="`swap-${idx}`" type="checkbox" checked />
+                                <input :id="`swap-${idx}`" type="checkbox" :checked="idx === 0" />
                                 <FontAwesomeIcon class="swap-on" :icon="detail.iconOn" :size="'sm'" />
                                 <FontAwesomeIcon class="swap-off" :icon="detail.iconOff" :size="'sm'" />
                             </div>
@@ -45,29 +45,23 @@ import { ref } from 'vue';
 
 const show = ref(true)
 defineExpose({ setVisibility })
-const emit = defineEmits(['onOgroupSelected'])
+const emit = defineEmits(['onGroupSelected'])
 
-interface Prop {
-    details?: Array<{
-        iconOn: string[]
-        iconOff: string[]
-        title: string
-        children: Array<string>
-    }>
+export interface Detail {
+    iconOn: string[]
+    iconOff: string[]
+    title: string
+    children: Array<string>
+}
+export interface Props {
+    details?: Array<Detail>
 }
 
-const props = withDefaults(defineProps<Prop>(), {
-    details: () => [
-        {
-            iconOn: ['fas', 'door-open'],
-            iconOff: ['fas', 'door-closed'],
-            title: "Who Am I",
-            children: ["CV", "Images"]
-        }
-    ],
+const props = withDefaults(defineProps<Props>(), {
+    details: () => [],
 })
 
-interface Group {
+export interface Group {
     icon: string[],
     id: string,
 }
@@ -86,7 +80,7 @@ function setVisibility(visibility: boolean) {
 
 function selectGroup(groupIdx: number, group: Group) {
     selectedGroup.value = groupIdx
-    emit('onOgroupSelected', group.id)
+    emit('onGroupSelected', group.id)
 }
 
 function toggleChecked(id: string) {

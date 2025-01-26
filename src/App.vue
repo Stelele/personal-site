@@ -4,15 +4,12 @@
       <div class=" input">Gift Personal Site</div>
     </div>
     <div class="flex flex-grow bg-base-100">
-      <SideBar ref="sideBar" />
+      <Navigation />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import SideBar from './components/navigation/SideBar.vue';
-
-const sideBar = ref<InstanceType<typeof SideBar>>()
+import Navigation from './components/navigation/Navigation.vue';
 
 </script>
