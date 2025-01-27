@@ -1,8 +1,0 @@
-name: personal-site
-services:
-- environment_slug: node-js
-  github:
-    branch: main
-    deploy_on_push: true
-    repo: Stelele/personal-site
-  name: personal-site

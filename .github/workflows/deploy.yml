@@ -33,6 +33,7 @@ jobs:
           git clone https://$PAT@github.com/Stelele/personal-site-build.git out
           cp -R dist/* out/
           cd out
+          cp index.html 404.html
           git config --global user.email "giftmugweni@gmail.com"
           git config --global user.name "stelele"
           git add .
