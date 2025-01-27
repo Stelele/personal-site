@@ -5,7 +5,9 @@
     </div>
     <div class="flex flex-grow bg-base-100">
       <Navigation />
-      <RouterView />
+      <div class="flex flex-grow justify-center items-center">
+        <RouterView />
+      </div>
     </div>
   </div>
 </template>

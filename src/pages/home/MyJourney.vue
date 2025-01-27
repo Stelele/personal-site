@@ -1,5 +1,5 @@
 <template>
     <div class="w-full h-full">
-        Overview page
+        My Journey Page
     </div>
 </template>

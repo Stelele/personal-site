@@ -1,10 +1,10 @@
 <template>
-    <div class="drawer" :class="{
+    <div class="drawer w-64 overflow-clip" :class="{
         'drawer-open': show
     }">
         <input ref="toggleBar" type="checkbox" class="drawer-toggle" />
         <div class="drawer-side">
-            <div class="menu bg-base-100 min-h-full w-60 overflow-x-hidden grid grid-cols-6 gap-[2px]">
+            <div class="menu bg-base-100 min-h-full w-full overflow-x-hidden grid grid-cols-6 gap-[2px]">
                 <div
                     class="bg-base-200 min-h-full p-4 gap-6 flex flex-col items-center w-10 transition-all duration-100 ease-out">
                     <div v-for="group, idx in groups" :key="idx">
@@ -28,7 +28,10 @@
                         <ul>
                             <li v-for="child in detail.children">
                                 <ul>
-                                    <li><a class="group"><span>{{ child }}</span></a></li>
+                                    <li>
+                                        <RouterLink :to="child.path" class="group"><span>{{ child.name }}</span>
+                                        </RouterLink>
+                                    </li>
                                 </ul>
                             </li>
                         </ul>
@@ -42,6 +45,7 @@
 <script lang="ts" setup>
 import { OhVueIcon } from 'oh-vue-icons';
 import { ref } from 'vue';
+import { RouterLink } from 'vue-router';
 
 const show = ref(true)
 defineExpose({ setVisibility })
@@ -51,7 +55,10 @@ export interface Detail {
     iconOn: string
     iconOff: string
     title: string
-    children: Array<string>
+    children: Array<{
+        name: string
+        path: string
+    }>
 }
 export interface Props {
     details?: Array<Detail>
