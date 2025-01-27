@@ -1,8 +1,8 @@
 import { createApp } from 'vue'
 import './style.css'
 import App from './App.vue'
-import { addIcons } from './helpers/fontAwesome'
+import { importIcons } from './helpers/icons'
 
-addIcons()
+importIcons()
 createApp(App)
     .mount('#app')

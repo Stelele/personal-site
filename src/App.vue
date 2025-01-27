@@ -5,11 +5,13 @@
     </div>
     <div class="flex flex-grow bg-base-100">
       <Navigation />
+      <RouterView />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import Navigation from './components/navigation/Navigation.vue';
+import { RouterView } from 'vue-router'
 
 </script>
