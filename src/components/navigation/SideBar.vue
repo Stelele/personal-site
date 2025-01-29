@@ -4,9 +4,8 @@
     }">
         <input ref="toggleBar" type="checkbox" class="drawer-toggle" />
         <div class="drawer-side">
-            <div class="menu bg-base-100 min-h-full w-full overflow-x-hidden grid grid-cols-6 gap-[2px]">
-                <div
-                    class="bg-base-200 min-h-full p-4 gap-6 flex flex-col items-center w-10 transition-all duration-100 ease-out">
+            <div class="menu m-0 p-0 bg-base-100 w-full overflow-x-hidden grid grid-cols-6 gap-[2px]">
+                <div class="bg-base-200 p-4 gap-6 flex flex-col items-center w-10 transition-all duration-100 ease-out">
                     <div v-for="group, idx in groups" :key="idx">
                         <div class="hover:cursor-pointer swap" @click="selectGroup(idx, group)">
                             <input type="checkbox" :checked="idx === selectedGroup" />
@@ -15,7 +14,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="bg-base-200 col-span-5 flex-grow p-4 min-h-full">
+                <div class="bg-base-200 col-span-5 flex-grow p-4">
                     <details :open="idx === 0" v-for="detail, idx in props.details">
                         <summary class="group hover:cursor-pointer items-center" @click="toggleChecked(`swap-${idx}`)">
                             <div class="swap h-fit">
@@ -29,7 +28,8 @@
                             <li v-for="child in detail.children">
                                 <ul>
                                     <li>
-                                        <RouterLink :to="child.path" class="group"><span>{{ child.name }}</span>
+                                        <RouterLink :to="child.path" class="group">
+                                            <span>{{ child.name }}</span>
                                         </RouterLink>
                                     </li>
                                 </ul>

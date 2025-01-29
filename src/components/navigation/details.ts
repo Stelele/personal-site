@@ -8,7 +8,7 @@ export const AboutMeDetails: Detail[] = [
         children: [
             { name: 'Overview', path: "/" },
             { name: 'CV', path: "/cv" },
-            { name: 'My Journey', path: 'my-journey' },
+            { name: 'My Journey', path: '/my-journey' },
         ]
     }
 ]

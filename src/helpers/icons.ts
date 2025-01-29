@@ -8,6 +8,10 @@ import {
     BiPersonWorkspace,
     FcOpenedFolder,
     FcFolder,
+    IoClose,
+    BiGift,
+    MdWavinghandOutlined,
+    MdWavinghand,
 } from 'oh-vue-icons/icons'
 
 export function importIcons() {
@@ -20,5 +24,9 @@ export function importIcons() {
         BiPersonWorkspace,
         FcFolder,
         FcOpenedFolder,
+        IoClose,
+        BiGift,
+        MdWavinghandOutlined,
+        MdWavinghand,
     )
 }
