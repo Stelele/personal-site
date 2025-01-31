@@ -12,6 +12,16 @@ import {
     BiGift,
     MdWavinghandOutlined,
     MdWavinghand,
+    ViFileTypeJs,
+    ViFileTypeGo,
+    ViFileTypeCpp2,
+    ViFileTypeC,
+    ViFileTypePhp3,
+    ViFileTypeJar,
+    ViFileTypeJulia,
+    ViFileTypeMatlab,
+    ViFileTypePython,
+    ViFileTypeBinary,
 } from 'oh-vue-icons/icons'
 
 export function importIcons() {
@@ -28,5 +38,15 @@ export function importIcons() {
         BiGift,
         MdWavinghandOutlined,
         MdWavinghand,
+        ViFileTypeJs,
+        ViFileTypeGo,
+        ViFileTypeCpp2,
+        ViFileTypeC,
+        ViFileTypePhp3,
+        ViFileTypeJar,
+        ViFileTypeJulia,
+        ViFileTypeMatlab,
+        ViFileTypePython,
+        ViFileTypeBinary,
     )
 }

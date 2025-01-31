@@ -9,6 +9,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@giphy/js-components": "^5.13.0",
+    "@giphy/js-fetch-api": "^5.6.0",
     "@highlightjs/vue-plugin": "^2.1.0",
     "@webgpu/types": "^0.1.51",
     "axios": "^1.7.9",

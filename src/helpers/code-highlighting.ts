@@ -9,9 +9,6 @@ import julia from 'highlight.js/lib/languages/julia'
 import matlab from 'highlight.js/lib/languages/matlab'
 import python from 'highlight.js/lib/languages/python'
 import mipsasm from 'highlight.js/lib/languages/mipsasm'
-import latex from 'highlight.js/lib/languages/latex'
-import css from 'highlight.js/lib/languages/css'
-import xml from 'highlight.js/lib/languages/xml'
 
 export function addLanguages() {
     hljs.registerLanguage('javascript', javascript)
@@ -24,7 +21,5 @@ export function addLanguages() {
     hljs.registerLanguage('matlab', matlab)
     hljs.registerLanguage('python', python)
     hljs.registerLanguage('mipsasm', mipsasm)
-    hljs.registerLanguage('latex', latex)
-    hljs.registerLanguage('css', css)
-    hljs.registerLanguage('xml', xml)
 }
+
