@@ -1,9 +1,9 @@
 <template>
-    <div class="w-full h-full flex flex-col m-0 p-0">
-        <Tab icon="fc-opened-folder" label="CV" />
-    </div>
+    <PageBase label="CV" icon="fc-opened-folder">
+
+    </PageBase>
 </template>
 
 <script lang="ts" setup>
-import Tab from '../../components/Tab.vue';
+import PageBase from '../../components/PageBase.vue';
 </script>

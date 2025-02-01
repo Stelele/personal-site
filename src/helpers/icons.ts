@@ -22,6 +22,7 @@ import {
     ViFileTypeMatlab,
     ViFileTypePython,
     ViFileTypeBinary,
+    GiHamburgerMenu,
 } from 'oh-vue-icons/icons'
 
 export function importIcons() {
@@ -48,5 +49,6 @@ export function importIcons() {
         ViFileTypeMatlab,
         ViFileTypePython,
         ViFileTypeBinary,
+        GiHamburgerMenu,
     )
 }

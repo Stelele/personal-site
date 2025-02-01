@@ -1,5 +1,5 @@
 <template>
-    <PageBase>
+    <PageBase icon="fc-opened-folder" label="Overview">
         <div class="flex flex-col flex-grow items-center">
             <Giphy class=" mt-3" :width="300" name="Hello there" />
             <div class="prose">

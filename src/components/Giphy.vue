@@ -29,7 +29,7 @@ async function setGif() {
     const gf = new GiphyFetch(import.meta.env.VITE_GIPHY_API_KEY)
 
     const results = await gf.search(props.name, {
-        rating: "pg",
+        rating: "g",
         limit: 25,
         offset: Math.floor(Math.random() * 100),
     })

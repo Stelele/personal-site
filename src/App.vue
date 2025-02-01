@@ -7,12 +7,13 @@
       </div>
       <div class="flex-grow"></div>
     </div>
-    <div class="flex flex-grow bg-base-200 gap-0">
-      <Navigation />
-      <div class="flex flex-grow justify-center items-center">
-        <RouterView />
+    <Navigation>
+      <div class="flex flex-grow bg-base-200 gap-0">
+        <div class="flex flex-grow justify-center items-center">
+          <RouterView />
+        </div>
       </div>
-    </div>
+    </Navigation>
   </div>
 </template>
 

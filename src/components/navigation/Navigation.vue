@@ -1,5 +1,7 @@
 <template>
-    <SideBar :details="barDetails" @on-group-selected="onGroupSelect" />
+    <SideBar class="w-full" :details="barDetails" @on-group-selected="onGroupSelect">
+        <slot></slot>
+    </SideBar>
 </template>
 
 <script setup lang="ts">

@@ -1,8 +1,11 @@
 <template>
-    <div class="drawer w-64 overflow-clip" :class="{
-        'drawer-open': show
+    <div class="drawer w-full overflow-clip z-50 lg:drawer-open" :class="{
+        'sm:drawer-open': sideBarStore.show,
     }">
-        <input ref="toggleBar" type="checkbox" class="drawer-toggle" />
+        <input ref="toggleBar" id="toggleBar" type="checkbox" class="drawer-toggle" />
+        <div class="drawer-content">
+            <slot></slot>
+        </div>
         <div class="drawer-side">
             <div class="menu m-0 p-0 bg-base-100 w-full overflow-x-hidden grid grid-cols-6 gap-[2px]">
                 <div class="bg-base-200 p-4 gap-6 flex flex-col items-center w-10 transition-all duration-100 ease-out">
@@ -46,9 +49,11 @@
 import { OhVueIcon } from 'oh-vue-icons';
 import { ref } from 'vue';
 import { RouterLink } from 'vue-router';
+import { useSideBarStore } from '../../stores/sidebar-store';
 
-const show = ref(true)
-defineExpose({ setVisibility })
+const sideBarStore = useSideBarStore()
+
+
 const emit = defineEmits(['onGroupSelected'])
 
 export interface Detail {
@@ -79,11 +84,6 @@ const groups = ref<Group[]>([
     { icon: 'fa-book-open', id: "book-recommendations" },
 ])
 const selectedGroup = ref(0)
-
-function setVisibility(visibility: boolean) {
-    console.log(visibility)
-    show.value = visibility
-}
 
 function selectGroup(groupIdx: number, group: Group) {
     selectedGroup.value = groupIdx
