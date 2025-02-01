@@ -20,7 +20,7 @@ jobs:
           node-version: '22'
 
       - name: Setup Env Variables
-        run: sed -i 's/{{GIPHY_API_KEY}}/$GIPHY_API_KEY/' .env
+        run: sed 's/{{GIPHY_API_KEY}}/$GIPHY_API_KEY/' .env > .env.production
         env:
           GIPHY_API_KEY: ${{ secrets.GIPHY_API_KEY }}
 
