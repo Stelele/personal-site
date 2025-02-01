@@ -19,6 +19,11 @@ jobs:
         with:
           node-version: '22'
 
+      - name: Setup Env Variables
+        run: sed -i 's/{{GIPHY_API_KEY}}/$GIPHY_API_KEY/' .env
+        env:
+          GIPHY_API_KEY: ${{ secrets.GIPHY_API_KEY }}
+
       - name: Install dependencies
         run: npm install
 
