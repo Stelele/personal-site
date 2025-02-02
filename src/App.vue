@@ -21,4 +21,5 @@
 import Navigation from './components/navigation/Navigation.vue';
 import { RouterView } from 'vue-router'
 import { OhVueIcon } from 'oh-vue-icons';
+console.log("")
 </script>
