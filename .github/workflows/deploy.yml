@@ -36,6 +36,7 @@ jobs:
           PAT: ${{ secrets.PAT }}
         run: |
           git clone https://$PAT@github.com/Stelele/personal-site-build.git out
+          rm -r out/*
           cp -R dist/* out/
           cd out
           cp index.html 404.html
