@@ -23,6 +23,7 @@ import {
     ViFileTypePython,
     ViFileTypeBinary,
     GiHamburgerMenu,
+    FaGrinBeam,
 } from 'oh-vue-icons/icons'
 
 export function importIcons() {
@@ -50,5 +51,6 @@ export function importIcons() {
         ViFileTypePython,
         ViFileTypeBinary,
         GiHamburgerMenu,
+        FaGrinBeam,
     )
 }
