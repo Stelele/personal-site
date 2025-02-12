@@ -1,6 +1,8 @@
 <template>
     <PageBase label="Work In Progress" icon="fc-opened-folder">
-        <Giphy class=" mt-3" :width="600" name="work in progress" />
+        <div class="flex flex-col flex-grow items-center justify-center">
+            <Giphy class=" mt-3" :width="600" name="work in progress" />
+        </div>
     </PageBase>
 </template>
 
