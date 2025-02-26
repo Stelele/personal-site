@@ -19,8 +19,8 @@ export const BlogDetails: Detail[] = [
         iconOn: 'fa-door-open',
         iconOff: 'fa-door-closed',
         children: [
-            { name: 'Who is tech', path: "/" },
-            { name: 'Move fat...', path: "/" },
+            { name: 'Who is tech', path: "/who-is-tech" },
+            { name: 'Move fat...', path: "/move-fast" },
         ]
     },
     {
@@ -28,8 +28,8 @@ export const BlogDetails: Detail[] = [
         iconOn: 'fa-door-open',
         iconOff: 'fa-door-closed',
         children: [
-            { name: 'I think...', path: "/" },
-            { name: 'We move or do we...', path: "/" },
+            { name: 'I think...', path: "/i-think" },
+            { name: 'We move or do we...', path: "/we-move" },
         ]
     }
 ]
@@ -40,8 +40,8 @@ export const ProjectDetails: Detail[] = [
         iconOn: 'fa-door-open',
         iconOff: 'fa-door-closed',
         children: [
-            { name: 'Web GPU Game Engine', path: "/" },
-            { name: 'Shader Land', path: "/" },
+            { name: 'Web GPU Game Engine', path: "/web-gpu" },
+            { name: 'Shader Land', path: "/shader-land" },
         ]
     },
     {
@@ -49,8 +49,8 @@ export const ProjectDetails: Detail[] = [
         iconOn: 'fa-door-open',
         iconOff: 'fa-door-closed',
         children: [
-            { name: 'Pets', path: "/" },
-            { name: 'Fight Night', path: "/" },
+            { name: 'Pets', path: "/pets" },
+            { name: 'Fight Night', path: "/fight-night" },
         ],
     }
 ]
@@ -61,8 +61,8 @@ export const BooksDetails: Detail[] = [
         iconOn: 'fa-door-open',
         iconOff: 'fa-door-closed',
         children: [
-            { name: 'God of fishing', path: "/" },
-            { name: 'Martial World', path: "/" },
+            { name: 'God of fishing', path: "/god-of-fishing" },
+            { name: 'Martial World', path: "/martial-world" },
         ],
     },
     {
@@ -70,8 +70,8 @@ export const BooksDetails: Detail[] = [
         iconOn: 'fa-door-open',
         iconOff: 'fa-door-closed',
         children: [
-            { name: 'Discworld Series', path: "/" },
-            { name: 'Imajica', path: "/" },
+            { name: 'Discworld Series', path: "/discworld" },
+            { name: 'Imajica', path: "/imajica" },
         ]
     }
 ]
