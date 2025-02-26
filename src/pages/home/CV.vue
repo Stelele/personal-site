@@ -5,12 +5,13 @@
                 <h3><a href="#">Here</a> is the official one page CV</h3>
                 <h2>Below is the overly dramatized timeline</h2>
             </div>
-            <Timeline />
+            <Timeline :elements="timelineDetails" />
         </div>
     </PageBase>
 </template>
 
 <script lang="ts" setup>
-import PageBase from '../../components/PageBase.vue';
-import Timeline from '../../components/Timeline.vue';
+import PageBase from '../../components/PageBase.vue'
+import Timeline from '../../components/timeline/Timeline.vue'
+import { timelineDetails } from '../../components/timeline/details';
 </script>
