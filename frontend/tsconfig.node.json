@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
-    "target": "ES2024",
+    "target": "ESNext",
     "lib": ["ES2023", "ES2024.String"],
     "module": "ESNext",
     "skipLibCheck": true,
