@@ -19,6 +19,9 @@ jobs:
         with:
           node-version: '22'
 
+      - name: Building Front End
+        run: cd frontend
+        
       - name: Setup Env Variables
         run: sed s/{{GIPHY_API_KEY}}/$API_KEY/ .env > .env.production
         env:

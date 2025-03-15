@@ -1,0 +1,9 @@
+{
+    "editor.defaultFormatter": "Vue.volar",
+    "editor.formatOnSave": true,
+    "[typescript]": {
+        "editor.defaultFormatter": "vscode.typescript-language-features",
+        "editor.formatOnSave": true,
+    },
+    
+}

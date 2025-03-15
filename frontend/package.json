@@ -13,7 +13,6 @@
     "@giphy/js-fetch-api": "^5.6.0",
     "@highlightjs/vue-plugin": "^2.1.0",
     "@webgpu/types": "^0.1.51",
-    "axios": "^1.7.9",
     "highlight.js": "^11.11.1",
     "oh-vue-icons": "^1.0.0-rc3",
     "pinia": "^2.3.1",

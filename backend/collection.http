@@ -1,0 +1,6 @@
+@baseUrl = http://localhost:3000
+@feedUrl = https://medium.com/feed/@giftmugweni
+
+GET {{baseUrl}}/feed?url={{feedUrl}}
+
+###
