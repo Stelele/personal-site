@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -30,9 +31,16 @@ func handleGetFeed(w http.ResponseWriter, r *http.Request) {
 
 	params := r.URL.Query()
 
-	feedUrl := params.Get("url")
-	if feedUrl == "" {
+	escapedFeedUrl := params.Get("url")
+	if escapedFeedUrl == "" {
 		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	feedUrl, err := url.QueryUnescape(escapedFeedUrl)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(err)
 		return
 	}
 

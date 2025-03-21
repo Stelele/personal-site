@@ -18,7 +18,16 @@
 </template>
 
 <script setup lang="ts">
-import Navigation from './components/navigation/Navigation.vue';
+import Navigation from './components/navigation/Navigation.vue'
 import { RouterView } from 'vue-router'
-import { OhVueIcon } from 'oh-vue-icons';
+import { OhVueIcon } from 'oh-vue-icons'
+import { onBeforeMount } from 'vue'
+import { useArticlesStore } from './stores/aritcles-store'
+
+const articlesStore = useArticlesStore()
+
+onBeforeMount(() => {
+  articlesStore.update()
+})
+
 </script>
