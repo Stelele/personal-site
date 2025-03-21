@@ -40,7 +40,7 @@ jobs:
       - name: Building Front End
         run: |
           cd frontend
-          sed s/{{GIPHY_API_KEY}}/$API_KEY/ .env > .env.production
+          sed -e s/{{GIPHY_API_KEY}}/$API_KEY/ -e s|{{PRIV_API_URL}}|https://api.giftmugweni.com| .env > .env.production
           npm install
           npm run build
           git clone https://$PAT@github.com/Stelele/personal-site-build.git out
