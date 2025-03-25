@@ -20,7 +20,7 @@ jobs:
       - name: Build Backend
         run: |
           cd backend
-          sed -i |http://localhost:5173|https://giftmugweni.com| main.go
+          sed -i -e "|http://localhost:5173|https://giftmugweni.com|" main.go
           go build -o bin/
 
       - name: Push to DigitalOcean
