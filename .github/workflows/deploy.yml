@@ -40,7 +40,7 @@ jobs:
           username: ${{secrets.DROPLET_USERNAME}}
           key: ${{ secrets.SSH_KEY }}
           port: 22
-          script: whoami
+          script: sudo systemctl restart goweb
 
       - name: Setup Node.js
         uses: actions/setup-node@v2
