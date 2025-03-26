@@ -33,6 +33,15 @@ jobs:
           source: "backend/bin"
           target: "/var/www/personal-site"
 
+      - name: Restart Backend Server
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.DROPLET_IP }}
+          username: ${{secrets.DROPLET_USERNAME}}
+          key: ${{ secrets.SSH_KEY }}
+          port: 22
+          script: whoami
+
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
