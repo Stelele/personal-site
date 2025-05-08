@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"strconv"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -13,7 +14,8 @@ import (
 func main() {
 	r := mux.NewRouter()
 
-	r.HandleFunc("/feed", handleGetFeed).Methods("GET")
+	r.HandleFunc("/feed", handleGetRssFeed).Methods("GET")
+	r.HandleFunc("/medium-posts", handleGetMediumPosts).Methods("GET")
 
 	srv := &http.Server{
 		Handler: r,
@@ -26,7 +28,7 @@ func main() {
 	log.Fatal(srv.ListenAndServe())
 }
 
-func handleGetFeed(w http.ResponseWriter, r *http.Request) {
+func handleGetRssFeed(w http.ResponseWriter, r *http.Request) {
 	addResponseHeaders(&w)
 
 	params := r.URL.Query()
@@ -45,6 +47,26 @@ func handleGetFeed(w http.ResponseWriter, r *http.Request) {
 	}
 
 	feed, err := getRssFeed(feedUrl)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(err)
+		return
+	}
+
+	w.Write([]byte(feed))
+}
+
+func handleGetMediumPosts(w http.ResponseWriter, r *http.Request) {
+	addResponseHeaders(&w)
+
+	params := r.URL.Query()
+
+	page := params.Get("page")
+	if page == "" {
+		page = strconv.FormatInt(time.Now().UnixMilli(), 10)
+	}
+
+	feed, err := getMediumFeed(page)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(err)

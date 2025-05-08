@@ -1,6 +1,6 @@
 <template>
-    <PageBase v-if="post?.title" :label="post?.title" icon="fc-opened-folder">
-        <div class="prose min-w-full p-4 lg:pb-20 lg:pt-8 lg:px-20" v-html="augmentedContent">
+    <PageBase v-if="!isLoading" :label="post?.title" icon="fc-opened-folder">
+        <div class="prose min-w-full text-xl p-4 lg:pb-20 lg:pt-8 lg:px-20" v-html="augmentedContent">
         </div>
     </PageBase>
     <div class="min-w-full min-h-full gap-4 flex flex-col bg-base-100 px-4" v-else>
@@ -19,13 +19,52 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue';
+import { computed, onMounted, onUpdated, ref } from 'vue';
 import { useArticlesStore } from '../../stores/aritcles-store';
 import { useRoute } from 'vue-router';
 import PageBase from '../../components/PageBase.vue';
+import { getMediumPostText } from '../../helpers/blogs/medium';
 
 const articlesStore = useArticlesStore()
 const route = useRoute()
+const isLoading = ref(true)
+const prevRoute = ref({
+    site: "",
+    id: "",
+})
+
+onMounted(() => {
+    loadPost()
+    prevRoute.value.id = route.params.id as string
+    prevRoute.value.site = route.params.site as string
+})
+
+onUpdated(async () => {
+    if (isLoading.value) return
+    if (prevRoute.value.id !== route.params.id || prevRoute.value.site !== route.params.site) {
+        isLoading.value = true
+        loadPost()
+        prevRoute.value.id = route.params.id as string
+        prevRoute.value.site = route.params.site as string
+    }
+})
+
+
+
+async function loadPost() {
+    if (post.value?.title === undefined || post.value?.title === null) {
+        setTimeout(loadPost)
+        return
+    } else if (route.params.site === "medium") {
+        console.log("medium stuff")
+        const foundPost = articlesStore.posts.find(x => x.blogSite === route.params.site && x.id === route.params.id)
+        if (foundPost) {
+            foundPost.content = await getMediumPostText(foundPost.link)
+        }
+    }
+
+    isLoading.value = false
+}
 
 const post = computed(() => {
     const foundPost = articlesStore.posts.find(x => x.blogSite === route.params.site && x.id === route.params.id)

@@ -4,3 +4,7 @@
 GET {{baseUrl}}/feed?url={{feedUrl}}
 
 ###
+@page = 
+GET {{baseUrl}}/medium-posts?page={{page}}
+
+###
