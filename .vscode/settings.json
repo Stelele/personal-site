@@ -9,5 +9,8 @@
         "editor.defaultFormatter": "vscode.html-language-features"
     },
     "oxc.enable": false,
+    "[json]": {
+        "editor.defaultFormatter": "vscode.json-language-features"
+    },
     
 }

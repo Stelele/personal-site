@@ -137,7 +137,7 @@ export async function getMediumPostText(link: string) {
             }
 
             if (textSlice === details.text) {
-                paragraphText = `<${el}${attr}>${paragraphText}</${el}>`
+                paragraphText = `<${el}${attr}>${paragraphText.replaceAll("\n", "<br>")}</${el}>`
             } else {
                 paragraphText = paragraphText.replace(textSlice, `<${el}${attr}>${textSlice}</${el}>`)
             }

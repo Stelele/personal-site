@@ -13,27 +13,6 @@ export const AboutMeDetails: Detail[] = [
     }
 ]
 
-export const BlogDetails: Detail[] = [
-    {
-        title: 'Tech Blog',
-        iconOn: 'fa-door-open',
-        iconOff: 'fa-door-closed',
-        children: [
-            { name: 'Who is tech', path: "/who-is-tech" },
-            { name: 'Move fat...', path: "/move-fast" },
-        ]
-    },
-    {
-        title: 'Thinking Blog',
-        iconOn: 'fa-door-open',
-        iconOff: 'fa-door-closed',
-        children: [
-            { name: 'I think...', path: "/i-think" },
-            { name: 'We move or do we...', path: "/we-move" },
-        ]
-    }
-]
-
 export const ProjectDetails: Detail[] = [
     {
         title: 'Graphics Projects',
