@@ -47,12 +47,12 @@
 
 <script lang="ts" setup>
 import { OhVueIcon } from 'oh-vue-icons';
-import { ref } from 'vue';
-import { RouterLink } from 'vue-router';
+import { onMounted, ref } from 'vue';
+import { RouterLink, useRoute } from 'vue-router';
 import { useSideBarStore } from '../../stores/sidebar-store';
 
 const sideBarStore = useSideBarStore()
-
+const route = useRoute()
 
 const emit = defineEmits(['onGroupSelected'])
 
@@ -84,6 +84,11 @@ const groups = ref<Group[]>([
     { icon: 'fa-book-open', id: "book-recommendations" },
 ])
 const selectedGroup = ref(0)
+
+onMounted(() => {
+    const paths = window.location.href.replace(`${import.meta.env.VITE_BASE_URL}/`, "").split("/")
+    console.log(paths)
+})
 
 function selectGroup(groupIdx: number, group: Group) {
     selectedGroup.value = groupIdx

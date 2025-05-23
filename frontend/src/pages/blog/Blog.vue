@@ -56,7 +56,6 @@ async function loadPost() {
         setTimeout(loadPost)
         return
     } else if (route.params.site === "medium") {
-        console.log("medium stuff")
         const foundPost = articlesStore.posts.find(x => x.blogSite === route.params.site && x.id === route.params.id)
         if (foundPost) {
             foundPost.content = await getMediumPostText(foundPost.link)

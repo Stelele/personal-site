@@ -103,7 +103,6 @@ export async function getMediumPostText(link: string) {
     let text = ""
 
     const paragraphDetails: any[] = []
-    console.log(postDetails)
     for (const paragraph of paragraphs) {
         const details = postDetails[paragraph["__ref"]] as IParagraphDetail
         paragraphDetails.push(details)

@@ -20,7 +20,7 @@ jobs:
       - name: Build Backend
         run: |
           cd backend
-          sed -i -e "s|http://localhost:5173|https://giftmugweni.com|" main.go
+          sed -i -e "s|http://localhost:5173|https://giftmugweni.com,http://localhost:5173,https://*.masvingo.org|" main.go
           go build -o bin/
 
       - name: Push to DigitalOcean
@@ -45,12 +45,12 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '22'
+          node-version: "22"
 
       - name: Building Front End
         run: |
           cd frontend
-          sed -e 's|{{GIPHY_API_KEY}}|$API_KEY|' -e 's|{{PRIV_API_URL}}|https://api.giftmugweni.com|' .env > .env.production
+          sed -e 's|{{GIPHY_API_KEY}}|$API_KEY|' -e 's|{{PRIV_API_URL}}|https://api.giftmugweni.com|' -e 's|{{BASE_URL}}|https://giftmugweni.com|' .env > .env.production
           npm install
           npm run build
           git clone https://$PAT@github.com/Stelele/personal-site-build.git out
@@ -67,3 +67,4 @@ jobs:
           API_KEY: ${{ secrets.GIPHY_API_KEY }}
           DEPLOY_BRANCH: main
           PAT: ${{ secrets.PAT }}
+

@@ -31,10 +31,10 @@ const blogNavs = computed<Detail[]>(() => {
     }
 
     for (const post of articlesStore.posts) {
-        if (medium.children.length >= 10 && hashnode.children.length >= 10) break
+        // if (medium.children.length >= 10 && hashnode.children.length >= 10) break
 
         const section = post.blogSite === "medium" ? medium : hashnode
-        if (section.children.length >= 10) continue
+        // if (section.children.length >= 10) continue
 
         const title = post.title.length < 16 ?
             post.title :
