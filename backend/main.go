@@ -18,10 +18,10 @@ func main() {
 	r.HandleFunc("/medium-posts", handleGetMediumPosts).Methods("GET")
 
 	srv := &http.Server{
-		Handler: r,
-		Addr: "localhost:3000",
+		Handler:      r,
+		Addr:         "localhost:3000",
 		WriteTimeout: 15 * time.Second,
-		ReadTimeout: 15 * time.Second,
+		ReadTimeout:  15 * time.Second,
 	}
 
 	log.Println("Starting Server at: http://localhost:3000")
@@ -29,7 +29,13 @@ func main() {
 }
 
 func handleGetRssFeed(w http.ResponseWriter, r *http.Request) {
-	addResponseHeaders(&w)
+	origin := r.Header.Get("origin")
+	if !isOriginAuthorised(origin) {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	addResponseHeaders(&w, origin)
 
 	params := r.URL.Query()
 
@@ -57,7 +63,13 @@ func handleGetRssFeed(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleGetMediumPosts(w http.ResponseWriter, r *http.Request) {
-	addResponseHeaders(&w)
+	origin := r.Header.Get("origin")
+	if !isOriginAuthorised(origin) {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	addResponseHeaders(&w, origin)
 
 	params := r.URL.Query()
 
@@ -76,12 +88,25 @@ func handleGetMediumPosts(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(feed))
 }
 
-func addResponseHeaders(w *http.ResponseWriter) {
+func addResponseHeaders(w *http.ResponseWriter, origin string) {
 	// CORS Stuff
-	
-	(*w).Header().Set("Access-Control-Allow-Origin", "http://localhost:5173")
+
+	(*w).Header().Set("Access-Control-Allow-Origin", origin)
 	(*w).Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
 	(*w).Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 
 	(*w).Header().Add("Content-Type", "application/json")
+}
+
+func isOriginAuthorised(origin string) bool {
+	switch origin {
+	case "http://localhost:5173":
+		return true
+	case "https://anglican.masvingo.org":
+		return true
+	case "https://giftmugweni.com":
+		return true
+	default:
+		return false
+	}
 }

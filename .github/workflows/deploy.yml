@@ -20,7 +20,6 @@ jobs:
       - name: Build Backend
         run: |
           cd backend
-          sed -i -e "s|http://localhost:5173|https://giftmugweni.com,http://localhost:5173,https://*.masvingo.org|" main.go
           go build -o bin/
 
       - name: Push to DigitalOcean
@@ -67,4 +66,3 @@ jobs:
           API_KEY: ${{ secrets.GIPHY_API_KEY }}
           DEPLOY_BRANCH: main
           PAT: ${{ secrets.PAT }}
-
