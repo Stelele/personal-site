@@ -1,6 +1,6 @@
 <template>
   <div class="mockup-browser bg-base-200 flex flex-col min-h-[100vh]">
-    <div class="mockup-browser-toolbar flex">
+    <div class="mockup-browser-toolbar flex sticky top-0">
       <div class="flex-grow"></div>
       <div class="w-80 text-center bg-base-100 rounded-lg">
         <OhVueIcon name="bi-gift" /> Gift's Personal Site
@@ -18,18 +18,15 @@
 </template>
 
 <script setup lang="ts">
-import Navigation from './components/navigation/Navigation.vue'
-import { RouterView } from 'vue-router'
-import { OhVueIcon } from 'oh-vue-icons'
-import { onBeforeMount } from 'vue'
-import { useArticlesStore } from './stores/aritcles-store'
+import Navigation from "./components/navigation/Navigation.vue";
+import { RouterView } from "vue-router";
+import { OhVueIcon } from "oh-vue-icons";
+import { onBeforeMount } from "vue";
+import { useArticlesStore } from "./stores/aritcles-store";
 
-const articlesStore = useArticlesStore()
+const articlesStore = useArticlesStore();
 
 onBeforeMount(() => {
-  articlesStore.update()
-})
-
-
-
+  articlesStore.update();
+});
 </script>
