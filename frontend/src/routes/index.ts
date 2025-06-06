@@ -40,7 +40,7 @@ const routes: RouteRecordRaw[] = [
   },
 ];
 
-const scrollBehavior: RouterScrollBehavior = (to, from, savedBehaviour) => {
+const scrollBehavior: RouterScrollBehavior = (_to, _from, _savedBehaviour) => {
   return { top: 0 };
 };
 
