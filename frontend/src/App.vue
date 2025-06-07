@@ -23,10 +23,15 @@ import { RouterView } from "vue-router";
 import { OhVueIcon } from "oh-vue-icons";
 import { onBeforeMount } from "vue";
 import { useArticlesStore } from "./stores/aritcles-store";
+import { useSeoMeta } from "@unhead/vue";
 
 const articlesStore = useArticlesStore();
 
 onBeforeMount(() => {
   articlesStore.update();
+});
+
+useSeoMeta({
+  titleTemplate: "%s | Gift Mugweni",
 });
 </script>

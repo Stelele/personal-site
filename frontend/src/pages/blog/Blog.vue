@@ -30,6 +30,7 @@ import { useArticlesStore } from "../../stores/aritcles-store";
 import { useRoute } from "vue-router";
 import PageBase from "../../components/PageBase.vue";
 import { getMediumPostText } from "../../helpers/blogs/medium";
+import { useSeoMeta } from "@unhead/vue";
 
 const articlesStore = useArticlesStore();
 const route = useRoute();
@@ -102,6 +103,11 @@ const post = computed(() => {
 const augmentedContent = computed(() => {
   return `<h3><a target="_blank" href="${post.value?.link}">Here</a> is the link to original article</h3>${post.value?.content}`;
 });
+
+useSeoMeta({
+  title: () => `${post.value?.title} | ${post.value?.blogSite}`,
+  description: () => post.value?.brief,
+});
 </script>
 
 <style scoped>
@@ -110,4 +116,3 @@ const augmentedContent = computed(() => {
   margin: 0 auto;
 }
 </style>
-

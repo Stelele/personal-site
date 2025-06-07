@@ -12,12 +12,12 @@
     "@giphy/js-components": "^5.13.0",
     "@giphy/js-fetch-api": "^5.6.0",
     "@highlightjs/vue-plugin": "^2.1.0",
+    "@unhead/vue": "^2.0.10",
     "@webgpu/types": "^0.1.51",
     "highlight.js": "^11.11.1",
     "moment": "^2.30.1",
     "oh-vue-icons": "^1.0.0-rc3",
     "pinia": "^2.3.1",
-    "unhead": "^2.0.8",
     "vue": "^3.5.12",
     "vue-router": "^4.5.0"
   },

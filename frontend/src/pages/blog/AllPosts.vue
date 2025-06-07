@@ -50,6 +50,7 @@ import { computed } from "vue";
 import { useArticlesStore } from "../../stores/aritcles-store";
 import { Post } from "../../helpers/type";
 import moment from "moment";
+import { useSeoMeta } from "@unhead/vue";
 
 const route = useRoute();
 const articlesStore = useArticlesStore();
@@ -67,6 +68,12 @@ const posts = computed<Post[]>(() => {
   return articlesStore.posts.filter(
     (post) => post.blogSite === route.params.site,
   );
+});
+
+useSeoMeta({
+  title: () => `${blogSite.value} blog aritcles`,
+  description: () =>
+    `These are all the articles I've written on ${blogSite.value}.`,
 });
 
 function getFormatedDate(date: string) {

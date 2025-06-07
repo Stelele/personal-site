@@ -49,6 +49,7 @@ async function getMediumPosts(nextPage?: string, _allPosts?: any[]) {
         thumbnail:
           "https://cdn-images-1.medium.com/max/1024/" + post.previewImage.id,
         categories: (post.tags as any[]).map((tag_obj) => tag_obj.id),
+        subtitle: post.extendedPreviewContent.subtitle,
       };
     });
 
@@ -69,7 +70,7 @@ export async function getMediumFeed() {
     feedPosts.push({
       id: post.id,
       title: post.title,
-      brief: "",
+      brief: post.subtitle,
       link: post.link,
       publishDate: moment(post.pubDate).format(),
       updateDate: moment(post.pubDate).format(),
@@ -178,4 +179,3 @@ function getElementType(type: string) {
       return t;
   }
 }
-
