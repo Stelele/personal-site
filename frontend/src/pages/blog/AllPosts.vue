@@ -71,7 +71,7 @@ const posts = computed<Post[]>(() => {
 });
 
 useSeoMeta({
-  title: () => `${blogSite.value} blog aritcles`,
+  title: () => `${blogSite.value} blog articles`,
   description: () =>
     `These are all the articles I've written on ${blogSite.value}.`,
 });
