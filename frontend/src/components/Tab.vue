@@ -1,7 +1,7 @@
 <template>
     <div class="flex w-full gap-0" :class="prop.baseStyles">
         <div
-            class="flex w-fit border-t gap-1 py-1 px-2 items-center justify-center"
+            class="flex w-fit border-t border-primary gap-1 py-1 px-2 items-center justify-center tab-color"
         >
             <div>
                 <UIcon :name="prop.iconLeft" class="w-4 h-4" />
@@ -31,3 +31,9 @@ const prop = withDefaults(defineProps<Prop>(), {
     baseStyles: "",
 });
 </script>
+
+<style lang="css" scoped>
+.tab-color {
+    background-color: #22272e;
+}
+</style>

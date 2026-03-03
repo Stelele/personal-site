@@ -13,6 +13,7 @@ import AllPosts from "../pages/blog/AllPosts.vue";
 const routes: RouteRecordRaw[] = [
   {
     path: "/",
+    name: "Home",
     component: Overview,
     meta: {
       title: "Home Page - Overview",
@@ -20,10 +21,12 @@ const routes: RouteRecordRaw[] = [
   },
   {
     path: "/cv",
+    name: "CV",
     component: CV,
   },
   {
     path: "/my-journey",
+    name: "MyJourney",
     component: MyJourney,
   },
   {

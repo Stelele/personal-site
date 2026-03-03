@@ -1,13 +1,10 @@
 <template>
     <div class="flex w-full min-h-[calc(100vh-48px)] gap-1">
-        <!-- Desktop sidebar: fixed width, always visible on lg+ -->
         <div
             class="hidden lg:block lg:w-64 lg:sticky lg:top-10 lg:h-screen shrink-0 overflow-auto"
         >
             <UTree :items="treeItems" class="p-2 fixed w-64" />
         </div>
-
-        <!-- Main content: takes remaining width -->
         <div class="grow">
             <slot></slot>
         </div>
@@ -93,16 +90,9 @@ const treeItems = computed<TreeItem[]>(() => {
             icon: "i-heroicons-user",
             defaultExpanded: currentGroupId === "home",
             children: [
-                {
-                    label: "Who am I",
-                    icon: "i-heroicons-folder",
-                    defaultExpanded: true,
-                    children: [
-                        { label: "Overview", to: "/" },
-                        { label: "CV", to: "/cv" },
-                        { label: "My Journey", to: "/my-journey" },
-                    ],
-                },
+                { label: "Overview", to: "/" },
+                { label: "CV", to: "/cv" },
+                { label: "My Journey", to: "/my-journey" },
             ],
         },
         {
