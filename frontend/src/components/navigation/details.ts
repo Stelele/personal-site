@@ -1,4 +1,12 @@
-import { Detail } from "./SideBar.vue";
+export interface Detail {
+  iconOn: string;
+  iconOff: string;
+  title: string;
+  children: Array<{
+    name: string;
+    path: string;
+  }>;
+}
 
 export const AboutMeDetails: Detail[] = [
     {

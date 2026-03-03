@@ -7,26 +7,27 @@
         :key="post.id"
         :to="`/blog/${blogSite}/${post.id}`"
       >
-        <div class="card bg-base-200 w-full shadow-sm hover:cursor-pointer">
+        <div class="bg-[--ui-bg-alt] rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer">
           <figure>
             <img
-              class="max-h-72"
+              class="max-h-72 w-full object-cover"
               :src="post.coverImage || `/blog-empty.png`"
               :alt="post.title"
             />
           </figure>
-          <div class="card-body">
-            <h2 class="card-title">{{ post.title }}</h2>
-            <div class="flex flex-wrap gap-2 mt-1">
-              <div
+          <div class="p-4">
+            <h2 class="text-lg font-semibold mb-2">{{ post.title }}</h2>
+            <div class="flex flex-wrap gap-2 mb-2">
+              <UBadge
                 v-for="tag in post.tags"
                 :key="`${post.id}_${tag}`"
-                class="badge badge-outline badge-primary"
+                variant="outline"
+                color="primary"
               >
                 {{ tag }}
-              </div>
+              </UBadge>
             </div>
-            <p class="mt-1">{{ getFormatedDate(post.publishDate) }}</p>
+            <p class="text-sm text-[--ui-text-muted]">{{ getFormatedDate(post.publishDate) }}</p>
           </div>
         </div>
       </router-link>
@@ -36,8 +37,8 @@
         :key="i"
         class="flex flex-col gap-2"
       >
-        <div class="skeleton w-full h-[40vh]"></div>
-        <div class="skeleton w-3/4 h-10"></div>
+        <USkeleton class="w-full h-[40vh]" />
+        <USkeleton class="w-3/4 h-10" />
       </div>
     </div>
   </PageBase>

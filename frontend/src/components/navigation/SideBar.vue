@@ -1,89 +1,13 @@
 <template>
-  <div
-    class="drawer w-full overflow-x-clip z-50 lg:drawer-open"
-    :class="{
-      'sm:drawer-open': sideBarStore.show,
-    }"
-  >
-    <input
-      ref="toggleBar"
-      id="toggleBar"
-      type="checkbox"
-      class="drawer-toggle"
-    />
-    <div class="drawer-content">
-      <slot></slot>
-    </div>
-    <div class="drawer-side">
-      <div
-        class="menu m-0 p-0 bg-base-100 w-full overflow-x-hidden grid grid-cols-6 gap-[2px]"
-      >
-        <div
-          class="bg-base-200 p-4 gap-6 flex flex-col items-center w-10 transition-all duration-100 ease-out"
-        >
-          <div v-for="(group, idx) in groups" :key="idx">
-            <div
-              class="hover:cursor-pointer swap"
-              @click="selectGroup(idx, group)"
-            >
-              <input type="checkbox" :checked="idx === selectedGroup" />
-              <OhVueIcon
-                class="swap-on selected"
-                :name="group.icon"
-                :scale="1.5"
-              />
-              <OhVueIcon class="swap-off" :name="group.icon" :scale="1.5" />
-            </div>
-          </div>
-        </div>
-        <div class="bg-base-200 col-span-5 flex-grow p-4">
-          <details :open="idx === 0" v-for="(detail, idx) in props.details">
-            <summary
-              class="group hover:cursor-pointer items-center"
-              @click="toggleChecked(`swap-${idx}`)"
-            >
-              <div class="swap h-fit">
-                <input
-                  :id="`swap-${idx}`"
-                  type="checkbox"
-                  :checked="idx === 0"
-                />
-                <OhVueIcon class="swap-on" :name="detail.iconOn" />
-                <OhVueIcon class="swap-off" :name="detail.iconOff" />
-              </div>
-              <span class="pl-1">{{ detail.title }}</span>
-            </summary>
-            <ul>
-              <li v-for="child in detail.children">
-                <ul>
-                  <li>
-                    <RouterLink :to="child.path" class="group">
-                      <span>{{
-                        child.name.length < 16
-                          ? child.name
-                          : `${child.name.slice(0, 13)}...`
-                      }}</span>
-                    </RouterLink>
-                  </li>
-                </ul>
-              </li>
-            </ul>
-          </details>
-        </div>
-      </div>
-    </div>
-  </div>
+  <UTree :items="treeItems" class="bg-transparent p-2" />
 </template>
 
 <script lang="ts" setup>
-import { OhVueIcon } from "oh-vue-icons";
-import { onMounted, ref } from "vue";
-import { RouterLink } from "vue-router";
-import { useSideBarStore } from "../../stores/sidebar-store";
+import { computed } from "vue";
+import { useRoute } from "vue-router";
+import type { TreeItem } from "@nuxt/ui";
 
-const sideBarStore = useSideBarStore();
-
-const emit = defineEmits(["onGroupSelected"]);
+const route = useRoute();
 
 export interface Detail {
   iconOn: string;
@@ -94,6 +18,7 @@ export interface Detail {
     path: string;
   }>;
 }
+
 export interface Props {
   details?: Array<Detail>;
 }
@@ -102,47 +27,115 @@ const props = withDefaults(defineProps<Props>(), {
   details: () => [],
 });
 
-export interface Group {
-  icon: string;
-  id: string;
-}
-const groups = ref<Group[]>([
-  { icon: "fa-user", id: "home" },
-  { icon: "fa-blog", id: "blog" },
-  { icon: "bi-person-workspace", id: "projects" },
-  { icon: "fa-book-open", id: "book-recommendations" },
-]);
-const selectedGroup = ref(0);
-
-onMounted(() => {
-  const path = window.location.pathname.slice(1).split("/")[0];
-
-  switch (path) {
+const routeToGroupId = (path: string): string => {
+  const segment = path.slice(1).split("/")[0];
+  switch (segment) {
     case "":
-      selectedGroup.value = 0;
-      break;
+      return "home";
     case "blog":
-      selectedGroup.value = 1;
-      break;
+      return "blog";
+    case "projects":
+      return "projects";
+    case "book-recommendations":
+      return "book-recommendations";
     default:
-      selectedGroup.value = 0;
-      break;
+      return "home";
   }
+};
+
+const treeItems = computed<TreeItem[]>(() => {
+  const currentGroupId = routeToGroupId(route.path);
+
+  const groups: TreeItem[] = [
+    {
+      label: "Home",
+      icon: "i-heroicons-user",
+      defaultExpanded: currentGroupId === "home",
+      children: [
+        {
+          label: "Who am I",
+          icon: "i-heroicons-folder",
+          defaultExpanded: true,
+          children: [
+            { label: "Overview", to: "/" },
+            { label: "CV", to: "/cv" },
+            { label: "My Journey", to: "/my-journey" },
+          ],
+        },
+      ],
+    },
+    {
+      label: "Blog",
+      icon: "i-heroicons-document-text",
+      defaultExpanded: currentGroupId === "blog",
+      children: props.details
+        .filter(
+          (d) =>
+            d.title.toLowerCase().includes("medium") ||
+            d.title.toLowerCase().includes("hashnode")
+        )
+        .map((detail) => ({
+          label: detail.title,
+          icon: "i-heroicons-folder",
+          defaultExpanded: true,
+          children: detail.children.map((child) => ({
+            label: child.name.length < 20 ? child.name : `${child.name.slice(0, 17)}...`,
+            to: child.path,
+          })),
+        })),
+    },
+    {
+      label: "Projects",
+      icon: "i-heroicons-code-bracket",
+      defaultExpanded: currentGroupId === "projects",
+      children: [
+        {
+          label: "Graphics Projects",
+          icon: "i-heroicons-folder",
+          defaultExpanded: true,
+          children: [
+            { label: "Web GPU Game Engine", to: "/web-gpu" },
+            { label: "Shader Land", to: "/shader-land" },
+          ],
+        },
+        {
+          label: "Game Dev Projects",
+          icon: "i-heroicons-folder",
+          defaultExpanded: true,
+          children: [
+            { label: "Pets", to: "/pets" },
+            { label: "Fight Night", to: "/fight-night" },
+          ],
+        },
+      ],
+    },
+    {
+      label: "Books",
+      icon: "i-heroicons-book-open",
+      defaultExpanded: currentGroupId === "book-recommendations",
+      children: [
+        {
+          label: "Wuxia Books",
+          icon: "i-heroicons-folder",
+          defaultExpanded: true,
+          children: [
+            { label: "God of fishing", to: "/god-of-fishing" },
+            { label: "Martial World", to: "/martial-world" },
+          ],
+        },
+        {
+          label: "Western Books",
+          icon: "i-heroicons-folder",
+          defaultExpanded: true,
+          children: [
+            { label: "Discworld Series", to: "/discworld" },
+            { label: "Imajica", to: "/imajica" },
+          ],
+        },
+      ],
+    },
+  ];
+
+  return groups;
 });
-
-function selectGroup(groupIdx: number, group: Group) {
-  selectedGroup.value = groupIdx;
-  emit("onGroupSelected", group.id);
-}
-
-function toggleChecked(id: string) {
-  const element = document.getElementById(id) as HTMLInputElement;
-  element.checked = !element.checked;
-}
 </script>
-
-<style>
-.selected {
-  color: oklch(var(--p) / 1);
-}
-</style>

@@ -4,6 +4,7 @@ import App from "./App.vue";
 import { importIcons } from "./helpers/icons";
 import { addLanguages } from "./helpers/code-highlighting";
 import hljsVuePlugin from "@highlightjs/vue-plugin";
+import ui from "@nuxt/ui/vue-plugin";
 import "highlight.js/styles/github-dark-dimmed.min.css";
 import { createPinia } from "pinia";
 import { router } from "./routes";
@@ -20,4 +21,5 @@ createApp(App)
   .use(hljsVuePlugin)
   .use(router)
   .use(head)
+  .use(ui)
   .mount("#app");

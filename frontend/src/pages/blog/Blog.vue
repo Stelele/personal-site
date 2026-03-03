@@ -6,19 +6,19 @@
       v-html="augmentedContent"
     ></div>
     <div
-      class="min-w-full min-h-full gap-4 flex flex-col bg-base-100 px-4"
+      class="min-w-full min-h-full gap-4 flex flex-col px-4"
       v-else
     >
-      <div class="skeleton h-80 w-3/4 center-fig"></div>
+      <USkeleton class="h-80 w-3/4 mx-auto" />
       <div v-for="_ in 4" class="flex flex-col gap-1">
-        <div class="skeleton w-[80%] h-5"></div>
-        <div class="skeleton w-[80%] h-5"></div>
-        <div class="skeleton w-[85%] h-5"></div>
-        <div class="skeleton w-[85%] h-5"></div>
-        <div class="skeleton w-[90%] h-5"></div>
-        <div class="skeleton w-[90%] h-5"></div>
-        <div class="skeleton w-[85%] h-5"></div>
-        <div class="skeleton w-[85%] h-5"></div>
+        <USkeleton class="w-[80%] h-5" />
+        <USkeleton class="w-[80%] h-5" />
+        <USkeleton class="w-[85%] h-5" />
+        <USkeleton class="w-[85%] h-5" />
+        <USkeleton class="w-[90%] h-5" />
+        <USkeleton class="w-[90%] h-5" />
+        <USkeleton class="w-[85%] h-5" />
+        <USkeleton class="w-[85%] h-5" />
       </div>
     </div>
   </PageBase>
@@ -109,10 +109,3 @@ useSeoMeta({
   description: () => post.value?.brief,
 });
 </script>
-
-<style scoped>
-.center-fig {
-  display: block;
-  margin: 0 auto;
-}
-</style>
