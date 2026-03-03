@@ -3,15 +3,3 @@
         <slot></slot>
     </div>
 </template>
-
-<script lang="ts" setup>
-export interface Props {
-    label?: string;
-    icon?: string;
-}
-
-const props = withDefaults(defineProps<Props>(), {
-    label: "",
-    icon: "",
-});
-</script>
