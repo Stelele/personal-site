@@ -2,8 +2,14 @@ import { TreeItem } from "@nuxt/ui";
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
-import { useArticlesStore } from "./aritcles-store";
-import { Detail } from "../components/navigation/details";
+import { useArticlesStore } from "@/stores/aritcles-store";
+
+interface Detail {
+  title: string;
+  iconOn: string;
+  iconOff: string;
+  children: { name: string; path: string }[];
+}
 
 export const useSideBarStore = defineStore("SideBarStore", () => {
   const router = useRouter();

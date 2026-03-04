@@ -1,5 +1,5 @@
 import moment from "moment";
-import { Post } from "../type";
+import { Post } from "@/helpers/type";
 
 interface IParagraphDetail {
   __typename: string;

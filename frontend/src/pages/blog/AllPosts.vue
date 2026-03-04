@@ -46,10 +46,10 @@
 
 <script setup lang="ts">
 import { useRoute } from "vue-router";
-import PageBase from "../../components/PageBase.vue";
+import PageBase from "@/components/PageBase.vue";
 import { computed } from "vue";
-import { useArticlesStore } from "../../stores/aritcles-store";
-import { Post } from "../../helpers/type";
+import { useArticlesStore } from "@/stores/aritcles-store";
+import { Post } from "@/helpers/type";
 import moment from "moment";
 import { useSeoMeta } from "@unhead/vue";
 

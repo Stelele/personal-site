@@ -23,6 +23,10 @@
     "noUncheckedSideEffectImports": true,
 
     "types": ["@webgpu/types"],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    }
   },
   "include": [
     "src/**/*.ts",

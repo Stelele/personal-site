@@ -4,6 +4,11 @@ import ui from "@nuxt/ui/vite";
 import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
+  resolve: {
+    alias: {
+      '@': '/src'
+    }
+  },
   plugins: [
     vue(),
     tailwindcss(),

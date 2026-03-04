@@ -27,11 +27,11 @@
 
 <script lang="ts" setup>
 import { ref } from "vue";
-import PageBase from "../../components/PageBase.vue";
-import CodeBlock from "../../components/CodeBlock.vue";
-import Giphy from "../../components/Giphy.vue";
+import PageBase from "@/components/PageBase.vue";
+import CodeBlock from "@/components/CodeBlock.vue";
+import Giphy from "@/components/Giphy.vue";
 import { OhVueIcon } from "oh-vue-icons";
-import { getHelloWorlds } from "../../helpers/hello-worlds";
+import { getHelloWorlds } from "@/helpers/hello-worlds";
 import { useSeoMeta } from "@unhead/vue";
 
 const languages = ref(getHelloWorlds());

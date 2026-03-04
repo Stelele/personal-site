@@ -16,7 +16,7 @@
 </template>
 
 <script lang="ts" setup>
-import Tab from "./Tab.vue";
+import Tab from "@/components/Tab.vue";
 
 export interface Prop {
     label?: string;

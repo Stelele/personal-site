@@ -1,4 +1,4 @@
-import { Prop } from "../components/CodeBlock.vue"
+import { Prop } from "@/components/CodeBlock.vue"
 
 const C = `#include "stdio.h"
 

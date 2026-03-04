@@ -1,5 +1,5 @@
 import moment from "moment";
-import { HashnodeFeed, Post } from "../type";
+import { HashnodeFeed, Post } from "@/helpers/type";
 
 async function getHashNodePosts() {
   const query = `

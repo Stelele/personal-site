@@ -7,8 +7,8 @@
 </template>
 
 <script lang="ts" setup>
-import PageBase from "../../components/PageBase.vue";
-import Giphy from "../../components/Giphy.vue";
+import PageBase from "@/components/PageBase.vue";
+import Giphy from "@/components/Giphy.vue";
 import { useSeoMeta } from "@unhead/vue";
 
 useSeoMeta({

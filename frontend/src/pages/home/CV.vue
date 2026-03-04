@@ -12,9 +12,9 @@
 
 <script lang="ts" setup>
 import { useSeoMeta } from "@unhead/vue";
-import PageBase from "../../components/PageBase.vue";
-import Timeline from "../../components/timeline/Timeline.vue";
-import { timelineDetails } from "../../components/timeline/details";
+import PageBase from "@/components/PageBase.vue";
+import Timeline from "@/components/timeline/Timeline.vue";
+import { timelineDetails } from "@/components/timeline/details";
 
 useSeoMeta({
   title: `CV`,

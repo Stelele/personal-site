@@ -4,12 +4,12 @@ import {
   RouteRecordRaw,
   RouterScrollBehavior,
 } from "vue-router";
-import Overview from "../pages/home/Overview.vue";
-import CV from "../pages/home/CV.vue";
-import MyJourney from "../pages/home/MyJourney.vue";
-import Blog from "../pages/blog/Blog.vue";
-import AllPosts from "../pages/blog/AllPosts.vue";
-import WorkInProgress from "../pages/home/WorkInProgess.vue";
+import Overview from "@/pages/home/Overview.vue";
+import CV from "@/pages/home/CV.vue";
+import MyJourney from "@/pages/home/MyJourney.vue";
+import Blog from "@/pages/blog/Blog.vue";
+import AllPosts from "@/pages/blog/AllPosts.vue";
+import WorkInProgress from "@/pages/home/WorkInProgess.vue";
 
 const routes: RouteRecordRaw[] = [
   {

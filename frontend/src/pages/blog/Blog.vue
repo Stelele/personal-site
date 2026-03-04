@@ -26,10 +26,10 @@
 
 <script lang="ts" setup>
 import { computed, onMounted, onUpdated, ref } from "vue";
-import { useArticlesStore } from "../../stores/aritcles-store";
+import { useArticlesStore } from "@/stores/aritcles-store";
 import { useRoute } from "vue-router";
-import PageBase from "../../components/PageBase.vue";
-import { getMediumPostText } from "../../helpers/blogs/medium";
+import PageBase from "@/components/PageBase.vue";
+import { getMediumPostText } from "@/helpers/blogs/medium";
 import { useSeoMeta } from "@unhead/vue";
 
 const articlesStore = useArticlesStore();

@@ -1,4 +1,4 @@
-import { Element } from "./Timeline.vue"
+import { Element } from "@/components/timeline/Timeline.vue"
 
 export const timelineDetails: Element[] = [
     {

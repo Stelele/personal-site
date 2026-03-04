@@ -1,6 +1,6 @@
-import { Post } from "./type";
-import { getHashNodeFeed } from "./blogs/hashnode";
-import { getMediumFeed } from "./blogs/medium";
+import { Post } from "@/helpers/type";
+import { getHashNodeFeed } from "@/helpers/blogs/hashnode";
+import { getMediumFeed } from "@/helpers/blogs/medium";
 import moment from "moment";
 
 export async function getBlogFeeds() {

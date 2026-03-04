@@ -33,13 +33,13 @@
 </template>
 
 <script setup lang="ts">
-import Navigation from "./components/navigation/Navigation.vue";
+import Navigation from "@/components/navigation/Navigation.vue";
 import { RouterView, useRoute } from "vue-router";
 import { computed, onBeforeMount } from "vue";
-import { useArticlesStore } from "./stores/aritcles-store";
+import { useArticlesStore } from "@/stores/aritcles-store";
 import { useSeoMeta } from "@unhead/vue";
 import { NavigationMenuItem } from "@nuxt/ui";
-import { useSideBarStore } from "./stores/sidebar-store";
+import { useSideBarStore } from "@/stores/sidebar-store";
 
 const route = useRoute();
 
