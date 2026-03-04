@@ -1,10 +1,12 @@
 import { TreeItem } from "@nuxt/ui";
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
+import { useRouter } from "vue-router";
 import { useArticlesStore } from "./aritcles-store";
 import { Detail } from "../components/navigation/details";
 
 export const useSideBarStore = defineStore("SideBarStore", () => {
+  const router = useRouter();
   const articlesStore = useArticlesStore();
   const show = ref(false);
   const currentGroupId = ref("home");
@@ -58,9 +60,9 @@ export const useSideBarStore = defineStore("SideBarStore", () => {
       icon: "i-heroicons-user",
       defaultExpanded: currentGroupId.value === "home",
       children: [
-        { label: "Overview", to: "/" },
-        { label: "CV", to: "/cv" },
-        { label: "My Journey", to: "/my-journey" },
+        { label: "Overview", to: "/", onSelect: () => router.push("/") },
+        { label: "CV", to: "/cv", onSelect: () => router.push("/cv") },
+        { label: "My Journey", to: "/my-journey", onSelect: () => router.push("/my-journey") },
       ],
     },
     {
@@ -83,6 +85,7 @@ export const useSideBarStore = defineStore("SideBarStore", () => {
                 ? child.name
                 : `${child.name.slice(0, 17)}...`,
             to: child.path,
+            onSelect: () => router.push(child.path),
           })),
         })),
     },
@@ -96,8 +99,8 @@ export const useSideBarStore = defineStore("SideBarStore", () => {
           icon: "i-heroicons-folder",
           defaultExpanded: true,
           children: [
-            { label: "Web GPU Game Engine", to: "/web-gpu" },
-            { label: "Shader Land", to: "/shader-land" },
+            { label: "Web GPU Game Engine", to: "/web-gpu", onSelect: () => router.push("/web-gpu") },
+            { label: "Shader Land", to: "/shader-land", onSelect: () => router.push("/shader-land") },
           ],
         },
         {
@@ -105,8 +108,8 @@ export const useSideBarStore = defineStore("SideBarStore", () => {
           icon: "i-heroicons-folder",
           defaultExpanded: true,
           children: [
-            { label: "Pets", to: "/pets" },
-            { label: "Fight Night", to: "/fight-night" },
+            { label: "Pets", to: "/pets", onSelect: () => router.push("/pets") },
+            { label: "Fight Night", to: "/fight-night", onSelect: () => router.push("/fight-night") },
           ],
         },
       ],
@@ -121,8 +124,8 @@ export const useSideBarStore = defineStore("SideBarStore", () => {
           icon: "i-heroicons-folder",
           defaultExpanded: true,
           children: [
-            { label: "God of fishing", to: "/god-of-fishing" },
-            { label: "Martial World", to: "/martial-world" },
+            { label: "God of fishing", to: "/god-of-fishing", onSelect: () => router.push("/god-of-fishing") },
+            { label: "Martial World", to: "/martial-world", onSelect: () => router.push("/martial-world") },
           ],
         },
         {
@@ -130,8 +133,8 @@ export const useSideBarStore = defineStore("SideBarStore", () => {
           icon: "i-heroicons-folder",
           defaultExpanded: true,
           children: [
-            { label: "Discworld Series", to: "/discworld" },
-            { label: "Imajica", to: "/imajica" },
+            { label: "Discworld Series", to: "/discworld", onSelect: () => router.push("/discworld") },
+            { label: "Imajica", to: "/imajica", onSelect: () => router.push("/imajica") },
           ],
         },
       ],

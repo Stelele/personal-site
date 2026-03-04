@@ -1,6 +1,15 @@
 <template>
     <UApp>
         <UHeader :mode="'drawer'">
+            <template #left>
+                <div class="h-14 w-auto flex items-start justify-start">
+                    <img
+                        src="/assets/logo.png"
+                        class="h-full w-auto object-contain"
+                        alt="Gift Logo"
+                    />
+                </div>
+            </template>
             <UPageHeader
                 :ui="{
                     title: 'text-xl sm:text-2xl',
