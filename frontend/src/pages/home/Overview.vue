@@ -1,40 +1,19 @@
 <template>
-    <PageBase icon="fc-opened-folder" label="Overview">
-        <div class="flex flex-col grow items-center">
-            <Giphy class="mt-3" :width="300" name="Hello there" />
-            <div class="prose text-center">
-                <h1 class="p-0 m-2">Hello World</h1>
-                <h2 class="p-0 m-2">
-                    I'm Gift. Welcome to my site
-                    <span>
-                        <OhVueIcon class="mb-1" name="fa-grin-beam" />
-                    </span>
-                </h2>
-            </div>
-            <div class="grid sm:grid-cols-1 lg:grid-cols-2 w-full h-full gap-2">
-                <CodeBlock
-                    class="mt-2"
-                    v-for="code in languages"
-                    :label="code.label"
-                    :language="code.language"
-                    :icon="code.icon"
-                    :code="code.code"
+    <div class="flex w-full h-full items-center justify-center">
+        <div class="flex flex-col items-center w-1/2">
+            <div class="h-28 w-full">
+                <img
+                    src="/assets/welcome.png"
+                    class="w-full h-full object-contain"
+                    alt="Logo"
                 />
             </div>
         </div>
-    </PageBase>
+    </div>
 </template>
 
 <script lang="ts" setup>
-import { ref } from "vue";
-import PageBase from "@/components/PageBase.vue";
-import CodeBlock from "@/components/CodeBlock.vue";
-import Giphy from "@/components/Giphy.vue";
-import { OhVueIcon } from "oh-vue-icons";
-import { getHelloWorlds } from "@/helpers/hello-worlds";
 import { useSeoMeta } from "@unhead/vue";
-
-const languages = ref(getHelloWorlds());
 
 useSeoMeta({
     title: "Home",

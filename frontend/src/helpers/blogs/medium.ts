@@ -31,6 +31,7 @@ async function getMediumPosts(nextPage?: string, _allPosts?: any[]) {
   const response = await fetch(
     `${import.meta.env.VITE_PRIV_API_URL}/medium-posts?page=${nextPage ? nextPage : ""}`,
   ).then((r) => r.json());
+  console.log(response);
 
   // NOTE: strip non-post items and strip description fields
   let next = null;

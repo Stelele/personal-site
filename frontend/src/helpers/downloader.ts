@@ -11,6 +11,8 @@ export async function getBlogFeeds() {
 
   const posts: Post[] = [...mediumFeed, ...hashNodeFeed];
 
+  console.log(posts);
+
   posts.sort((a, b) =>
     moment(a.publishDate).isBefore(moment(b.publishDate)) ? 1 : -1,
   );

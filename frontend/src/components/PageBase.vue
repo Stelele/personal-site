@@ -1,5 +1,21 @@
 <template>
-    <div class="min-w-full min-h-full flex flex-col m-0 p-0 bg-neutral-800">
-        <slot></slot>
-    </div>
+    <UPage>
+        <template #left>
+            <UPageAside>
+                <UTree
+                    :items="sideBarStore.links"
+                    class="bg-transparent w-full"
+                />
+            </UPageAside>
+        </template>
+        <UPageBody class="h-screen">
+            <slot />
+        </UPageBody>
+    </UPage>
 </template>
+
+<script setup lang="ts">
+import { useSideBarStore } from "@/stores/sidebar-store";
+
+const sideBarStore = useSideBarStore();
+</script>
