@@ -5,7 +5,7 @@ import moment from "moment";
 
 export async function getBlogFeeds() {
   const [mediumFeed, hashNodeFeed] = await Promise.all([
-    getMediumFeed(),
+    [], // getMediumFeed(),
     getHashNodeFeed(),
   ]);
 
