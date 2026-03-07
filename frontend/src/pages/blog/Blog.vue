@@ -26,27 +26,31 @@
           <h1 class="text-2xl md:text-3xl font-bold">
             {{ post?.title }}
           </h1>
-          <p v-if="post?.publishDate" class="text-sm text-muted mt-1">
+          <p v-if="post?.publishDate" class="text-lg font-medium text-muted mt-1">
             {{ formatDate(post.publishDate) }}
           </p>
-        </template>
-
-        <article
-          class="prose prose-lg dark:prose-invert max-w-none text-justify leading-relaxed"
-          v-html="augmentedContent"
-        />
-
-        <template #footer>
           <UButton
             :to="post?.link"
             target="_blank"
             variant="link"
             color="primary"
             icon="i-heroicons-arrow-top-right-on-square-20-solid"
+            class="mt-1 px-0"
           >
             View original article
           </UButton>
+          <img
+            v-if="post?.coverImage"
+            :src="post.coverImage"
+            :alt="post.title"
+            class="w-full mt-4 rounded-lg"
+          />
         </template>
+
+        <article
+          class="prose prose-lg dark:prose-invert max-w-none text-justify leading-relaxed"
+          v-html="augmentedContent"
+        />
       </UCard>
     </UContainer>
   </div>
