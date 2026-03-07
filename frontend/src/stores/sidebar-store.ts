@@ -6,8 +6,7 @@ import { useArticlesStore } from "@/stores/aritcles-store";
 
 interface Detail {
   title: string;
-  iconOn: string;
-  iconOff: string;
+  icon: string;
   children: { name: string; path: string }[];
 }
 
@@ -20,15 +19,13 @@ export const useSideBarStore = defineStore("SideBarStore", () => {
   const blogNavs = computed<Detail[]>(() => {
     const medium: Detail = {
       title: "Medium Blog",
-      iconOn: "fa-door-open",
-      iconOff: "fa-door-closed",
+      icon: "i-simple-icons:medium",
       children: [],
     };
 
     const hashnode: Detail = {
       title: "Hashnode Blog",
-      iconOn: "fa-door-open",
-      iconOff: "fa-door-closed",
+      icon: "i-simple-icons:hashnode",
       children: [],
     };
 
@@ -79,21 +76,16 @@ export const useSideBarStore = defineStore("SideBarStore", () => {
       label: "Blog",
       icon: "i-heroicons-document-text",
       defaultExpanded: currentGroupId.value === "blog",
-      children: blogNavs.value
-        .filter(
-          (d) =>
-            d.title.toLowerCase().includes("medium") || d.title.toLowerCase().includes("hashnode")
-        )
-        .map((detail) => ({
-          label: detail.title,
-          icon: "i-simple-icons-hashnode",
-          defaultExpanded: true,
-          children: detail.children.map((child) => ({
-            label: child.name,
-            to: child.path,
-            onSelect: () => router.push(child.path),
-          })),
+      children: blogNavs.value.map((detail) => ({
+        label: detail.title,
+        icon: detail.icon,
+        defaultExpanded: true,
+        children: detail.children.map((child) => ({
+          label: child.name,
+          to: child.path,
+          onSelect: () => router.push(child.path),
         })),
+      })),
     },
     {
       label: "Projects",

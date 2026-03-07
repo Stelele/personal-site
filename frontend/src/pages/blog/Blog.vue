@@ -1,31 +1,28 @@
 <template>
-  <PageBase :label="post?.title" icon="fc-opened-folder">
-    <div
-      v-if="!isLoading"
-      class="prose min-w-full text-xl p-4 lg:pb-20 lg:pt-8 lg:px-20"
-      v-html="augmentedContent"
-    />
-    <div v-else class="min-w-full min-h-full gap-4 flex flex-col px-4">
-      <USkeleton class="h-80 w-3/4 mx-auto" />
-      <div v-for="(_, index) in 4" :key="index" class="flex flex-col gap-1">
-        <USkeleton class="w-[80%] h-5" />
-        <USkeleton class="w-[80%] h-5" />
-        <USkeleton class="w-[85%] h-5" />
-        <USkeleton class="w-[85%] h-5" />
-        <USkeleton class="w-[90%] h-5" />
-        <USkeleton class="w-[90%] h-5" />
-        <USkeleton class="w-[85%] h-5" />
-        <USkeleton class="w-[85%] h-5" />
-      </div>
+  <div
+    v-if="!isLoading"
+    class="prose min-w-full text-xl p-4 lg:pb-20 lg:pt-8 lg:px-20"
+    v-html="augmentedContent"
+  />
+  <div v-else class="min-w-full min-h-full gap-4 flex flex-col px-4">
+    <USkeleton class="h-80 w-3/4 mx-auto" />
+    <div v-for="(_, index) in 4" :key="index" class="flex flex-col gap-1">
+      <USkeleton class="w-[80%] h-5" />
+      <USkeleton class="w-[80%] h-5" />
+      <USkeleton class="w-[85%] h-5" />
+      <USkeleton class="w-[85%] h-5" />
+      <USkeleton class="w-[90%] h-5" />
+      <USkeleton class="w-[90%] h-5" />
+      <USkeleton class="w-[85%] h-5" />
+      <USkeleton class="w-[85%] h-5" />
     </div>
-  </PageBase>
+  </div>
 </template>
 
 <script lang="ts" setup>
 import { computed, onMounted, onUpdated, ref } from "vue";
 import { useArticlesStore } from "@/stores/aritcles-store";
 import { useRoute } from "vue-router";
-import PageBase from "@/components/PageBase.vue";
 import { getMediumPostText } from "@/helpers/blogs/medium";
 import { useSeoMeta } from "@unhead/vue";
 

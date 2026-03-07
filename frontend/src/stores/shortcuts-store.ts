@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
+import { useRouter } from "vue-router";
 
 export interface ShortcutItem {
   label: string;
@@ -8,6 +9,7 @@ export interface ShortcutItem {
   handler: () => void;
 }
 export const useShortcutsStore = defineStore("ShortcutsStore", () => {
+  const router = useRouter();
   const commandPaletteOpen = ref(false);
 
   const items = ref<ShortcutItem[]>([
@@ -16,32 +18,31 @@ export const useShortcutsStore = defineStore("ShortcutsStore", () => {
       icon: "i-heroicons-magnifying-glass",
       kbds: ["meta", "F"],
       handler: () => {
-        console.log("Search Site");
         commandPaletteOpen.value = true;
       },
     },
     {
-      label: "Create New Task",
-      icon: "i-heroicons-plus",
-      kbds: ["meta", "N"],
+      label: "Jump to Medium Blogs",
+      icon: "i-simple-icons:medium",
+      kbds: ["meta", "M"],
       handler: () => {
-        console.log("Create New Task");
+        router.push("/blog/medium");
       },
     },
     {
-      label: "Settings",
-      icon: "i-heroicons-cog-6-tooth",
-      kbds: ["meta", ","],
+      label: "Jump to Hashnode Blogs",
+      icon: "i-simple-icons:hashnode",
+      kbds: ["meta", "H"],
       handler: () => {
-        console.log("Settings");
+        router.push("/blog/hashnode");
       },
     },
     {
-      label: "Help & Documentation",
+      label: "Jump to Projects",
       icon: "i-heroicons-question-mark-circle",
-      kbds: ["meta", "?"],
+      kbds: ["meta", "P"],
       handler: () => {
-        console.log("Help & Documentation");
+        console.log("Jump to Projects");
       },
     },
   ]);
