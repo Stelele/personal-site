@@ -2,7 +2,7 @@
   <UPage>
     <template #left>
       <UPageAside>
-        <UTree :items="sideBarStore.links" class="bg-transparent w-full" />
+        <UTree :items="sideBarStore.links" class="bg-transparent w-full fixed max-w-72" />
       </UPageAside>
     </template>
     <UPageBody class="h-screen">

@@ -7,6 +7,7 @@ import { useArticlesStore } from "@/stores/aritcles-store";
 interface Detail {
   title: string;
   icon: string;
+  path: string;
   children: { name: string; path: string }[];
 }
 
@@ -20,40 +21,25 @@ export const useSideBarStore = defineStore("SideBarStore", () => {
     const medium: Detail = {
       title: "Medium Blog",
       icon: "i-simple-icons:medium",
+      path: "/blog/medium",
       children: [],
     };
 
     const hashnode: Detail = {
       title: "Hashnode Blog",
       icon: "i-simple-icons:hashnode",
+      path: "/blog/hashnode",
       children: [],
     };
 
     for (const post of articlesStore.posts) {
-      if (medium.children.length >= 10 && hashnode.children.length >= 10) break;
-
       const section = post.blogSite === "medium" ? medium : hashnode;
-      if (section.children.length >= 10) continue;
 
       section.children.push({
         name: post.title,
         path: `/blog/${post.blogSite}/${post.id}`,
       });
     }
-
-    if (medium.children.length >= 10) {
-      medium.children.push({
-        name: "See more articles",
-        path: `/blog/medium`,
-      });
-    }
-    if (hashnode.children.length >= 10) {
-      hashnode.children.push({
-        name: "See more articles",
-        path: `/blog/hashnode`,
-      });
-    }
-
     return [medium, hashnode];
   });
 
@@ -63,11 +49,10 @@ export const useSideBarStore = defineStore("SideBarStore", () => {
       icon: "i-heroicons-user",
       defaultExpanded: currentGroupId.value === "home",
       children: [
-        { label: "Overview", to: "/", onSelect: () => router.push("/") },
-        { label: "CV", to: "/cv", onSelect: () => router.push("/cv") },
+        { label: "Overview", onSelect: () => router.push("/") },
+        { label: "CV", onSelect: () => router.push("/cv") },
         {
           label: "My Journey",
-          to: "/my-journey",
           onSelect: () => router.push("/my-journey"),
         },
       ],
@@ -79,12 +64,7 @@ export const useSideBarStore = defineStore("SideBarStore", () => {
       children: blogNavs.value.map((detail) => ({
         label: detail.title,
         icon: detail.icon,
-        defaultExpanded: true,
-        children: detail.children.map((child) => ({
-          label: child.name,
-          to: child.path,
-          onSelect: () => router.push(child.path),
-        })),
+        onSelect: () => router.push(detail.path),
       })),
     },
     {
@@ -194,5 +174,6 @@ export const useSideBarStore = defineStore("SideBarStore", () => {
     show,
     links,
     update,
+    blogNavs,
   };
 });

@@ -1,21 +1,54 @@
 <template>
-  <div
-    v-if="!isLoading"
-    class="prose min-w-full text-xl p-4 lg:pb-20 lg:pt-8 lg:px-20"
-    v-html="augmentedContent"
-  />
-  <div v-else class="min-w-full min-h-full gap-4 flex flex-col px-4">
-    <USkeleton class="h-80 w-3/4 mx-auto" />
-    <div v-for="(_, index) in 4" :key="index" class="flex flex-col gap-1">
-      <USkeleton class="w-[80%] h-5" />
-      <USkeleton class="w-[80%] h-5" />
-      <USkeleton class="w-[85%] h-5" />
-      <USkeleton class="w-[85%] h-5" />
-      <USkeleton class="w-[90%] h-5" />
-      <USkeleton class="w-[90%] h-5" />
-      <USkeleton class="w-[85%] h-5" />
-      <USkeleton class="w-[85%] h-5" />
-    </div>
+  <div class="min-w-full min-h-full p-8">
+    <UContainer class="py-6 md:py-10 max-w-9/10">
+      <UCard v-if="isLoading" variant="ghost" class="p-4 md:p-6 lg:p-8">
+        <template #header>
+          <div class="flex flex-col gap-3">
+            <USkeleton class="h-8 w-3/4" />
+            <USkeleton class="h-5 w-1/2" />
+          </div>
+        </template>
+
+        <div class="flex flex-col gap-3">
+          <div v-for="(_, index) in 6" :key="index" class="flex flex-col gap-2">
+            <USkeleton v-if="index % 2 === 0" class="h-4 w-full" />
+            <USkeleton v-else class="h-4 w-[90%]" />
+          </div>
+          <USkeleton class="h-64 w-full rounded-lg mt-2" />
+          <div v-for="(_, index) in 4" :key="`p${index}`" class="flex flex-col gap-2">
+            <USkeleton class="h-4 w-full" />
+          </div>
+        </div>
+      </UCard>
+
+      <UCard v-else variant="ghost" class="p-4 md:p-6 lg:p-8">
+        <template #header>
+          <h1 class="text-2xl md:text-3xl font-bold">
+            {{ post?.title }}
+          </h1>
+          <p v-if="post?.publishDate" class="text-sm text-muted mt-1">
+            {{ formatDate(post.publishDate) }}
+          </p>
+        </template>
+
+        <article
+          class="prose prose-lg dark:prose-invert max-w-none text-justify leading-relaxed"
+          v-html="augmentedContent"
+        />
+
+        <template #footer>
+          <UButton
+            :to="post?.link"
+            target="_blank"
+            variant="link"
+            color="primary"
+            icon="i-heroicons-arrow-top-right-on-square-20-solid"
+          >
+            View original article
+          </UButton>
+        </template>
+      </UCard>
+    </UContainer>
   </div>
 </template>
 
@@ -25,6 +58,7 @@ import { useArticlesStore } from "@/stores/aritcles-store";
 import { useRoute } from "vue-router";
 import { getMediumPostText } from "@/helpers/blogs/medium";
 import { useSeoMeta } from "@unhead/vue";
+import moment from "moment";
 
 const articlesStore = useArticlesStore();
 const route = useRoute();
@@ -33,6 +67,10 @@ const prevRoute = ref({
   site: "",
   id: "",
 });
+
+function formatDate(date: string): string {
+  return moment(date).format("MMMM D, YYYY");
+}
 
 onMounted(() => {
   loadPost();
@@ -78,6 +116,7 @@ const post = computed(() => {
     img.style.marginLeft = "auto";
     img.style.marginRight = "auto";
     img.style.maxWidth = "400px";
+    img.style.borderRadius = "0.5rem";
   });
   content.querySelectorAll("figcaption").forEach((caption) => {
     caption.style.textAlign = "center";
@@ -89,7 +128,7 @@ const post = computed(() => {
 });
 
 const augmentedContent = computed(() => {
-  return `<h3><a target="_blank" href="${post.value?.link}">Here</a> is the link to original article</h3>${post.value?.content}`;
+  return post.value?.content;
 });
 
 useSeoMeta({
