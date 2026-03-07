@@ -49,10 +49,11 @@ export const useSideBarStore = defineStore("SideBarStore", () => {
       icon: "i-heroicons-user",
       defaultExpanded: currentGroupId.value === "home",
       children: [
-        { label: "Overview", onSelect: () => router.push("/") },
-        { label: "CV", onSelect: () => router.push("/cv") },
+        { label: "Overview", path: "/", onSelect: () => router.push("/") },
+        { label: "CV", path: "/cv", onSelect: () => router.push("/cv") },
         {
           label: "My Journey",
+          path: "/my-journey",
           onSelect: () => router.push("/my-journey"),
         },
       ],
@@ -64,6 +65,7 @@ export const useSideBarStore = defineStore("SideBarStore", () => {
       children: blogNavs.value.map((detail) => ({
         label: detail.title,
         icon: detail.icon,
+        path: detail.path,
         onSelect: () => router.push(detail.path),
       })),
     },
@@ -79,12 +81,12 @@ export const useSideBarStore = defineStore("SideBarStore", () => {
           children: [
             {
               label: "Web GPU Game Engine",
-              to: "/web-gpu",
+              path: "/web-gpu",
               onSelect: () => router.push("/web-gpu"),
             },
             {
               label: "Shader Land",
-              to: "/shader-land",
+              path: "/shader-land",
               onSelect: () => router.push("/shader-land"),
             },
           ],
@@ -96,12 +98,12 @@ export const useSideBarStore = defineStore("SideBarStore", () => {
           children: [
             {
               label: "Pets",
-              to: "/pets",
+              path: "/pets",
               onSelect: () => router.push("/pets"),
             },
             {
               label: "Fight Night",
-              to: "/fight-night",
+              path: "/fight-night",
               onSelect: () => router.push("/fight-night"),
             },
           ],
@@ -120,12 +122,12 @@ export const useSideBarStore = defineStore("SideBarStore", () => {
           children: [
             {
               label: "God of fishing",
-              to: "/god-of-fishing",
+              path: "/god-of-fishing",
               onSelect: () => router.push("/god-of-fishing"),
             },
             {
               label: "Martial World",
-              to: "/martial-world",
+              path: "/martial-world",
               onSelect: () => router.push("/martial-world"),
             },
           ],
@@ -137,12 +139,12 @@ export const useSideBarStore = defineStore("SideBarStore", () => {
           children: [
             {
               label: "Discworld Series",
-              to: "/discworld",
+              path: "/discworld",
               onSelect: () => router.push("/discworld"),
             },
             {
               label: "Imajica",
-              to: "/imajica",
+              path: "/imajica",
               onSelect: () => router.push("/imajica"),
             },
           ],
