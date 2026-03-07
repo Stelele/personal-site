@@ -16,4 +16,3 @@ useSeoMeta({
   description: `Good things take time. This is why you should never trust any hard deadlines given by software developers.`,
 });
 </script>
-

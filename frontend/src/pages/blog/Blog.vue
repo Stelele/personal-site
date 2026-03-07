@@ -4,13 +4,10 @@
       v-if="!isLoading"
       class="prose min-w-full text-xl p-4 lg:pb-20 lg:pt-8 lg:px-20"
       v-html="augmentedContent"
-    ></div>
-    <div
-      class="min-w-full min-h-full gap-4 flex flex-col px-4"
-      v-else
-    >
+    />
+    <div v-else class="min-w-full min-h-full gap-4 flex flex-col px-4">
       <USkeleton class="h-80 w-3/4 mx-auto" />
-      <div v-for="_ in 4" class="flex flex-col gap-1">
+      <div v-for="(_, index) in 4" :key="index" class="flex flex-col gap-1">
         <USkeleton class="w-[80%] h-5" />
         <USkeleton class="w-[80%] h-5" />
         <USkeleton class="w-[85%] h-5" />
@@ -48,10 +45,7 @@ onMounted(() => {
 
 onUpdated(async () => {
   if (isLoading.value) return;
-  if (
-    prevRoute.value.id !== route.params.id ||
-    prevRoute.value.site !== route.params.site
-  ) {
+  if (prevRoute.value.id !== route.params.id || prevRoute.value.site !== route.params.site) {
     isLoading.value = true;
     loadPost();
     prevRoute.value.id = route.params.id as string;
@@ -65,7 +59,7 @@ async function loadPost() {
     return;
   } else if (route.params.site === "medium") {
     const foundPost = articlesStore.posts.find(
-      (x) => x.blogSite === route.params.site && x.id === route.params.id,
+      (x) => x.blogSite === route.params.site && x.id === route.params.id
     );
     if (foundPost) {
       foundPost.content = await getMediumPostText(foundPost.link);
@@ -77,14 +71,11 @@ async function loadPost() {
 
 const post = computed(() => {
   const foundPost = articlesStore.posts.find(
-    (x) => x.blogSite === route.params.site && x.id === route.params.id,
+    (x) => x.blogSite === route.params.site && x.id === route.params.id
   );
   if (!foundPost) return;
 
-  const content = new DOMParser().parseFromString(
-    foundPost.content,
-    "text/html",
-  );
+  const content = new DOMParser().parseFromString(foundPost.content, "text/html");
   content.querySelectorAll("img").forEach((img) => {
     img.style.display = "block";
     img.style.marginLeft = "auto";

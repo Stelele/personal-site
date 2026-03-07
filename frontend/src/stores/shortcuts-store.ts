@@ -65,8 +65,8 @@ export const useShortcutsStore = defineStore("ShortcutsStore", () => {
           usingInput: true,
           handler: item.handler,
         },
-      ]),
-    ),
+      ])
+    )
   );
 
   return { commandPaletteOpen, items, shortcuts };

@@ -27,9 +27,9 @@ interface IParagraphDetail {
   mixtapeMetadata: any;
 }
 
-async function getMediumPosts(nextPage?: string, _allPosts?: any[]) {
+async function getMediumPosts(nextPage?: string) {
   const response = await fetch(
-    `${import.meta.env.VITE_PRIV_API_URL}/medium-posts?page=${nextPage ? nextPage : ""}`,
+    `${import.meta.env.VITE_PRIV_API_URL}/medium-posts?page=${nextPage ? nextPage : ""}`
   ).then((r) => r.json());
   console.log(response);
 
@@ -47,8 +47,7 @@ async function getMediumPosts(nextPage?: string, _allPosts?: any[]) {
         link: post.mediumUrl,
         pubDate: post.firstPublishedAt,
         tags: post?.tags.map((t: any) => t.id) ?? [],
-        thumbnail:
-          "https://cdn-images-1.medium.com/max/1024/" + post.previewImage.id,
+        thumbnail: "https://cdn-images-1.medium.com/max/1024/" + post.previewImage.id,
         categories: (post.tags as any[]).map((tag_obj) => tag_obj.id),
         subtitle: post.extendedPreviewContent.subtitle,
       };
@@ -56,7 +55,7 @@ async function getMediumPosts(nextPage?: string, _allPosts?: any[]) {
 
   if (posts.length === 10) {
     next = response.data.user.profileStreamConnection.pagingInfo?.next?.to;
-    const otherPosts = await getMediumPosts(next, posts);
+    const otherPosts = await getMediumPosts(next);
     posts = [...posts, ...otherPosts];
   }
 
@@ -86,18 +85,16 @@ export async function getMediumFeed() {
 }
 
 export async function getMediumPostText(link: string) {
-  const response = await fetch(
-    `${import.meta.env.VITE_PRIV_API_URL}/feed?url=${link}`,
-  ).then((r) => r.text());
+  const response = await fetch(`${import.meta.env.VITE_PRIV_API_URL}/feed?url=${link}`).then((r) =>
+    r.text()
+  );
   const dom = new DOMParser().parseFromString(response, "text/html");
 
   let stringDetails = "{}";
   const searchString = "window.__APOLLO_STATE__ =";
   dom.querySelectorAll("script").forEach((s) => {
     if (s.innerHTML.includes(searchString)) {
-      stringDetails = s.innerHTML.slice(
-        s.innerHTML.indexOf(searchString) + searchString.length,
-      );
+      stringDetails = s.innerHTML.slice(s.innerHTML.indexOf(searchString) + searchString.length);
     }
   });
 
@@ -106,12 +103,9 @@ export async function getMediumPostText(link: string) {
   const postKey = Object.keys(postDetails)
     .filter((p) => p.startsWith("Post:"))
     .filter((p) => postDetails[p]["mediumUrl"] === link)[0];
-  const contentKey = Object.keys(postDetails[postKey]).filter((p) =>
-    p.startsWith("content({"),
-  )[0];
+  const contentKey = Object.keys(postDetails[postKey]).filter((p) => p.startsWith("content({"))[0];
 
-  const paragraphs: any[] =
-    postDetails[postKey][contentKey]?.bodyModel?.paragraphs ?? [];
+  const paragraphs: any[] = postDetails[postKey][contentKey]?.bodyModel?.paragraphs ?? [];
   let text = "";
 
   const paragraphDetails: any[] = [];
@@ -150,10 +144,7 @@ export async function getMediumPostText(link: string) {
       if (textSlice === details.text) {
         paragraphText = `<${el}${attr}>${paragraphText.replaceAll("\n", "<br>")}</${el}>`;
       } else {
-        paragraphText = paragraphText.replace(
-          textSlice,
-          `<${el}${attr}>${textSlice}</${el}>`,
-        );
+        paragraphText = paragraphText.replace(textSlice, `<${el}${attr}>${textSlice}</${el}>`);
       }
     }
 

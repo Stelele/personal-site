@@ -23,4 +23,3 @@ async function updatePosts(posts: Ref<Post[]>, isDownloading: Ref<boolean>) {
   posts.value = await getBlogFeeds();
   isDownloading.value = false;
 }
-

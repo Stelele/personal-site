@@ -1,10 +1,6 @@
 <template>
   <div>
-    <UTimeline
-      :items="timelineItems"
-      orientation="vertical"
-      class="w-full"
-    />
+    <UTimeline :items="timelineItems" orientation="vertical" class="w-full" />
   </div>
 </template>
 

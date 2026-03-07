@@ -82,12 +82,11 @@ export const useSideBarStore = defineStore("SideBarStore", () => {
       children: blogNavs.value
         .filter(
           (d) =>
-            d.title.toLowerCase().includes("medium") ||
-            d.title.toLowerCase().includes("hashnode"),
+            d.title.toLowerCase().includes("medium") || d.title.toLowerCase().includes("hashnode")
         )
         .map((detail) => ({
           label: detail.title,
-          icon: "i-heroicons-folder",
+          icon: "i-simple-icons-hashnode",
           defaultExpanded: true,
           children: detail.children.map((child) => ({
             label: child.name,

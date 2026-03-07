@@ -1,6 +1,5 @@
 import { Post } from "@/helpers/type";
 import { getHashNodeFeed } from "@/helpers/blogs/hashnode";
-import { getMediumFeed } from "@/helpers/blogs/medium";
 import moment from "moment";
 
 export async function getBlogFeeds() {
@@ -13,9 +12,7 @@ export async function getBlogFeeds() {
 
   console.log(posts);
 
-  posts.sort((a, b) =>
-    moment(a.publishDate).isBefore(moment(b.publishDate)) ? 1 : -1,
-  );
+  posts.sort((a, b) => (moment(a.publishDate).isBefore(moment(b.publishDate)) ? 1 : -1));
 
   return posts;
 }
