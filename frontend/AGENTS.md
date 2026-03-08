@@ -177,6 +177,40 @@ useSeoMeta({
 });
 ```
 
+### Breadcrumbs
+
+Use `UBreadcrumb` component from `@nuxt/ui` for page navigation. Breadcrumbs should be explicit - pass items directly rather than auto-generating from routes.
+
+**Import:**
+```typescript
+import type { BreadcrumbItem } from "@nuxt/ui";
+```
+
+**Usage:**
+```typescript
+const breadcrumbItems = computed<BreadcrumbItem[]>(() => {
+  return [
+    { label: "Home", to: "/" },
+    { label: "Blog", to: "/blog" },
+    { label: "Article Title" }, // Last item has no link (current page)
+  ];
+});
+```
+
+```vue
+<template>
+  <UBreadcrumb :items="breadcrumbItems" class="mb-4" />
+</template>
+```
+
+**Breadcrumb Structure by Page Type:**
+
+| Page Type | Items |
+|-----------|-------|
+| Home page | None needed |
+| Listing page (e.g., AllPosts) | Home → Listing |
+| Detail page (e.g., Blog) | Home → Listing → Item |
+
 ### Linting
 
 ESLint and Prettier are configured. Run these commands:
