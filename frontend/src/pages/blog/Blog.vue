@@ -1,6 +1,7 @@
 <template>
   <div class="min-w-full min-h-full p-8">
     <UContainer class="py-6 md:py-10 max-w-9/10">
+      <UBreadcrumb :items="breadcrumbLinks" class="mb-4" />
       <UCard v-if="isLoading" variant="ghost" class="p-4 md:p-6 lg:p-8">
         <template #header>
           <div class="flex flex-col gap-3">
@@ -61,6 +62,7 @@ import { computed, onMounted, onUpdated, ref } from "vue";
 import { useArticlesStore } from "@/stores/aritcles-store";
 import { useRoute } from "vue-router";
 import { useSeoMeta, useHead } from "@unhead/vue";
+import type { BreadcrumbItem } from "@nuxt/ui";
 import moment from "moment";
 
 const articlesStore = useArticlesStore();
@@ -72,6 +74,7 @@ const prevRoute = ref({
 });
 
 function formatDate(date: string): string {
+  if (!moment(date).isValid()) return "Never Published";
   return moment(date).format("MMMM D, YYYY");
 }
 
@@ -125,6 +128,19 @@ const post = computed(() => {
 
 const augmentedContent = computed(() => {
   return post.value?.content;
+});
+
+const capitalizedSite = computed(() => {
+  const site = route.params.site as string;
+  return site?.charAt(0).toUpperCase() + site?.slice(1) || "";
+});
+
+const breadcrumbLinks = computed<BreadcrumbItem[]>(() => {
+  return [
+    { label: "Home", to: "/" },
+    { label: capitalizedSite.value, to: `/blog/${route.params.site}` },
+    { label: post.value?.title || "" },
+  ];
 });
 
 const getAbsoluteImageUrl = (image: string | undefined): string => {
