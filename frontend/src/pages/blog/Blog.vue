@@ -135,17 +135,26 @@ const augmentedContent = computed(() => {
   return post.value?.content;
 });
 
+const getAbsoluteImageUrl = (image: string | undefined): string => {
+  const img = image || "/assets/logo.png";
+  return img.startsWith("http") ? img : `${import.meta.env.VITE_SITE_URL}${img}`;
+};
+
 useSeoMeta({
   title: () => `${post.value?.title} - Gift Mugweni`,
   description: () => post.value?.brief,
   ogTitle: () => `${post.value?.title} - Gift Mugweni`,
   ogDescription: () => post.value?.brief,
-  ogImage: () => post.value?.coverImage || "/assets/logo.png",
+  ogImage: () => getAbsoluteImageUrl(post.value?.coverImage),
+  "og:image:width": "1200",
+  "og:image:height": "630",
+  "og:image:alt": () => post.value?.title,
+  "og:image:secure_url": () => getAbsoluteImageUrl(post.value?.coverImage),
   ogType: "article",
   twitterCard: "summary_large_image",
   twitterTitle: () => `${post.value?.title} - Gift Mugweni`,
   twitterDescription: () => post.value?.brief,
-  twitterImage: () => post.value?.coverImage || "/assets/logo.png",
+  twitterImage: () => getAbsoluteImageUrl(post.value?.coverImage),
 });
 
 useHead(() => {
