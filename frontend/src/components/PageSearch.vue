@@ -20,6 +20,7 @@ import { useSideBarStore } from "@/stores/sidebar-store";
 import type { CommandPaletteGroup, CommandPaletteItem, TreeItem } from "@nuxt/ui";
 import { useShortcutsStore } from "@/stores/shortcuts-store";
 import { useRouter } from "vue-router";
+import { generateUUID } from "@/helpers/generate-uuid";
 
 const value = ref({});
 const router = useRouter();
@@ -30,7 +31,7 @@ const routes = computed<CommandPaletteGroup[]>(() => {
   const baseLinks = sideBarStore.links
     .filter((link) => link.label !== "Blog")
     .map((link) => ({
-      id: generateUID(),
+      id: generateUUID(),
       label: link.label,
       icon: link.icon,
       items: getFlattenedlinks(link, link.icon),
@@ -48,7 +49,7 @@ const routes = computed<CommandPaletteGroup[]>(() => {
         }) as TreeItem
     )
     .map((link) => ({
-      id: generateUID(),
+      id: generateUUID(),
       label: link.label,
       icon: link.icon,
       items: getFlattenedlinks(link, link.icon),
@@ -75,7 +76,7 @@ function getFlattenedlinks(
     return links.path
       ? [
           {
-            id: generateUID(),
+            id: generateUUID(),
             label: `/${links.label ?? ""}`,
             icon: effectiveIcon,
             path: links.path,
@@ -90,13 +91,5 @@ function getFlattenedlinks(
       ...item,
       label: `/${links.label ?? ""}${item.label}`,
     }));
-}
-
-function generateUID() {
-  const firstPart = (Math.random() * 46656) | 0;
-  const secondPart = (Math.random() * 46656) | 0;
-  const first = ("000" + firstPart.toString(36)).slice(-3);
-  const second = ("000" + secondPart.toString(36)).slice(-3);
-  return `${first}${second}`;
 }
 </script>

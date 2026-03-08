@@ -60,7 +60,6 @@
 import { computed, onMounted, onUpdated, ref } from "vue";
 import { useArticlesStore } from "@/stores/aritcles-store";
 import { useRoute } from "vue-router";
-import { getMediumPostText } from "@/helpers/blogs/medium";
 import { useSeoMeta, useHead } from "@unhead/vue";
 import moment from "moment";
 
@@ -96,13 +95,6 @@ async function loadPost() {
   if (post.value?.title === undefined || post.value?.title === null) {
     setTimeout(loadPost);
     return;
-  } else if (route.params.site === "medium") {
-    const foundPost = articlesStore.posts.find(
-      (x) => x.blogSite === route.params.site && x.id === route.params.id
-    );
-    if (foundPost) {
-      foundPost.content = await getMediumPostText(foundPost.link);
-    }
   }
 
   isLoading.value = false;
@@ -141,45 +133,52 @@ const getAbsoluteImageUrl = (image: string | undefined): string => {
 };
 
 useSeoMeta({
-  title: () => `${post.value?.title} - Gift Mugweni`,
+  title: () => `${post.value?.title}`,
   description: () => post.value?.brief,
-  ogTitle: () => `${post.value?.title} - Gift Mugweni`,
+  ogTitle: () => `${post.value?.title}`,
   ogDescription: () => post.value?.brief,
   ogImage: () => getAbsoluteImageUrl(post.value?.coverImage),
-  "og:image:width": "1200",
-  "og:image:height": "630",
-  "og:image:alt": () => post.value?.title,
-  "og:image:secure_url": () => getAbsoluteImageUrl(post.value?.coverImage),
   ogType: "article",
   twitterCard: "summary_large_image",
-  twitterTitle: () => `${post.value?.title} - Gift Mugweni`,
+  twitterTitle: () => `${post.value?.title}`,
   twitterDescription: () => post.value?.brief,
   twitterImage: () => getAbsoluteImageUrl(post.value?.coverImage),
 });
 
+useHead({
+  meta: [
+    { property: "og:image:width", content: "1200" },
+    { property: "og:image:height", content: "630" },
+  ],
+});
+
 useHead(() => {
-  if (!post.value) return [];
-  return [
-    {
-      script: [
-        {
-          type: "application/ld+json",
-          children: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "Article",
-            headline: post.value.title,
-            image: post.value.coverImage ? [post.value.coverImage] : [],
-            datePublished: post.value.publishDate,
-            dateModified: post.value.updateDate,
-            author: {
-              "@type": "Person",
-              name: "Gift Mugweni",
-            },
-            description: post.value.brief,
-          }),
-        },
-      ],
-    },
-  ];
+  if (!post.value) {
+    return;
+  }
+  return {
+    meta: [
+      { property: "og:image:alt", content: post.value.title },
+      { property: "og:image:secure_url", content: getAbsoluteImageUrl(post.value.coverImage) },
+    ],
+    script: [
+      {
+        type: "application/ld+json",
+        innerHTML: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Article",
+          headline: post.value.title,
+          image: post.value.coverImage ? [post.value.coverImage] : [],
+          datePublished: post.value.publishDate,
+          dateModified: post.value.updateDate,
+          author: {
+            "@type": "Person",
+            name: "Gift Mugweni",
+          },
+          description: post.value.brief,
+        }),
+      },
+    ],
+  };
 });
 </script>
