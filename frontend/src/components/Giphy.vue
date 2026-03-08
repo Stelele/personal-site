@@ -35,6 +35,6 @@ async function setGif() {
   });
   const gif = results.data[Math.floor(Math.random() * 25)];
 
-  renderGif({ gif, width: props.width as any }, giphy.value as HTMLDivElement);
+  renderGif({ gif, width: props.width ?? 200 }, giphy.value as HTMLDivElement);
 }
 </script>

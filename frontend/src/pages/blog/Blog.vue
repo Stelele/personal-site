@@ -45,9 +45,10 @@
             :src="post.coverImage"
             :alt="post.title"
             class="w-full mt-4 rounded-lg"
-          />
+          >
         </template>
 
+        <!-- eslint-disable-next-line vue/no-v-html -->
         <article
           class="prose prose-lg dark:prose-invert max-w-none text-justify leading-relaxed"
           v-html="augmentedContent"
@@ -64,6 +65,7 @@ import { useRoute } from "vue-router";
 import { useSeoMeta, useHead } from "@unhead/vue";
 import type { BreadcrumbItem } from "@nuxt/ui";
 import moment from "moment";
+import DOMPurify from "dompurify";
 
 const articlesStore = useArticlesStore();
 const route = useRoute();
@@ -127,7 +129,8 @@ const post = computed(() => {
 });
 
 const augmentedContent = computed(() => {
-  return post.value?.content;
+  const content = post.value?.content;
+  return DOMPurify.sanitize(content ?? "");
 });
 
 const capitalizedSite = computed(() => {

@@ -419,7 +419,7 @@ const awards: Award[] = [
 ];
 
 const breadcrumbItems = computed<BreadcrumbItem[]>(() => {
-  return [{ label: "Home", to: "/" }, { label: "CV" }];
+  return [{ label: "Home", to: "/" }, { label: "Resume & Professional Experience" }];
 });
 
 useSeoMeta({

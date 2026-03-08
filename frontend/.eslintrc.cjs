@@ -23,4 +23,12 @@ module.exports = {
     "vue/max-attributes-per-line": "off",
     "vue/html-closing-bracket-newline": "off",
   },
+  overrides: [
+    {
+      files: ["src/pages/blog/Blog.vue"],
+      rules: {
+        "vue/no-v-html": "off",
+      },
+    },
+  ],
 };
