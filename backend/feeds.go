@@ -161,13 +161,11 @@ func fetchAndParsePost(downloadURL string) (Post, error) {
 					if attr.Key == "class" && attr.Val == "e-content" {
 						contentBuilder := &strings.Builder{}
 						firstImg := findFirstImg(n)
-						if firstImg != nil && firstImg.Parent != nil {
+						if firstImg != nil {
 							post.CoverImage = getAttr(firstImg, "src")
-							renderNodeFrom(firstImg.Parent.NextSibling, contentBuilder)
-						} else {
-							renderNodeToBuilder(n, contentBuilder)
 						}
-						post.Content = contentBuilder.String()
+						renderNodeToBuilder(n, contentBuilder)
+						post.Content = removeContentBeforeFirstImg(contentBuilder.String())
 					}
 				}
 			case "h4":
@@ -262,4 +260,19 @@ func renderNodeToBuilder(n *html.Node, sb *strings.Builder) {
 		sb.WriteString(n.Data)
 		sb.WriteString(">")
 	}
+}
+
+func removeContentBeforeFirstImg(content string) string {
+	idx := strings.Index(content, "<img")
+	if idx == -1 {
+		return content
+	}
+
+	endIdx := strings.Index(content[idx:], ">")
+	if endIdx == -1 {
+		return content
+	}
+	endIdx += idx + 1
+
+	return content[endIdx:]
 }
