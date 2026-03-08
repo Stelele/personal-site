@@ -160,7 +160,13 @@ func fetchAndParsePost(downloadURL string) (Post, error) {
 					}
 					if attr.Key == "class" && attr.Val == "e-content" {
 						contentBuilder := &strings.Builder{}
-						renderNodeToBuilder(n, contentBuilder)
+						firstImg := findFirstImg(n)
+						if firstImg != nil && firstImg.Parent != nil {
+							post.CoverImage = getAttr(firstImg, "src")
+							renderNodeFrom(firstImg.Parent.NextSibling, contentBuilder)
+						} else {
+							renderNodeToBuilder(n, contentBuilder)
+						}
 						post.Content = contentBuilder.String()
 					}
 				}
@@ -179,10 +185,6 @@ func fetchAndParsePost(downloadURL string) (Post, error) {
 							post.URL = getAttr(parent, "href")
 						}
 					}
-				}
-			case "img":
-				if post.CoverImage == "" {
-					post.CoverImage = getAttr(n, "src")
 				}
 			}
 		}
@@ -219,6 +221,24 @@ func getTextContent(n *html.Node) string {
 	}
 	traverse(n)
 	return sb.String()
+}
+
+func findFirstImg(n *html.Node) *html.Node {
+	if n.Type == html.ElementNode && n.Data == "img" {
+		return n
+	}
+	for c := n.FirstChild; c != nil; c = c.NextSibling {
+		if found := findFirstImg(c); found != nil {
+			return found
+		}
+	}
+	return nil
+}
+
+func renderNodeFrom(start *html.Node, sb *strings.Builder) {
+	for c := start; c != nil; c = c.NextSibling {
+		renderNodeToBuilder(c, sb)
+	}
 }
 
 func renderNodeToBuilder(n *html.Node, sb *strings.Builder) {
