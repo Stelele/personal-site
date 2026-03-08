@@ -1,6 +1,6 @@
 <template>
   <div class="min-w-full min-h-full p-8">
-    <UContainer class="py-6 md:py-10 max-w-9/10">
+    <UContainer class="max-w-9/10">
       <UBreadcrumb :items="breadcrumbLinks" class="mb-4" />
       <UCard v-if="isLoading" variant="ghost" class="p-4 md:p-6 lg:p-8">
         <template #header>
@@ -22,7 +22,7 @@
         </div>
       </UCard>
 
-      <UCard v-else variant="ghost" class="p-4 md:p-6 lg:p-8">
+      <UCard v-else variant="ghost">
         <template #header>
           <h1 class="text-2xl md:text-3xl font-bold">
             {{ post?.title }}

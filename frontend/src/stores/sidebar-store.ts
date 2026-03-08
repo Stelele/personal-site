@@ -50,12 +50,7 @@ export const useSideBarStore = defineStore("SideBarStore", () => {
       defaultExpanded: currentGroupId.value === "home",
       children: [
         { label: "Overview", path: "/", onSelect: () => router.push("/") },
-        { label: "CV", path: "/cv", onSelect: () => router.push("/cv") },
-        {
-          label: "My Journey",
-          path: "/my-journey",
-          onSelect: () => router.push("/my-journey"),
-        },
+        { label: "Professional Experience", path: "/cv", onSelect: () => router.push("/cv") },
       ],
     },
     {

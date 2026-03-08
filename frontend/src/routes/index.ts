@@ -1,7 +1,6 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
 import Overview from "@/pages/home/Overview.vue";
 import CV from "@/pages/home/CV.vue";
-import MyJourney from "@/pages/home/MyJourney.vue";
 import Blog from "@/pages/blog/Blog.vue";
 import AllPosts from "@/pages/blog/AllPosts.vue";
 import WorkInProgress from "@/pages/home/WorkInProgess.vue";
@@ -19,11 +18,6 @@ const routes: RouteRecordRaw[] = [
     path: "/cv",
     name: "CV",
     component: CV,
-  },
-  {
-    path: "/my-journey",
-    name: "MyJourney",
-    component: MyJourney,
   },
   {
     path: "/blog/:site/:id",
@@ -79,19 +73,9 @@ const routes: RouteRecordRaw[] = [
   },
 ];
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const scrollBehavior = (
-  _to: unknown,
-  _from: unknown,
-  _savedBehaviour: unknown
-): { top: number } => {
-  return { top: 0 };
-};
-
 const router = createRouter({
   history: createWebHistory(),
   routes,
-  scrollBehavior,
 });
 
 export { router };
