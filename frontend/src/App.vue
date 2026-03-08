@@ -35,6 +35,10 @@ onBeforeMount(() => {
 
 useSeoMeta({
   titleTemplate: "%s | Gift Mugweni",
+  ogImage: "/assets/logo.png",
+  twitterCard: "summary_large_image",
+  twitterImage: "/assets/logo.png",
+  ogSiteName: "Gift Mugweni",
 });
 
 const items = computed<NavigationMenuItem[]>(() => sideBarStore.links as NavigationMenuItem[]);

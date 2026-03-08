@@ -14,7 +14,17 @@ import Timeline from "@/components/timeline/Timeline.vue";
 import { timelineDetails } from "@/components/timeline/details";
 
 useSeoMeta({
-  title: `CV`,
-  description: `I mean I do still have a professional life. So, what kind of personal site would it be if I don't put my CV somewhere.`,
+  title: "Resume & Professional Experience - Gift Mugweni",
+  description:
+    "View my professional resume and work experience. Software engineer with expertise in Vue.js, TypeScript, and modern web development.",
+  ogTitle: "Resume & Professional Experience - Gift Mugweni",
+  ogDescription:
+    "View my professional resume and work experience. Software engineer with expertise in Vue.js, TypeScript, and modern web development.",
+  ogImage: "/assets/logo.png",
+  twitterCard: "summary_large_image",
+  twitterTitle: "Resume & Professional Experience - Gift Mugweni",
+  twitterDescription:
+    "View my professional resume and work experience. Software engineer with expertise in Vue.js, TypeScript, and modern web development.",
+  twitterImage: "/assets/logo.png",
 });
 </script>

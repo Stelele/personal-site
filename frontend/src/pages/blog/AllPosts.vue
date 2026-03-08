@@ -65,7 +65,17 @@ const posts = computed<Post[]>(() => {
 });
 
 useSeoMeta({
-  title: () => `${blogSite.value} blog articles`,
-  description: () => `These are all the articles I've written on ${blogSite.value}.`,
+  title: () => `${capitalizedSite.value} Articles by Gift Mugweni`,
+  description: () =>
+    `Browse all ${blogSite.value} articles on web development, JavaScript, programming tutorials, and tech insights.`,
+  ogTitle: () => `${capitalizedSite.value} Articles by Gift Mugweni`,
+  ogDescription: () =>
+    `Browse all ${blogSite.value} articles on web development, JavaScript, programming tutorials, and tech insights.`,
+  ogImage: "/assets/logo.png",
+  twitterCard: "summary_large_image",
+  twitterTitle: () => `${capitalizedSite.value} Articles by Gift Mugweni`,
+  twitterDescription: () =>
+    `Browse all ${blogSite.value} articles on web development, JavaScript, programming tutorials, and tech insights.`,
+  twitterImage: "/assets/logo.png",
 });
 </script>

@@ -9,7 +9,17 @@ import Giphy from "@/components/Giphy.vue";
 import { useSeoMeta } from "@unhead/vue";
 
 useSeoMeta({
-  title: `Work in Progress`,
-  description: `Good things take time. This is why you should never trust any hard deadlines given by software developers.`,
+  title: "Projects in Development - Coming Soon",
+  description:
+    "Explore my work-in-progress projects and experiments. Building the future, one feature at a time.",
+  ogTitle: "Projects in Development - Coming Soon",
+  ogDescription:
+    "Explore my work-in-progress projects and experiments. Building the future, one feature at a time.",
+  ogImage: "/assets/logo.png",
+  twitterCard: "summary_large_image",
+  twitterTitle: "Projects in Development - Coming Soon",
+  twitterDescription:
+    "Explore my work-in-progress projects and experiments. Building the future, one feature at a time.",
+  twitterImage: "/assets/logo.png",
 });
 </script>

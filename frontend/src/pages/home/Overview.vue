@@ -35,7 +35,17 @@ import { useSeoMeta } from "@unhead/vue";
 const shortcutsStore = useShortcutsStore();
 
 useSeoMeta({
-  title: "Home",
-  description: "Hello there. I'm Gift. Welcome to my little corner of the internet",
+  title: "Gift Mugweni - Software Engineer & Developer",
+  description:
+    "Software engineer, writer, and lifelong learner. Welcome to my personal portfolio featuring blog posts on web development, programming, and tech.",
+  ogTitle: "Gift Mugweni - Software Engineer & Developer",
+  ogDescription:
+    "Software engineer, writer, and lifelong learner. Welcome to my personal portfolio featuring blog posts on web development, programming, and tech.",
+  ogImage: "/assets/logo.png",
+  twitterCard: "summary_large_image",
+  twitterTitle: "Gift Mugweni - Software Engineer & Developer",
+  twitterDescription:
+    "Software engineer, writer, and lifelong learner. Welcome to my personal portfolio featuring blog posts on web development, programming, and tech.",
+  twitterImage: "/assets/logo.png",
 });
 </script>

@@ -61,7 +61,7 @@ import { computed, onMounted, onUpdated, ref } from "vue";
 import { useArticlesStore } from "@/stores/aritcles-store";
 import { useRoute } from "vue-router";
 import { getMediumPostText } from "@/helpers/blogs/medium";
-import { useSeoMeta } from "@unhead/vue";
+import { useSeoMeta, useHead } from "@unhead/vue";
 import moment from "moment";
 
 const articlesStore = useArticlesStore();
@@ -136,7 +136,41 @@ const augmentedContent = computed(() => {
 });
 
 useSeoMeta({
-  title: () => `${post.value?.title} | ${post.value?.blogSite}`,
+  title: () => `${post.value?.title} - Gift Mugweni`,
   description: () => post.value?.brief,
+  ogTitle: () => `${post.value?.title} - Gift Mugweni`,
+  ogDescription: () => post.value?.brief,
+  ogImage: () => post.value?.coverImage || "/assets/logo.png",
+  ogType: "article",
+  twitterCard: "summary_large_image",
+  twitterTitle: () => `${post.value?.title} - Gift Mugweni`,
+  twitterDescription: () => post.value?.brief,
+  twitterImage: () => post.value?.coverImage || "/assets/logo.png",
+});
+
+useHead(() => {
+  if (!post.value) return [];
+  return [
+    {
+      script: [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Article",
+            headline: post.value.title,
+            image: post.value.coverImage ? [post.value.coverImage] : [],
+            datePublished: post.value.publishDate,
+            dateModified: post.value.updateDate,
+            author: {
+              "@type": "Person",
+              name: "Gift Mugweni",
+            },
+            description: post.value.brief,
+          }),
+        },
+      ],
+    },
+  ];
 });
 </script>
