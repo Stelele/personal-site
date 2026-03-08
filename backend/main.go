@@ -5,7 +5,6 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-	"strconv"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -57,21 +56,15 @@ func handleGetRssFeed(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleGetMediumPosts(w http.ResponseWriter, r *http.Request) {
-	params := r.URL.Query()
-
-	page := params.Get("page")
-	if page == "" {
-		page = strconv.FormatInt(time.Now().UnixMilli(), 10)
-	}
-
-	feed, err := getMediumFeed(page)
+	posts, err := getMediumFeed()
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(err)
 		return
 	}
 
-	w.Write([]byte(feed))
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(posts)
 }
 
 func addResponseHeaders(next http.Handler) http.Handler {
