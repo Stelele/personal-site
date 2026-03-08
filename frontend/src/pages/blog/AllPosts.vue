@@ -1,5 +1,6 @@
 <template>
   <div class="min-w-full min-h-full p-8">
+    <UPageHeader :title="capitalizedSite" :description="siteDescription" class="mb-8" />
     <template v-if="!articlesStore.isDownloading">
       <UBlogPosts orientation="vertical" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
         <UBlogPost
@@ -42,13 +43,25 @@ const route = useRoute();
 const articlesStore = useArticlesStore();
 
 const blogSite = computed(() => {
-  return route.params.site;
+  const site = route.params.site;
+  return Array.isArray(site) ? site[0] : site;
+});
+
+const capitalizedSite = computed(() => {
+  return blogSite.value?.charAt(0).toUpperCase() + blogSite.value?.slice(1) || "";
+});
+
+const siteDescription = computed(() => {
+  if (blogSite.value === "hashnode") {
+    return "Exploring web development, JavaScript, programming concepts, and software engineering insights.";
+  }
+  return "Thoughts on technology, personal growth, and the creative journey.";
 });
 
 const posts = computed<Post[]>(() => {
   if (articlesStore.isDownloading) return [];
 
-  return articlesStore.posts.filter((post) => post.blogSite === route.params.site);
+  return articlesStore.posts.filter((post) => post.blogSite === blogSite.value);
 });
 
 useSeoMeta({
