@@ -1,5 +1,6 @@
 <template>
   <div class="min-w-full min-h-full p-8">
+    <UBreadcrumb :items="breadcrumbLinks" class="mb-4" />
     <UPageHeader :title="capitalizedSite" :description="siteDescription" class="mb-8" />
     <template v-if="!articlesStore.isDownloading">
       <UBlogPosts
@@ -41,6 +42,7 @@ import { computed } from "vue";
 import { useArticlesStore } from "@/stores/aritcles-store";
 import { Post } from "@/helpers/type";
 import { useSeoMeta } from "@unhead/vue";
+import type { BreadcrumbItem } from "@nuxt/ui";
 
 const route = useRoute();
 const articlesStore = useArticlesStore();
@@ -59,6 +61,10 @@ const siteDescription = computed(() => {
     return "Exploring web development, JavaScript, programming concepts, and software engineering insights.";
   }
   return "Thoughts on technology, personal growth, and the creative journey.";
+});
+
+const breadcrumbLinks = computed<BreadcrumbItem[]>(() => {
+  return [{ label: "Home", to: "/" }, { label: capitalizedSite.value }];
 });
 
 const posts = computed<Post[]>(() => {
