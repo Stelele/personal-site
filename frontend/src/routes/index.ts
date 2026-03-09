@@ -28,43 +28,13 @@ const routes: RouteRecordRaw[] = [
     component: AllPosts,
   },
   {
-    path: "/web-gpu",
-    name: "WebGPU",
+    path: "/projects/:type",
+    name: "Projects",
     component: WorkInProgress,
   },
   {
-    path: "/shader-land",
-    name: "ShaderLand",
-    component: WorkInProgress,
-  },
-  {
-    path: "/pets",
-    name: "Pets",
-    component: WorkInProgress,
-  },
-  {
-    path: "/fight-night",
-    name: "FightNight",
-    component: WorkInProgress,
-  },
-  {
-    path: "/god-of-fishing",
-    name: "GodOfFishing",
-    component: WorkInProgress,
-  },
-  {
-    path: "/martial-world",
-    name: "MartialWorld",
-    component: WorkInProgress,
-  },
-  {
-    path: "/discworld",
-    name: "Discworld",
-    component: WorkInProgress,
-  },
-  {
-    path: "/imajica",
-    name: "Imajica",
+    path: "/books/:genre",
+    name: "Books",
     component: WorkInProgress,
   },
   {

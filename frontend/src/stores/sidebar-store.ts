@@ -72,77 +72,35 @@ export const useSideBarStore = defineStore("SideBarStore", () => {
         {
           label: "Graphics Projects",
           icon: "i-heroicons-folder",
-          defaultExpanded: true,
-          children: [
-            {
-              label: "Web GPU Game Engine",
-              path: "/web-gpu",
-              onSelect: () => router.push("/web-gpu"),
-            },
-            {
-              label: "Shader Land",
-              path: "/shader-land",
-              onSelect: () => router.push("/shader-land"),
-            },
-          ],
+          path: "/projects/graphics",
+          onSelect: () => router.push("/projects/graphics"),
         },
         {
           label: "Game Dev Projects",
           icon: "i-heroicons-folder",
-          defaultExpanded: true,
-          children: [
-            {
-              label: "Pets",
-              path: "/pets",
-              onSelect: () => router.push("/pets"),
-            },
-            {
-              label: "Fight Night",
-              path: "/fight-night",
-              onSelect: () => router.push("/fight-night"),
-            },
-          ],
+          path: "/projects/game-dev",
+          onSelect: () => router.push("/projects/game-dev"),
         },
       ],
     },
     {
       label: "Books",
       icon: "i-heroicons-book-open",
-      defaultExpanded: currentGroupId.value === "book-recommendations",
+      defaultExpanded: currentGroupId.value === "books",
       children: [
         {
           label: "Wuxia Books",
           icon: "i-heroicons-folder",
           defaultExpanded: true,
-          children: [
-            {
-              label: "God of fishing",
-              path: "/god-of-fishing",
-              onSelect: () => router.push("/god-of-fishing"),
-            },
-            {
-              label: "Martial World",
-              path: "/martial-world",
-              onSelect: () => router.push("/martial-world"),
-            },
-          ],
+          path: "/books/wuxia",
+          onSelect: () => router.push("/books/wuxia"),
         },
         {
           label: "Western Books",
           icon: "i-heroicons-folder",
           defaultExpanded: true,
-          children: [
-            {
-              label: "Discworld Series",
-              path: "/discworld",
-              onSelect: () => router.push("/discworld"),
-            },
-            {
-              label: "Imajica",
-              path: "/imajica",
-              onSelect: () => router.push("/imajica"),
-            },
-          ],
+          path: "/books/western",
+          onSelect: () => router.push("/books/western"),
         },
       ],
     },
@@ -153,7 +111,11 @@ export const useSideBarStore = defineStore("SideBarStore", () => {
   }
 
   function routeToGroupId(path: string): string {
-    const segment = path.slice(1).split("/")[0];
+    let segment = path.slice(1).split("/")[0];
+    if (segment === "") {
+      segment = window.location.pathname.slice(1).split("/")[0];
+    }
+
     switch (segment) {
       case "":
         return "home";
@@ -161,8 +123,8 @@ export const useSideBarStore = defineStore("SideBarStore", () => {
         return "blog";
       case "projects":
         return "projects";
-      case "book-recommendations":
-        return "book-recommendations";
+      case "books":
+        return "books";
       default:
         return "home";
     }
