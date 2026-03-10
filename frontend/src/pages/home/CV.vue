@@ -1,6 +1,6 @@
 <template>
-  <div class="min-w-full min-h-full p-4 md:p-6 lg:p-8">
-    <UContainer class="max-w-9/10">
+  <div class="min-w-full min-h-full md:p-6 lg:p-8">
+    <UContainer class="lg:max-w-9/10">
       <UBreadcrumb :items="breadcrumbItems" class="mb-6" />
       <UPageHeader title="Resume & Professional Experience" class="mb-8" />
       <div class="lg:col-span-9 space-y-6">
@@ -40,7 +40,7 @@
               </div>
             </div>
 
-            <div>
+            <div class="prose">
               <h3 class="font-semibold mb-2">Summary</h3>
               <p class="text-sm leading-relaxed">
                 I am a dedicated and skilled professional with a Bachelor of Science in Electrical
@@ -74,7 +74,7 @@
                 </div>
               </template>
 
-              <div class="flex flex-col gap-1">
+              <div class="flex flex-col gap-1 prose">
                 <p class="text-sm text-muted mb-2">
                   {{ job.location }}
                 </p>
@@ -138,7 +138,7 @@
 
         <section id="awards">
           <h2 class="text-xl font-bold mb-4">Honors & Awards</h2>
-          <div class="space-y-4">
+          <div class="space-y-4 prose">
             <UCard v-for="award in awards" :key="award.name" variant="subtle">
               <template #header>
                 <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
@@ -168,6 +168,9 @@
 import { computed } from "vue";
 import { useSeoMeta } from "@unhead/vue";
 import type { BreadcrumbItem } from "@nuxt/ui";
+import { useSideBarStore } from "@/stores/sidebar-store";
+
+const sidebarStore = useSideBarStore();
 
 interface Experience {
   role: string;
@@ -419,7 +422,10 @@ const awards: Award[] = [
 ];
 
 const breadcrumbItems = computed<BreadcrumbItem[]>(() => {
-  return [{ label: "Home", to: "/" }, { label: "Resume & Professional Experience" }];
+  return [
+    { label: "Home", to: "/", onClick: () => sidebarStore.init("/") },
+    { label: "Resume & Professional Experience" },
+  ];
 });
 
 useSeoMeta({

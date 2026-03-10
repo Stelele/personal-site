@@ -1,6 +1,6 @@
 <template>
-  <div class="min-w-full min-h-full p-8">
-    <UContainer class="max-w-9/10">
+  <div class="min-w-full min-h-full lg:p-8">
+    <UContainer class="lg:max-w-9/10">
       <UBreadcrumb :items="breadcrumbLinks" class="mb-4" />
       <UCard v-if="isLoading" variant="ghost" class="p-4 md:p-6 lg:p-8">
         <template #header>
@@ -22,7 +22,7 @@
         </div>
       </UCard>
 
-      <UCard v-else variant="ghost">
+      <UCard v-else variant="ghost" class="w-full">
         <template #header>
           <h1 class="text-2xl md:text-3xl font-bold">
             {{ post?.title }}
@@ -50,7 +50,7 @@
 
         <!-- eslint-disable-next-line vue/no-v-html -->
         <article
-          class="prose prose-lg dark:prose-invert max-w-none text-justify leading-relaxed"
+          class="prose prose-lg max-w-none text-justify leading-relaxed"
           v-html="augmentedContent"
         />
       </UCard>

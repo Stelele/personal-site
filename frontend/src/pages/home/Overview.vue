@@ -1,8 +1,8 @@
 <template>
   <div class="flex w-full h-full items-center justify-center">
-    <div class="flex flex-col items-center w-1/2 gap-7">
+    <div class="flex flex-col items-center lg:w-1/2 gap-7">
       <div class="h-28 w-full">
-        <img src="/assets/welcome.png" class="w-full h-full object-contain" alt="Logo">
+        <img src="/assets/welcome.png" class="w-full h-full object-contain" alt="Logo" />
       </div>
       <div class="w-full max-w-lg overflow-hidden">
         <div class="p-2 space-y-1">
