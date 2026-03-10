@@ -45,7 +45,7 @@
             :src="post.coverImage"
             :alt="post.title"
             class="w-full mt-4 rounded-lg"
-          >
+          />
         </template>
 
         <!-- eslint-disable-next-line vue/no-v-html -->
@@ -66,8 +66,11 @@ import { useSeoMeta, useHead } from "@unhead/vue";
 import type { BreadcrumbItem } from "@nuxt/ui";
 import moment from "moment";
 import DOMPurify from "dompurify";
+import { useSideBarStore } from "@/stores/sidebar-store";
 
 const articlesStore = useArticlesStore();
+const sidebarStore = useSideBarStore();
+
 const route = useRoute();
 const isLoading = ref(true);
 const prevRoute = ref({
@@ -140,8 +143,12 @@ const capitalizedSite = computed(() => {
 
 const breadcrumbLinks = computed<BreadcrumbItem[]>(() => {
   return [
-    { label: "Home", to: "/" },
-    { label: capitalizedSite.value, to: `/blog/${route.params.site}` },
+    { label: "Home", to: "/", onClick: () => sidebarStore.init("/") },
+    {
+      label: capitalizedSite.value,
+      to: `/blog/${route.params.site}`,
+      onClick: () => sidebarStore.init(`/blog/${route.params.site}`),
+    },
     { label: post.value?.title || "" },
   ];
 });

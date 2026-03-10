@@ -43,9 +43,11 @@ import { useArticlesStore } from "@/stores/aritcles-store";
 import { Post } from "@/helpers/type";
 import { useSeoMeta } from "@unhead/vue";
 import type { BreadcrumbItem } from "@nuxt/ui";
+import { useSideBarStore } from "@/stores/sidebar-store";
 
 const route = useRoute();
 const articlesStore = useArticlesStore();
+const sidebarStore = useSideBarStore();
 
 const blogSite = computed(() => {
   const site = route.params.site;
@@ -64,7 +66,14 @@ const siteDescription = computed(() => {
 });
 
 const breadcrumbLinks = computed<BreadcrumbItem[]>(() => {
-  return [{ label: "Home", to: "/" }, { label: capitalizedSite.value }];
+  return [
+    {
+      label: "Home",
+      to: "/",
+      onClick: () => sidebarStore.init("/"),
+    },
+    { label: capitalizedSite.value },
+  ];
 });
 
 const posts = computed<Post[]>(() => {

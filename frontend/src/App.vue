@@ -18,18 +18,17 @@
 import { useSeoMeta } from "@unhead/vue";
 import { NavigationMenuItem } from "@nuxt/ui";
 import { computed, onBeforeMount } from "vue";
-import { RouterView, useRoute } from "vue-router";
+import { RouterView } from "vue-router";
 import { useSideBarStore } from "@/stores/sidebar-store";
 import { useArticlesStore } from "@/stores/aritcles-store";
 import { useShortcutsStore } from "./stores/shortcuts-store";
 
-const route = useRoute();
 const shortcutStore = useShortcutsStore();
 const articlesStore = useArticlesStore();
 const sideBarStore = useSideBarStore();
 
 onBeforeMount(() => {
-  sideBarStore.update(route.fullPath);
+  sideBarStore.init(window.location.pathname);
   articlesStore.update();
 });
 

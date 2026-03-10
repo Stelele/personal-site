@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
-import { useRouter } from "vue-router";
+import { useSideBarStore } from "./sidebar-store";
 
 export interface ShortcutItem {
   label: string;
@@ -9,7 +9,7 @@ export interface ShortcutItem {
   handler: () => void;
 }
 export const useShortcutsStore = defineStore("ShortcutsStore", () => {
-  const router = useRouter();
+  const sideBarStore = useSideBarStore();
   const commandPaletteOpen = ref(false);
 
   const items = ref<ShortcutItem[]>([
@@ -26,7 +26,7 @@ export const useShortcutsStore = defineStore("ShortcutsStore", () => {
       icon: "i-simple-icons:medium",
       kbds: ["meta", "M"],
       handler: () => {
-        router.push("/blog/medium");
+        sideBarStore.navigateTo("/blog/medium");
       },
     },
     {
@@ -34,7 +34,7 @@ export const useShortcutsStore = defineStore("ShortcutsStore", () => {
       icon: "i-simple-icons:hashnode",
       kbds: ["meta", "H"],
       handler: () => {
-        router.push("/blog/hashnode");
+        sideBarStore.navigateTo("/blog/hashnode");
       },
     },
     {
@@ -42,7 +42,7 @@ export const useShortcutsStore = defineStore("ShortcutsStore", () => {
       icon: "i-heroicons-question-mark-circle",
       kbds: ["meta", "P"],
       handler: () => {
-        console.log("Jump to Projects");
+        sideBarStore.navigateTo("/projects");
       },
     },
   ]);

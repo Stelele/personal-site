@@ -15,7 +15,7 @@ export const useSideBarStore = defineStore("SideBarStore", () => {
   const router = useRouter();
   const articlesStore = useArticlesStore();
   const show = ref(false);
-  const currentGroupId = ref("home");
+  const currentLink = ref<TreeItem | undefined>();
 
   const blogNavs = computed<Detail[]>(() => {
     const medium: Detail = {
@@ -47,7 +47,7 @@ export const useSideBarStore = defineStore("SideBarStore", () => {
     {
       label: "Home",
       icon: "i-heroicons-user",
-      defaultExpanded: currentGroupId.value === "home",
+      defaultExpanded: true,
       children: [
         { label: "Overview", path: "/", onSelect: () => router.push("/") },
         { label: "Professional Experience", path: "/cv", onSelect: () => router.push("/cv") },
@@ -56,7 +56,7 @@ export const useSideBarStore = defineStore("SideBarStore", () => {
     {
       label: "Blog",
       icon: "i-heroicons-document-text",
-      defaultExpanded: currentGroupId.value === "blog",
+      defaultExpanded: true,
       children: blogNavs.value.map((detail) => ({
         label: detail.title,
         icon: detail.icon,
@@ -67,7 +67,7 @@ export const useSideBarStore = defineStore("SideBarStore", () => {
     {
       label: "Projects",
       icon: "i-heroicons-code-bracket",
-      defaultExpanded: currentGroupId.value === "projects",
+      defaultExpanded: true,
       children: [
         {
           label: "Graphics Projects",
@@ -86,19 +86,17 @@ export const useSideBarStore = defineStore("SideBarStore", () => {
     {
       label: "Books",
       icon: "i-heroicons-book-open",
-      defaultExpanded: currentGroupId.value === "books",
+      defaultExpanded: true,
       children: [
         {
           label: "Wuxia Books",
           icon: "i-heroicons-folder",
-          defaultExpanded: true,
           path: "/books/wuxia",
           onSelect: () => router.push("/books/wuxia"),
         },
         {
           label: "Western Books",
           icon: "i-heroicons-folder",
-          defaultExpanded: true,
           path: "/books/western",
           onSelect: () => router.push("/books/western"),
         },
@@ -106,33 +104,28 @@ export const useSideBarStore = defineStore("SideBarStore", () => {
     },
   ]);
 
-  function update(path: string) {
-    currentGroupId.value = routeToGroupId(path);
+  function init(path: string) {
+    const matches: Array<[number, TreeItem]> = [];
+    for (const link of links.value) {
+      const child = link.children?.find((child) => path.startsWith(child.path));
+      if (child) {
+        matches.push([child.path.length, child]);
+      }
+    }
+    currentLink.value = matches.sort((a, b) => b[0] - a[0])[0]?.[1];
   }
 
-  function routeToGroupId(path: string): string {
-    let segment = path.slice(1).split("/")[0];
-    if (segment === "") {
-      segment = window.location.pathname.slice(1).split("/")[0];
-    }
-
-    switch (segment) {
-      case "":
-        return "home";
-      case "blog":
-        return "blog";
-      case "projects":
-        return "projects";
-      case "books":
-        return "books";
-      default:
-        return "home";
-    }
+  function navigateTo(path: string) {
+    router.push(path);
+    init(path);
   }
+
   return {
     show,
     links,
-    update,
+    currentLink,
     blogNavs,
+    navigateTo,
+    init,
   };
 });

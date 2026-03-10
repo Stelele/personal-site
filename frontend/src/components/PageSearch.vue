@@ -19,11 +19,9 @@ import { ref, computed } from "vue";
 import { useSideBarStore } from "@/stores/sidebar-store";
 import type { CommandPaletteGroup, CommandPaletteItem, TreeItem } from "@nuxt/ui";
 import { useShortcutsStore } from "@/stores/shortcuts-store";
-import { useRouter } from "vue-router";
 import { generateUUID } from "@/helpers/generate-uuid";
 
 const value = ref({});
-const router = useRouter();
 const sideBarStore = useSideBarStore();
 const shortcutStore = useShortcutsStore();
 
@@ -62,7 +60,7 @@ const routes = computed<CommandPaletteGroup[]>(() => {
 });
 
 function onSelect(value: CommandPaletteItem) {
-  router.push(value.path);
+  sideBarStore.navigateTo(value.path);
   shortcutStore.commandPaletteOpen = false;
 }
 
