@@ -1,4 +1,4 @@
-import { TreeItem } from "@nuxt/ui";
+import { NavigationMenuItem, TreeItem } from "@nuxt/ui";
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
@@ -43,7 +43,7 @@ export const useSideBarStore = defineStore("SideBarStore", () => {
     return [medium, hashnode];
   });
 
-  const links = computed<TreeItem[]>(() => [
+  const links = computed<NavigationMenuItem[]>(() => [
     {
       label: "Home",
       icon: "i-heroicons-user",
@@ -57,12 +57,20 @@ export const useSideBarStore = defineStore("SideBarStore", () => {
       label: "Blog",
       icon: "i-heroicons-document-text",
       defaultExpanded: true,
-      children: blogNavs.value.map((detail) => ({
-        label: detail.title,
-        icon: detail.icon,
-        path: detail.path,
-        onSelect: () => router.push(detail.path),
-      })),
+      children: [
+        {
+          label: "Why I blog",
+          icon: "i-heroicons-question-mark-circle",
+          path: "/blogs",
+          onSelect: () => router.push("/blogs"),
+        },
+        ...blogNavs.value.map((detail) => ({
+          label: detail.title,
+          icon: detail.icon,
+          path: detail.path,
+          onSelect: () => router.push(detail.path),
+        })),
+      ],
     },
     {
       label: "Projects",
@@ -70,35 +78,86 @@ export const useSideBarStore = defineStore("SideBarStore", () => {
       defaultExpanded: true,
       children: [
         {
+          label: "Why I do projects",
+          icon: "i-heroicons-question-mark-circle",
+          path: "/projects",
+          onSelect: () => router.push("/projects"),
+        },
+        {
+          label: "Business Case Projects",
+          icon: "i-heroicons-briefcase",
+          path: "/projects/business-case",
+          onSelect: () => router.push("/projects/business-case"),
+        },
+        {
           label: "Graphics Projects",
-          icon: "i-heroicons-folder",
+          icon: "i-ph-polygon",
           path: "/projects/graphics",
           onSelect: () => router.push("/projects/graphics"),
         },
         {
           label: "Game Dev Projects",
-          icon: "i-heroicons-folder",
+          icon: "i-ph-game-controller",
           path: "/projects/game-dev",
           onSelect: () => router.push("/projects/game-dev"),
         },
       ],
     },
     {
-      label: "Books",
+      label: "Reviews of Books",
       icon: "i-heroicons-book-open",
       defaultExpanded: true,
       children: [
         {
-          label: "Wuxia Books",
-          icon: "i-heroicons-folder",
-          path: "/books/wuxia",
-          onSelect: () => router.push("/books/wuxia"),
+          label: "Why I read books",
+          icon: "i-heroicons-question-mark-circle",
+          path: "/books",
+          onSelect: () => router.push("/books"),
         },
         {
-          label: "Western Books",
-          icon: "i-heroicons-folder",
-          path: "/books/western",
-          onSelect: () => router.push("/books/western"),
+          label: "Fantasy",
+          icon: "i-mdi-wizard-hat",
+          path: "/books/fantasy",
+          onSelect: () => router.push("/books/fantasy"),
+        },
+        {
+          label: "Isekai",
+          icon: "i-mdi-book-open-variant",
+          path: "/books/isekai",
+          onSelect: () => router.push("/books/isekai"),
+        },
+        {
+          label: "LitRPG",
+          icon: "i-mdi-dice-d20",
+          path: "/books/litrpg",
+          onSelect: () => router.push("/books/litrpg"),
+        },
+
+        {
+          label: "Programming",
+          icon: "i-heroicons-command-line",
+          path: "/books/programming",
+          onSelect: () => router.push("/books/programming"),
+        },
+
+        {
+          label: "Science Fiction",
+          icon: "i-mdi-robot-outline",
+          path: "/books/science-fiction",
+          onSelect: () => router.push("/books/science-fiction"),
+        },
+
+        {
+          label: "Self Help",
+          icon: "i-heroicons-light-bulb",
+          path: "/books/self-help",
+          onSelect: () => router.push("/books/self-help"),
+        },
+        {
+          label: "Wuxia Books",
+          icon: "i-heroicons-fire",
+          path: "/books/wuxia",
+          onSelect: () => router.push("/books/wuxia"),
         },
       ],
     },

@@ -2,14 +2,14 @@
   <UPage>
     <template #left>
       <UPageAside>
-        <UTree
-          v-model="sideBarStore.currentLink"
+        <UNavigationMenu
+          orientation="vertical"
           :items="sideBarStore.links"
-          class="bg-transparent w-full fixed max-w-60"
+          class="bg-transparent w-full max-w-60"
         />
       </UPageAside>
     </template>
-    <UPageBody class="h-screen">
+    <UPageBody class="h-[85vh] max-h-[85vh] overflow-y-auto">
       <slot />
     </UPageBody>
   </UPage>
