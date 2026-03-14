@@ -47,7 +47,7 @@ export const useSideBarStore = defineStore("SideBarStore", () => {
     {
       label: "Home",
       icon: "i-heroicons-user",
-      defaultExpanded: true,
+      defaultOpen: true,
       children: [
         {
           label: "Overview",
@@ -66,7 +66,7 @@ export const useSideBarStore = defineStore("SideBarStore", () => {
     {
       label: "Blog",
       icon: "i-heroicons-document-text",
-      defaultExpanded: true,
+      defaultOpen: true,
       children: [
         {
           label: "Why I blog",
@@ -87,7 +87,7 @@ export const useSideBarStore = defineStore("SideBarStore", () => {
     {
       label: "Projects",
       icon: "i-heroicons-code-bracket",
-      defaultExpanded: true,
+      defaultOpen: true,
       children: [
         {
           label: "Why I do projects",
@@ -122,7 +122,7 @@ export const useSideBarStore = defineStore("SideBarStore", () => {
     {
       label: "Reviews of Books",
       icon: "i-heroicons-book-open",
-      defaultExpanded: true,
+      defaultOpen: false,
       children: [
         {
           label: "Why I read books",
