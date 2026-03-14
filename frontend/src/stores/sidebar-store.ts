@@ -49,8 +49,18 @@ export const useSideBarStore = defineStore("SideBarStore", () => {
       icon: "i-heroicons-user",
       defaultExpanded: true,
       children: [
-        { label: "Overview", path: "/", onSelect: () => router.push("/") },
-        { label: "Professional Experience", path: "/cv", onSelect: () => router.push("/cv") },
+        {
+          label: "Overview",
+          active: currentLink.value?.path === "/",
+          path: "/",
+          onSelect: () => navigateTo("/"),
+        },
+        {
+          label: "Professional Experience",
+          active: currentLink.value?.path === "/cv",
+          path: "/cv",
+          onSelect: () => navigateTo("/cv"),
+        },
       ],
     },
     {
@@ -61,14 +71,16 @@ export const useSideBarStore = defineStore("SideBarStore", () => {
         {
           label: "Why I blog",
           icon: "i-heroicons-question-mark-circle",
-          path: "/blogs",
-          onSelect: () => router.push("/blogs"),
+          path: "/blog",
+          active: currentLink.value?.path === "/blog",
+          onSelect: () => navigateTo("/blog"),
         },
         ...blogNavs.value.map((detail) => ({
           label: detail.title,
           icon: detail.icon,
           path: detail.path,
-          onSelect: () => router.push(detail.path),
+          active: currentLink.value?.path === detail.path,
+          onSelect: () => navigateTo(detail.path),
         })),
       ],
     },
@@ -81,25 +93,29 @@ export const useSideBarStore = defineStore("SideBarStore", () => {
           label: "Why I do projects",
           icon: "i-heroicons-question-mark-circle",
           path: "/projects",
-          onSelect: () => router.push("/projects"),
+          active: currentLink.value?.path === "/projects",
+          onSelect: () => navigateTo("/projects"),
         },
         {
           label: "Business Case Projects",
           icon: "i-heroicons-briefcase",
           path: "/projects/business-case",
-          onSelect: () => router.push("/projects/business-case"),
+          active: currentLink.value?.path === "/projects/business-case",
+          onSelect: () => navigateTo("/projects/business-case"),
         },
         {
           label: "Graphics Projects",
           icon: "i-ph-polygon",
           path: "/projects/graphics",
-          onSelect: () => router.push("/projects/graphics"),
+          active: currentLink.value?.path === "/projects/graphics",
+          onSelect: () => navigateTo("/projects/graphics"),
         },
         {
           label: "Game Dev Projects",
           icon: "i-ph-game-controller",
           path: "/projects/game-dev",
-          onSelect: () => router.push("/projects/game-dev"),
+          active: currentLink.value?.path === "/projects/game-dev",
+          onSelect: () => navigateTo("/projects/game-dev"),
         },
       ],
     },
@@ -112,52 +128,60 @@ export const useSideBarStore = defineStore("SideBarStore", () => {
           label: "Why I read books",
           icon: "i-heroicons-question-mark-circle",
           path: "/books",
-          onSelect: () => router.push("/books"),
+          active: currentLink.value?.path === "/books",
+          onSelect: () => navigateTo("/books"),
         },
         {
           label: "Fantasy",
           icon: "i-mdi-wizard-hat",
           path: "/books/fantasy",
-          onSelect: () => router.push("/books/fantasy"),
+          active: currentLink.value?.path === "/books/fantasy",
+          onSelect: () => navigateTo("/books/fantasy"),
         },
         {
           label: "Isekai",
           icon: "i-mdi-book-open-variant",
           path: "/books/isekai",
-          onSelect: () => router.push("/books/isekai"),
+          active: currentLink.value?.path === "/books/isekai",
+          onSelect: () => navigateTo("/books/isekai"),
         },
         {
           label: "LitRPG",
           icon: "i-mdi-dice-d20",
           path: "/books/litrpg",
-          onSelect: () => router.push("/books/litrpg"),
+          active: currentLink.value?.path === "/books/litrpg",
+          onSelect: () => navigateTo("/books/litrpg"),
         },
 
         {
           label: "Programming",
           icon: "i-heroicons-command-line",
           path: "/books/programming",
-          onSelect: () => router.push("/books/programming"),
+          active: currentLink.value?.path === "/books/programming",
+          onSelect: () => navigateTo("/books/programming"),
         },
 
         {
           label: "Science Fiction",
           icon: "i-mdi-robot-outline",
           path: "/books/science-fiction",
-          onSelect: () => router.push("/books/science-fiction"),
+          active: currentLink.value?.path === "/books/science-fiction",
+          onSelect: () => navigateTo("/books/science-fiction"),
         },
 
         {
           label: "Self Help",
           icon: "i-heroicons-light-bulb",
           path: "/books/self-help",
-          onSelect: () => router.push("/books/self-help"),
+          active: currentLink.value?.path === "/books/self-help",
+          onSelect: () => navigateTo("/books/self-help"),
         },
         {
           label: "Wuxia Books",
           icon: "i-heroicons-fire",
           path: "/books/wuxia",
-          onSelect: () => router.push("/books/wuxia"),
+          active: currentLink.value?.path === "/books/wuxia",
+          onSelect: () => navigateTo("/books/wuxia"),
         },
       ],
     },
@@ -166,9 +190,9 @@ export const useSideBarStore = defineStore("SideBarStore", () => {
   function init(path: string) {
     const matches: Array<[number, TreeItem]> = [];
     for (const link of links.value) {
-      const child = link.children?.find((child) => path.startsWith(child.path));
-      if (child) {
-        matches.push([child.path.length, child]);
+      const child = link.children?.filter((child) => path.startsWith(child.path));
+      if (child?.length) {
+        matches.push(...child.map((child) => [child.path.length, child] as [number, TreeItem]));
       }
     }
     currentLink.value = matches.sort((a, b) => b[0] - a[0])[0]?.[1];
@@ -182,7 +206,6 @@ export const useSideBarStore = defineStore("SideBarStore", () => {
   return {
     show,
     links,
-    currentLink,
     blogNavs,
     navigateTo,
     init,

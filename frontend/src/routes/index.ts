@@ -1,9 +1,10 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
-import Overview from "@/pages/home/Overview.vue";
-import CV from "@/pages/home/CV.vue";
-import Blog from "@/pages/blog/Blog.vue";
-import AllPosts from "@/pages/blog/AllPosts.vue";
-import WorkInProgress from "@/pages/home/WorkInProgess.vue";
+
+const Overview = () => import("@/pages/home/Overview.vue");
+const CV = () => import("@/pages/home/CV.vue");
+const Blog = () => import("@/pages/blog/Blog.vue");
+const AllPosts = () => import("@/pages/blog/AllPosts.vue");
+const WorkInProgress = () => import("@/pages/home/WorkInProgess.vue");
 
 const routes: RouteRecordRaw[] = [
   {
@@ -20,6 +21,11 @@ const routes: RouteRecordRaw[] = [
     component: CV,
   },
   {
+    path: "/blog",
+    name: "Blog",
+    component: WorkInProgress,
+  },
+  {
     path: "/blog/:site/:id",
     component: Blog,
   },
@@ -28,8 +34,17 @@ const routes: RouteRecordRaw[] = [
     component: AllPosts,
   },
   {
+    path: "/projects",
+    name: "Projects",
+    component: WorkInProgress,
+  },
+  {
     path: "/projects/:type",
     name: "Projects",
+    component: WorkInProgress,
+  },
+  {
+    path: "/books",
     component: WorkInProgress,
   },
   {
