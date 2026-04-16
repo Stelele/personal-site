@@ -88,7 +88,7 @@ func addResponseHeaders(next http.Handler) http.Handler {
 
 func isOriginAuthorised(origin string) bool {
 	switch origin {
-	case "http://localhost:5173":
+	case "http://localhost:5174":
 		return true
 	case "https://anglican.masvingo.org":
 		return true
