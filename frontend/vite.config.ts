@@ -14,6 +14,7 @@ export default defineConfig({
     tailwindcss(),
     ui({
       ui: {
+        prose: true,
         colors: {
           primary: "blue",
           neutral: "gray",

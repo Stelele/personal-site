@@ -30,29 +30,15 @@
           <p v-if="post?.publishDate" class="text-lg font-medium text-muted mt-1">
             {{ formatDate(post.publishDate) }}
           </p>
-          <UButton
-            :to="post?.link"
-            target="_blank"
-            variant="link"
-            color="primary"
-            icon="i-heroicons-arrow-top-right-on-square-20-solid"
-            class="mt-1 px-0"
-          >
+          <UButton :to="post?.link" target="_blank" variant="link" color="primary"
+            icon="i-heroicons-arrow-top-right-on-square-20-solid" class="mt-1 px-0">
             View original article
           </UButton>
-          <img
-            v-if="post?.coverImage"
-            :src="post.coverImage"
-            :alt="post.title"
-            class="w-full mt-4 rounded-lg"
-          />
+          <img v-if="post?.coverImage" :src="post.coverImage" :alt="post.title" class="w-full mt-4 rounded-lg" />
         </template>
 
         <!-- eslint-disable-next-line vue/no-v-html -->
-        <article
-          class="prose prose-lg max-w-none text-justify leading-relaxed"
-          v-html="augmentedContent"
-        />
+        <article class="prose prose-xl max-w-none text-justify leading-relaxed" v-html="augmentedContent" />
       </UCard>
     </UContainer>
   </div>
