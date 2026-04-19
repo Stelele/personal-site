@@ -296,7 +296,9 @@ export type $defs = Record<string, never>;
 export interface operations {
     GetBlogs: {
         parameters: {
-            query?: never;
+            query?: {
+                slugs?: string[];
+            };
             header?: never;
             path?: never;
             cookie?: never;

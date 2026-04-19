@@ -13,7 +13,7 @@ export async function getBlogFeeds() {
   const cmsBlogs = await cmsClient.GET('/blogs', {
     params: {
       query: {
-        slugs: []
+        slugs: ["progamming", "walking", "random"]
       }
     }
   })
