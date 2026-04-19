@@ -3,7 +3,6 @@ import { getHashNodeFeed } from "@/helpers/blogs/hashnode";
 import moment from "moment";
 import { getMediumFeed } from "./blogs/medium";
 import { CmsService } from "@/services/cms";
-import { components } from "@/services/cms/schema";
 
 export async function getBlogFeeds(): Promise<Blog[]> {
   const [mediumFeed, hashNodeFeed] = await Promise.all([getMediumFeed(), getHashNodeFeed()]);
@@ -59,39 +58,6 @@ export async function getBlogFeeds(): Promise<Blog[]> {
   }
 
   return allBlogs;
-}
-    }
-  })
-  const cmsBlogPosts: components['schemas']['PostResponse'][] = [];
-  for (const blog of cmsBlogs.data ?? []) {
-    if (!blog.id) continue;
-    const blogPosts = await cmsClient.GET('/blogs/{blogId}/posts', {
-      params: {
-        path: {
-          blogId: blog.id
-        },
-      }
-    });
-    cmsBlogPosts.push(...blogPosts.data ?? []);
-  }
-  for (const post of cmsBlogPosts) {
-    posts.push({
-      id: post.id ?? '',
-      title: post.title ?? '',
-      brief: post.description ?? '',
-      link: post.slug ?? '',
-      coverImage: post.coverImageUrl ?? '',
-      publishDate: post.publishedOn ?? '',
-      updateDate: post.updatedOn ?? '',
-      blogSite: "hashnode",
-      tags: [post.tag ?? ''],
-      content: post.content ?? '',
-    });
-  }
-
-  posts.sort((a, b) => (moment(a.publishDate).isBefore(moment(b.publishDate)) ? 1 : -1));
-
-  return posts;
 }
 
 
