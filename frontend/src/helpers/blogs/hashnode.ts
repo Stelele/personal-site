@@ -1,5 +1,5 @@
 import moment from "moment";
-import { HashnodeFeed, Post } from "@/helpers/type";
+import { Blog, HashnodeFeed, Post } from "@/helpers/type";
 
 async function getHashNodePosts() {
   const query = `
@@ -18,8 +18,8 @@ async function getHashNodePosts() {
                         updatedAt
                         url
                       	coverImage {
-                          url
-                        }
+                           url
+                         }
                         tags {
                         name
                         }
@@ -43,9 +43,10 @@ async function getHashNodePosts() {
   return response as HashnodeFeed;
 }
 
-export async function getHashNodeFeed() {
+export async function getHashNodeFeed(): Promise<Blog> {
   const hashnodeFeed = await getHashNodePosts();
   const posts: Post[] = [];
+  
   for (const edge of hashnodeFeed.data.publication.posts.edges) {
     posts.push({
       id: edge.node.id,
@@ -56,10 +57,15 @@ export async function getHashNodeFeed() {
       publishDate: moment(edge.node.publishedAt).format(),
       updateDate: moment(edge.node.updatedAt).format(),
       tags: edge.node.tags.map((x) => x.name),
-      blogSite: "hashnode",
       content: edge.node.content.html,
     });
   }
 
-  return posts;
+  return {
+    id: "hashnode",
+    name: hashnodeFeed.data.publication.title,
+    slug: "hashnode",
+    icon: "i-simple-icons:hashnode",
+    posts: posts,
+  };
 }
