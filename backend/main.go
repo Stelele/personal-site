@@ -8,15 +8,20 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	godotenv.Load()
+
 	r := mux.NewRouter()
 
 	r.Use(addResponseHeaders)
 
 	r.HandleFunc("/feed", handleGetRssFeed).Methods("GET")
 	r.HandleFunc("/medium-posts", handleGetMediumPosts).Methods("GET")
+	r.HandleFunc("/cms/blogs", handleGetCmsBlogs).Methods("GET")
+	r.HandleFunc("/cms/blogs/{blogId}/posts", handleGetCmsPosts).Methods("GET")
 
 	srv := &http.Server{
 		Handler:      r,

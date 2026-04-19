@@ -2,9 +2,9 @@ name: Build and Deploy
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
+  # push:
+  #   branches:
+  #     - main
 
 jobs:
   changes:
@@ -43,24 +43,47 @@ jobs:
           cd backend
           go build -o bin/
 
-      - name: Push to DigitalOcean
+      - name: Push binary to DigitalOcean
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.DROPLET_IP }}
-          username: ${{secrets.DROPLET_USERNAME}}
+          username: ${{ secrets.DROPLET_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           port: 22
           source: "backend/bin"
           target: "/var/www/personal-site"
 
-      - name: Restart Backend Server
+      - name: Push service file to DigitalOcean
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.DROPLET_IP }}
+          username: ${{ secrets.DROPLET_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          port: 22
+          source: "backend/goweb.service"
+          target: "/tmp/goweb.service"
+
+      - name: Setup environment and restart service
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.DROPLET_IP }}
-          username: ${{secrets.DROPLET_USERNAME}}
+          username: ${{ secrets.DROPLET_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           port: 22
-          script: sudo systemctl restart goweb
+          script: |
+            # Create .env with CMS secrets
+            cat > /var/www/personal-site/.env << 'EOF'
+            CMS_AUTH0_DOMAIN=${{ secrets.CMS_AUTH0_DOMAIN }}
+            CMS_AUTH0_CLIENT_ID=${{ secrets.CMS_AUTH0_CLIENT_ID }}
+            CMS_AUTH0_CLIENT_SECRET=${{ secrets.CMS_AUTH0_CLIENT_SECRET }}
+            CMS_AUTH0_AUDIENCE=${{ secrets.CMS_AUTH0_AUDIENCE }}
+            CMS_API_URL=${{ secrets.CMS_API_URL }}
+            EOF
+            
+            # Install/update systemd service
+            sudo cp /tmp/goweb.service /etc/systemd/system/goweb.service
+            sudo systemctl daemon-reload
+            sudo systemctl restart goweb
 
   frontend:
     needs: changes
@@ -78,7 +101,7 @@ jobs:
       - name: Building Front End
         run: |
           cd frontend
-          sed -e 's|{{GIPHY_API_KEY}}|$API_KEY|' -e 's|{{PRIV_API_URL}}|https://api.giftmugweni.com|' -e 's|{{BASE_URL}}|https://giftmugweni.com|' .env > .env.production
+          sed -e 's|{{GIPHY_API_KEY}}|$API_KEY|' -e 's|{{PRIV_API_URL}}|https://api.giftmugweni.com|' -e 's|{{BASE_URL}}|https://giftmugweni.com|' -e 's|{{CMS_URL}}|https://api.giftmugweni.com/cms|' .env > .env.production
           npm install
           npm run build
           git clone https://$PAT@github.com/Stelele/personal-site-build.git out

@@ -1,0 +1,16 @@
+[Unit]
+Description=Personal Site Go Backend
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/personal-site
+EnvironmentFile=/var/www/personal-site/.env
+ExecStart=/var/www/personal-site/bin/backend
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
