@@ -95,8 +95,9 @@ async function loadPost() {
 }
 
 const post = computed(() => {
-  const foundPost = articlesStore.posts.find(
-    (x) => x.blogSite === route.params.site && x.id === route.params.id
+  const foundPost = articlesStore.findPost(
+    route.params.site as string,
+    route.params.id as string
   );
   if (!foundPost) return;
 
