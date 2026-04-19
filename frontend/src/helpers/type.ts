@@ -58,6 +58,14 @@ export interface HashnodePost {
   }[];
 }
 
+export interface Blog {
+  id: string;
+  name: string;
+  slug: string;
+  icon: string;
+  posts: Post[];
+}
+
 export interface Post {
   id: string;
   title: string;
@@ -66,7 +74,6 @@ export interface Post {
   coverImage?: string;
   publishDate: string;
   updateDate: string;
-  blogSite: "medium" | "hashnode";
   tags: string[];
   content: string;
 }
