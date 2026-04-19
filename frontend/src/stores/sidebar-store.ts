@@ -18,29 +18,15 @@ export const useSideBarStore = defineStore("SideBarStore", () => {
   const currentLink = ref<TreeItem | undefined>();
 
   const blogNavs = computed<Detail[]>(() => {
-    const medium: Detail = {
-      title: "Medium Blog",
-      icon: "i-simple-icons:medium",
-      path: "/blog/medium",
-      children: [],
-    };
-
-    const hashnode: Detail = {
-      title: "Hashnode Blog",
-      icon: "i-simple-icons:hashnode",
-      path: "/blog/hashnode",
-      children: [],
-    };
-
-    for (const post of articlesStore.posts) {
-      const section = post.blogSite === "medium" ? medium : hashnode;
-
-      section.children.push({
+    return articlesStore.blogs.map((blog) => ({
+      title: blog.name,
+      icon: blog.icon,
+      path: `/blog/${blog.slug}`,
+      children: blog.posts.map((post) => ({
         name: post.title,
-        path: `/blog/${post.blogSite}/${post.id}`,
-      });
-    }
-    return [medium, hashnode];
+        path: `/blog/${blog.slug}/${post.id}`,
+      })),
+    }));
   });
 
   const links = computed<NavigationMenuItem[]>(() => [
