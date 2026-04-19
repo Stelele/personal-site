@@ -79,7 +79,7 @@ const breadcrumbLinks = computed<BreadcrumbItem[]>(() => {
 const posts = computed<Post[]>(() => {
   if (articlesStore.isDownloading) return [];
 
-  return articlesStore.posts.filter((post) => post.blogSite === blogSite.value);
+  return articlesStore.getPostsByBlog(blogSite.value);
 });
 
 useSeoMeta({
