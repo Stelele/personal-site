@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { Blog } from "@/helpers/type";
+import { Blog, Post } from "@/helpers/type";
 import { Ref, ref } from "vue";
 import { getBlogFeeds } from "@/helpers/downloader";
 
@@ -11,14 +11,16 @@ export const useArticlesStore = defineStore("ArticlesStore", () => {
     updatePosts(blogs, isDownloading);
   }
 
-  function findPost(blogSlug: string, postId: string): Blog["posts"][0] | undefined {
-    const blog = blogs.value.find((b) => b.slug === blogSlug);
-    return blog?.posts.find((p) => p.id === postId);
+  function findBlog(blogSlug: string): Blog | undefined {
+    return blogs.value.find((b) => b.slug === blogSlug);
   }
 
-  function getPostsByBlog(blogSlug: string): Blog["posts"] {
-    const blog = blogs.value.find((b) => b.slug === blogSlug);
-    return blog?.posts ?? [];
+  function findPost(blogSlug: string, postId: string): Post | undefined {
+    return findBlog(blogSlug)?.posts.find((p) => p.id === postId);
+  }
+
+  function getPostsByBlog(blogSlug: string): Post[] {
+    return findBlog(blogSlug)?.posts || [];
   }
 
   return {
@@ -27,6 +29,7 @@ export const useArticlesStore = defineStore("ArticlesStore", () => {
     isDownloading,
     findPost,
     getPostsByBlog,
+    findBlog,
   };
 });
 

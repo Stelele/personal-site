@@ -3,19 +3,10 @@
     <UBreadcrumb :items="breadcrumbLinks" class="mb-4" />
     <UPageHeader :title="capitalizedSite" :description="siteDescription" class="mb-8" />
     <template v-if="!articlesStore.isDownloading">
-      <UBlogPosts
-        orientation="vertical"
-        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
-      >
-        <UBlogPost
-          v-for="post in posts"
-          :key="post.id"
-          :title="post.title"
-          :image="post.coverImage || '/blog-empty.jpg'"
-          :date="post.publishDate"
-          :badge="post.tags[0]"
-          :to="`/blog/${blogSite}/${post.id}`"
-        />
+      <UBlogPosts orientation="vertical" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        <UBlogPost v-for="post in posts" :key="post.id" :title="post.title"
+          :image="post.coverImage || '/blog-empty.jpg'" :date="post.publishDate" :badge="post.tags[0]"
+          :to="`/blog/${blogSite}/${post.id}`" />
       </UBlogPosts>
     </template>
     <template v-if="articlesStore.isDownloading">
@@ -59,10 +50,7 @@ const capitalizedSite = computed(() => {
 });
 
 const siteDescription = computed(() => {
-  if (blogSite.value === "hashnode") {
-    return "Exploring web development, JavaScript, programming concepts, and software engineering insights.";
-  }
-  return "Thoughts on technology, personal growth, and the creative journey.";
+  return articlesStore.findBlog(blogSite.value)?.description || "";
 });
 
 const breadcrumbLinks = computed<BreadcrumbItem[]>(() => {

@@ -61,6 +61,7 @@ export interface HashnodePost {
 export interface Blog {
   id: string;
   name: string;
+  description: string;
   slug: string;
   icon: string;
   posts: Post[];

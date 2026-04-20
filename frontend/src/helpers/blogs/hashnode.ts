@@ -46,7 +46,7 @@ async function getHashNodePosts() {
 export async function getHashNodeFeed(): Promise<Blog> {
   const hashnodeFeed = await getHashNodePosts();
   const posts: Post[] = [];
-  
+
   for (const edge of hashnodeFeed.data.publication.posts.edges) {
     posts.push({
       id: edge.node.id,
@@ -63,7 +63,8 @@ export async function getHashNodeFeed(): Promise<Blog> {
 
   return {
     id: "hashnode",
-    name: hashnodeFeed.data.publication.title,
+    name: "Hashnode Blog",
+    description: "Exploring web development, JavaScript, programming concepts, and software engineering insights.",
     slug: "hashnode",
     icon: "i-simple-icons:hashnode",
     posts: posts,

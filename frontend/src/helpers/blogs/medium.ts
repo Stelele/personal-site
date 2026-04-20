@@ -37,6 +37,7 @@ export async function getMediumFeed(): Promise<Blog> {
   return {
     id: "medium",
     name: "Medium Blog",
+    description: "Thoughts on technology, personal growth, and the creative journey.",
     slug: "medium",
     icon: "i-simple-icons:medium",
     posts: feedPosts,
