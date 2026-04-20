@@ -44,6 +44,7 @@ export async function getCmsBlogList(): Promise<Blog[]> {
             description: blog.description ?? '',
             icon: "i-heroicons-book-open",
             posts: posts,
+            contentType: 'markdown',
         });
     }
 

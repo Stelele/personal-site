@@ -65,6 +65,7 @@ export interface Blog {
   slug: string;
   icon: string;
   posts: Post[];
+  contentType?: 'html' | 'markdown';
 }
 
 export interface Post {

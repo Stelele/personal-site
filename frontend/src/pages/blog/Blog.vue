@@ -38,14 +38,14 @@
         </template>
 
         <!-- eslint-disable-next-line vue/no-v-html -->
-        <article class="prose prose-xl max-w-none text-justify leading-relaxed" v-html="augmentedContent" />
+        <article class="prose prose-xl prose-slate max-w-none text-justify leading-relaxed" v-html="augmentedContent" />
       </UCard>
     </UContainer>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, onUpdated, ref } from "vue";
+import { computed, onMounted, onUpdated, ref, watch } from "vue";
 import { useArticlesStore } from "@/stores/aritcles-store";
 import { useRoute } from "vue-router";
 import { useSeoMeta, useHead } from "@unhead/vue";
@@ -53,6 +53,7 @@ import type { BreadcrumbItem } from "@nuxt/ui";
 import moment from "moment";
 import DOMPurify from "dompurify";
 import { useSideBarStore } from "@/stores/sidebar-store";
+import MarkdownIt from "markdown-it";
 
 const articlesStore = useArticlesStore();
 const sidebarStore = useSideBarStore();
@@ -63,6 +64,7 @@ const prevRoute = ref({
   site: "",
   id: "",
 });
+const parsedMarkdown = ref("");
 
 function formatDate(date: string): string {
   if (!moment(date).isValid()) return "Never Published";
@@ -91,41 +93,55 @@ async function loadPost() {
     return;
   }
 
+  if (contentType.value === 'markdown') {
+    const md = new MarkdownIt();
+    parsedMarkdown.value = md.render(post.value.content);
+  }
+
   isLoading.value = false;
 }
 
 const post = computed(() => {
-  const foundPost = articlesStore.findPost(
+  return articlesStore.findPost(
     route.params.site as string,
     route.params.id as string
   );
-  if (!foundPost) return;
+});
 
-  const content = new DOMParser().parseFromString(foundPost.content, "text/html");
-  content.querySelectorAll("img").forEach((img) => {
+const augmentedContent = computed(() => {
+  const rawContent = post.value?.content ?? "";
+  let htmlContent: string;
+
+  if (contentType.value === 'markdown') {
+    htmlContent = parsedMarkdown.value || rawContent;
+  } else {
+    htmlContent = rawContent;
+  }
+
+  const doc = new DOMParser().parseFromString(htmlContent, "text/html");
+  doc.querySelectorAll("img").forEach((img) => {
     img.style.display = "block";
     img.style.marginLeft = "auto";
     img.style.marginRight = "auto";
     img.style.maxWidth = "400px";
     img.style.borderRadius = "0.5rem";
   });
-  content.querySelectorAll("figcaption").forEach((caption) => {
+  doc.querySelectorAll("figcaption").forEach((caption) => {
     caption.style.textAlign = "center";
   });
 
-  foundPost.content = new XMLSerializer().serializeToString(content);
-
-  return foundPost;
-});
-
-const augmentedContent = computed(() => {
-  const content = post.value?.content;
-  return DOMPurify.sanitize(content ?? "");
+  const serialized = new XMLSerializer().serializeToString(doc);
+  return DOMPurify.sanitize(serialized);
 });
 
 const capitalizedSite = computed(() => {
   const site = route.params.site as string;
   return site?.charAt(0).toUpperCase() + site?.slice(1) || "";
+});
+
+const contentType = computed(() => {
+  const blog = articlesStore.findBlog(route.params.site as string);
+  return blog?.contentType ?? 'html';
 });
 
 const breadcrumbLinks = computed<BreadcrumbItem[]>(() => {
@@ -195,3 +211,12 @@ useHead(() => {
   };
 });
 </script>
+
+<style scoped>
+:deep(.prose) {
+  font-size: 1.25rem;
+}
+:deep(.prose p) {
+  margin-bottom: 1.5rem;
+}
+</style>
