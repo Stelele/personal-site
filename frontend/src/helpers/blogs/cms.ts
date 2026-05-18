@@ -25,24 +25,24 @@ export async function getCmsBlogList(): Promise<Blog[]> {
         const posts: Post[] = [];
         for (const post of blogPosts.data ?? []) {
             posts.push({
-                id: post.id ?? '',
-                title: post.title ?? '',
+                id: post.id,
+                title: post.title,
                 brief: post.description ?? '',
-                link: post.slug ?? '',
+                link: post.slug,
                 coverImage: post.coverImageUrl ?? '',
                 publishDate: post.publishedOn ?? '',
-                updateDate: post.updatedOn ?? '',
-                tags: [post.tag ?? ''],
-                content: post.content ?? '',
+                updateDate: post.updatedOn,
+                tags: [post.tag],
+                content: post.content,
             });
         }
 
         cmsBlogList.push({
             id: blog.id,
-            name: blog.name ?? 'Untitled',
-            slug: blog.slug ?? blog.id,
-            description: blog.description ?? '',
-            icon: "i-heroicons-book-open",
+            name: blog.name,
+            slug: blog.slug,
+            description: blog.description,
+            icon: blog.icon,
             posts: posts,
             contentType: 'markdown',
         });
