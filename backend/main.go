@@ -20,6 +20,7 @@ func main() {
 
 	r.HandleFunc("/feed", handleGetRssFeed).Methods("GET")
 	r.HandleFunc("/medium-posts", handleGetMediumPosts).Methods("GET")
+	r.HandleFunc("/hashnode-posts", handleGetHashnodePosts).Methods("GET")
 	r.HandleFunc("/cms/blogs", handleGetCmsBlogs).Methods("GET")
 	r.HandleFunc("/cms/blogs/{blogId}/posts", handleGetCmsPosts).Methods("GET")
 
@@ -67,6 +68,21 @@ func handleGetMediumPosts(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(err)
 		return
 	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(posts)
+}
+
+func handleGetHashnodePosts(w http.ResponseWriter, r *http.Request) {
+	log.Println("Handling hashnode-posts request")
+	posts, err := getHashnodeFeed()
+	if err != nil {
+		log.Printf("Error getting hashnode feed: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(err)
+		return
+	}
+	log.Printf("Got %d hashnode posts", len(posts))
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(posts)
