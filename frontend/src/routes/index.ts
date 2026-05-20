@@ -28,6 +28,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: "/blog/:site/:id",
     component: Blog,
+    meta: { scrollToTop: true }
   },
   {
     path: "/blog/:site",
@@ -61,6 +62,15 @@ const routes: RouteRecordRaw[] = [
 const router = createRouter({
   history: createWebHistory(),
   routes,
+  scrollBehavior(to, from, savedPosition) {
+    if (savedPosition) {
+      return savedPosition
+    }
+    if (to.meta.scrollToTop) {
+      return { top: 0, left: 0 }
+    }
+    return { top: 0, left: 0 }
+  },
 });
 
 export { router };
