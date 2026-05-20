@@ -285,15 +285,20 @@ func fetchAndParseHashnodePost(file GitHubFile) (Post, error) {
 
 	var post Post
 	post.ID = generateTitleHash(file.Name)
-	post.URL = file.DownloadURL
 
 	// Extract date from filename (e.g., 2024-05-18.html)
 	post.Date = extractDateFromFilename(file.Name)
+
+	var canonicalURL string
 
 	var findElements func(*html.Node)
 	findElements = func(n *html.Node) {
 		if n.Type == html.ElementNode {
 			switch n.Data {
+			case "link":
+				if getAttr(n, "rel") == "canonical" {
+					canonicalURL = getAttr(n, "href")
+				}
 			case "h1":
 				if hasClassPrefix(n, "text-2xl") {
 					post.Title = getTextContent(n)
@@ -326,8 +331,12 @@ func fetchAndParseHashnodePost(file GitHubFile) (Post, error) {
 
 	findElements(doc)
 
-	// Construct GitHub blob URL
-	post.URL = fmt.Sprintf("https://github.com/Stelele/hashnode-blog-backups/blob/main/%s", file.Name)
+	// Use canonical URL if found, otherwise fallback to GitHub blob URL
+	if canonicalURL != "" {
+		post.URL = canonicalURL
+	} else {
+		post.URL = fmt.Sprintf("https://github.com/Stelele/hashnode-blog-backups/blob/main/%s", file.Name)
+	}
 
 	return post, nil
 }
