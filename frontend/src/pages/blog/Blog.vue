@@ -30,7 +30,7 @@
           <p v-if="post?.publishDate" class="text-lg font-medium text-muted mt-1">
             {{ formatDate(post.publishDate) }}
           </p>
-          <UButton :to="post?.link" target="_blank" variant="link" color="primary"
+          <UButton v-if="showCanonical" :to="post?.link" target="_blank" variant="link" color="primary"
             icon="i-heroicons-arrow-top-right-on-square-20-solid" class="mt-1 px-0">
             View original article
           </UButton>
@@ -65,6 +65,10 @@ const prevRoute = ref({
   id: "",
 });
 const parsedMarkdown = ref("");
+
+const showCanonical = computed(() => {
+  return post.value?.link.startsWith("https://");
+})
 
 function formatDate(date: string): string {
   if (!moment(date).isValid()) return "Never Published";
@@ -216,6 +220,7 @@ useHead(() => {
 :deep(.prose) {
   font-size: 1.25rem;
 }
+
 :deep(.prose p) {
   margin-bottom: 1.5rem;
 }

@@ -16,6 +16,9 @@ export async function getCmsBlogList(): Promise<Blog[]> {
         if (!blog.id) continue;
         const blogPosts = await cmsClient.GET('/blogs/{blogId}/posts', {
             params: {
+                query: {
+                    isPublished: true,
+                },
                 path: {
                     blogId: blog.id
                 },
