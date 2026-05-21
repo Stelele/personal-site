@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
+import { usePageScrollStore } from "@/stores/page-scroll-store";
 
 const Overview = () => import("@/pages/home/Overview.vue");
 const CV = () => import("@/pages/home/CV.vue");
@@ -64,9 +65,24 @@ const router = createRouter({
   routes,
 });
 
+router.beforeEach((to, from) => {
+  if (from.path !== to.path) {
+    const pageScrollStore = usePageScrollStore();
+    pageScrollStore.saveScrollPosition(from.fullPath);
+  }
+});
+
 router.afterEach((to, from) => {
-  if (to.meta.scrollToTop) {
-    window.scrollTo(0, 0)
+  if (from.path !== to.path) {
+    const pageScrollStore = usePageScrollStore();
+    if (to.meta.scrollToTop) {
+      pageScrollStore.scrollToTop();
+    } else {
+      const restored = pageScrollStore.restoreScrollPosition(to.fullPath);
+      if (!restored) {
+        pageScrollStore.scrollToTop();
+      }
+    }
   }
 });
 

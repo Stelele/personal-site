@@ -2,14 +2,10 @@
   <UPage>
     <template #left>
       <UPageAside>
-        <UNavigationMenu
-          orientation="vertical"
-          :items="sideBarStore.links"
-          class="bg-transparent w-full max-w-60"
-        />
+        <UNavigationMenu orientation="vertical" :items="sideBarStore.links" class="bg-transparent w-full max-w-60" />
       </UPageAside>
     </template>
-    <UPageBody class="h-[85vh] max-h-[85vh] overflow-y-auto">
+    <UPageBody ref="contentBody" class="h-[85vh] max-h-[85vh] overflow-y-auto">
       <slot />
     </UPageBody>
   </UPage>
@@ -17,6 +13,13 @@
 
 <script setup lang="ts">
 import { useSideBarStore } from "@/stores/sidebar-store";
+import { usePageScrollStore } from "@/stores/page-scroll-store";
+import { onMounted } from "vue";
 
 const sideBarStore = useSideBarStore();
+const pageScrollStore = usePageScrollStore();
+
+onMounted(() => {
+  pageScrollStore.setRef(contentBody.value);
+});
 </script>
