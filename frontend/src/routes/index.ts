@@ -1,5 +1,4 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
-import { usePageScrollStore } from "@/stores/page-scroll-store";
 
 const Overview = () => import("@/pages/home/Overview.vue");
 const CV = () => import("@/pages/home/CV.vue");
@@ -65,22 +64,35 @@ const router = createRouter({
   routes,
 });
 
+const scrollPositions = new Map<string, number>();
+
+function getContentArea(): HTMLElement | null {
+  const elements = Array.from(document.querySelectorAll('.overflow-y-auto'))
+  return elements.find(el => el.tagName === 'DIV' && el.scrollHeight > 0) || null
+}
+
 router.beforeEach((to, from) => {
   if (from.path !== to.path) {
-    const pageScrollStore = usePageScrollStore();
-    pageScrollStore.saveScrollPosition(from.fullPath);
+    const contentArea = getContentArea()
+    if (contentArea) {
+      scrollPositions.set(from.fullPath, contentArea.scrollTop)
+    }
   }
 });
 
 router.afterEach((to, from) => {
   if (from.path !== to.path) {
-    const pageScrollStore = usePageScrollStore();
+    const contentArea = getContentArea()
+    if (!contentArea) return
+    
     if (to.meta.scrollToTop) {
-      pageScrollStore.scrollToTop();
+      contentArea.scrollTop = 0
     } else {
-      const restored = pageScrollStore.restoreScrollPosition(to.fullPath);
-      if (!restored) {
-        pageScrollStore.scrollToTop();
+      const savedPosition = scrollPositions.get(to.fullPath)
+      if (savedPosition !== undefined) {
+        contentArea.scrollTop = savedPosition
+      } else {
+        contentArea.scrollTop = 0
       }
     }
   }
