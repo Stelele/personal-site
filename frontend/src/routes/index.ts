@@ -67,6 +67,9 @@ const router = createRouter({
       return savedPosition
     }
     if (to.meta.scrollToTop) {
+      setTimeout(() => {
+        window.scrollTo(0, 0)
+      }, 0)
       return { top: 0, left: 0 }
     }
     return { top: 0, left: 0 }
