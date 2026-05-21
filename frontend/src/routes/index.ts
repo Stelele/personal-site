@@ -62,18 +62,12 @@ const routes: RouteRecordRaw[] = [
 const router = createRouter({
   history: createWebHistory(),
   routes,
-  scrollBehavior(to, from, savedPosition) {
-    if (savedPosition) {
-      return savedPosition
-    }
-    if (to.meta.scrollToTop) {
-      setTimeout(() => {
-        window.scrollTo(0, 0)
-      }, 0)
-      return { top: 0, left: 0 }
-    }
-    return { top: 0, left: 0 }
-  },
+});
+
+router.afterEach((to, from) => {
+  if (to.meta.scrollToTop) {
+    window.scrollTo(0, 0)
+  }
 });
 
 export { router };
