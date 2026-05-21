@@ -14,12 +14,15 @@
 <script setup lang="ts">
 import { useSideBarStore } from "@/stores/sidebar-store";
 import { usePageScrollStore } from "@/stores/page-scroll-store";
-import { onMounted } from "vue";
+import { onMounted, ref } from "vue";
 
 const sideBarStore = useSideBarStore();
 const pageScrollStore = usePageScrollStore();
+const contentBody = ref<HTMLElement | null>(null);
 
 onMounted(() => {
-  pageScrollStore.setRef(contentBody.value);
+  if (contentBody.value) {
+    pageScrollStore.setRef(contentBody.value);
+  }
 });
 </script>
