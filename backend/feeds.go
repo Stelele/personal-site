@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"crypto/md5"
 	"encoding/json"
 	"fmt"
@@ -272,19 +273,32 @@ func fetchAllPostsFromGitHub() ([]Post, error) {
 		}
 
 		wg.Add(1)
-		go func(downloadURL string) {
+		go func(file GitHubFile) {
 			defer wg.Done()
 
-			post, err := fetchAndParsePost(downloadURL)
+			resp, err := httpClient.Get(file.DownloadURL)
 			if err != nil {
-				log.Printf("Error fetching %s: %v", downloadURL, err)
+				log.Printf("Error fetching %s: %v", file.DownloadURL, err)
+				return
+			}
+			defer resp.Body.Close()
+
+			content, err := io.ReadAll(resp.Body)
+			if err != nil {
+				log.Printf("Error reading %s: %v", file.DownloadURL, err)
+				return
+			}
+
+			post, err := parseMediumPost(content, file)
+			if err != nil {
+				log.Printf("Error parsing %s: %v", file.Name, err)
 				return
 			}
 
 			mu.Lock()
 			posts = append(posts, post)
 			mu.Unlock()
-		}(file.DownloadURL)
+		}(file)
 	}
 
 	wg.Wait()
@@ -296,20 +310,14 @@ func fetchAllPostsFromGitHub() ([]Post, error) {
 	return posts, nil
 }
 
-func fetchAndParsePost(downloadURL string) (Post, error) {
-	resp, err := httpClient.Get(downloadURL)
-	if err != nil {
-		return Post{}, err
-	}
-	defer resp.Body.Close()
-
-	doc, err := html.Parse(resp.Body)
+func parseMediumPost(content []byte, file GitHubFile) (Post, error) {
+	doc, err := html.Parse(bytes.NewReader(content))
 	if err != nil {
 		return Post{}, err
 	}
 
 	var post Post
-	post.URL = downloadURL
+	post.URL = file.DownloadURL
 
 	var findMeta func(*html.Node, *html.Node) // node, parent
 
@@ -319,7 +327,6 @@ func fetchAndParsePost(downloadURL string) (Post, error) {
 			case "title":
 				if n.FirstChild != nil {
 					post.Title = n.FirstChild.Data
-					// Generate ID from title (same as frontend's generateTitleHash)
 					post.ID = generateTitleHash(post.Title)
 				}
 			case "section":
@@ -350,7 +357,6 @@ func fetchAndParsePost(downloadURL string) (Post, error) {
 				for _, attr := range n.Attr {
 					if attr.Key == "class" && attr.Val == "dt-published" {
 						post.Date = getAttr(n, "datetime")
-						// Get href from parent <a>
 						if parent != nil && parent.Data == "a" {
 							post.URL = getAttr(parent, "href")
 						}
