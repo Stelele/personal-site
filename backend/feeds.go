@@ -30,17 +30,6 @@ type Post struct {
 	Tags       []string `json:"tags,omitempty"`
 }
 
-type HashnodePost struct {
-	Title      string
-	Subtitle   string
-	Date       string
-	Summary    string
-	CoverImage string
-	URL        string
-	Content    string
-	Tags       []string
-}
-
 type feedCache struct {
 	posts  []Post
 	loaded bool
