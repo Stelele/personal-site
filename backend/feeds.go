@@ -50,6 +50,30 @@ var (
 	mediumCache   = feedCache{}
 	hashnodeCache = feedCache{}
 )
+
+func getCachedFeed(cache *feedCache, fetchFunc func() ([]Post, error)) ([]Post, error) {
+	cache.mu.RLock()
+	if cache.loaded {
+		defer cache.mu.RUnlock()
+		return cache.posts, nil
+	}
+	cache.mu.RUnlock()
+
+	cache.mu.Lock()
+	defer cache.mu.Unlock()
+	if cache.loaded {
+		return cache.posts, nil
+	}
+
+	posts, err := fetchFunc()
+	if err != nil {
+		return nil, err
+	}
+	cache.posts = posts
+	cache.loaded = true
+	return posts, nil
+}
+
 var httpClient = &http.Client{Timeout: 30 * time.Second}
 
 type GitHubFile struct {
