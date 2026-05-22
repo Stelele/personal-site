@@ -71,7 +71,8 @@ jobs:
           username: ${{ secrets.DROPLET_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           port: 22
-          source: "backend/goweb.service"
+          source: "backend/service"
+          strip_components: 1
           target: "/tmp"
 
       - name: Setup environment and restart service
