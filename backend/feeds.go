@@ -171,28 +171,13 @@ func getRssFeed(url string) (string, error) {
 }
 
 func getMediumFeed() ([]Post, error) {
-	mediumCache.mu.RLock()
-	if mediumCache.loaded {
-		defer mediumCache.mu.RUnlock()
-		return mediumCache.posts, nil
-	}
-	mediumCache.mu.RUnlock()
-
-	mediumCache.mu.Lock()
-	defer mediumCache.mu.Unlock()
-
-	if mediumCache.loaded {
-		return mediumCache.posts, nil
-	}
-
-	posts, err := fetchAllPostsFromGitHub()
-	if err != nil {
-		return nil, err
-	}
-
-	mediumCache.posts = posts
-	mediumCache.loaded = true
-	return posts, nil
+	return getCachedFeed(&mediumCache, func() ([]Post, error) {
+		return fetchGitHubRepoPosts(
+			"https://api.github.com/repos/Stelele/medium-blogs-backup/contents",
+			parseMediumPost,
+			"Medium",
+		)
+	})
 }
 
 func getHashnodeFeed() ([]Post, error) {
