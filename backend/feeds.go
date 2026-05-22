@@ -74,6 +74,77 @@ func getCachedFeed(cache *feedCache, fetchFunc func() ([]Post, error)) ([]Post, 
 	return posts, nil
 }
 
+func fetchGitHubRepoPosts(
+	apiURL string,
+	parseFunc func(content []byte, file GitHubFile) (Post, error),
+	logPrefix string,
+) ([]Post, error) {
+	log.Printf("[%s] Fetching file list from GitHub", logPrefix)
+	resp, err := httpClient.Get(apiURL)
+	if err != nil {
+		log.Printf("[%s] Error fetching file list: %v", logPrefix, err)
+		return nil, err
+	}
+	defer resp.Body.Close()
+	log.Printf("[%s] Got response from GitHub, status: %s", logPrefix, resp.Status)
+
+	var files []GitHubFile
+	if err := json.NewDecoder(resp.Body).Decode(&files); err != nil {
+		log.Printf("[%s] Error decoding file list: %v", logPrefix, err)
+		return nil, err
+	}
+	log.Printf("[%s] Found %d files in repo", logPrefix, len(files))
+
+	var wg sync.WaitGroup
+	var mu sync.Mutex
+	posts := make([]Post, 0, len(files))
+
+	for _, file := range files {
+		if !strings.HasSuffix(file.Name, ".html") {
+			continue
+		}
+
+		wg.Add(1)
+		go func(file GitHubFile) {
+			defer wg.Done()
+			log.Printf("[%s] Fetching file: %s", logPrefix, file.Name)
+
+			resp, err := httpClient.Get(file.DownloadURL)
+			if err != nil {
+				log.Printf("[%s] Error fetching %s: %v", logPrefix, file.DownloadURL, err)
+				return
+			}
+			defer resp.Body.Close()
+
+			content, err := io.ReadAll(resp.Body)
+			if err != nil {
+				log.Printf("[%s] Error reading %s: %v", logPrefix, file.DownloadURL, err)
+				return
+			}
+
+			post, err := parseFunc(content, file)
+			if err != nil {
+				log.Printf("[%s] Error parsing %s: %v", logPrefix, file.Name, err)
+				return
+			}
+
+			mu.Lock()
+			posts = append(posts, post)
+			mu.Unlock()
+			log.Printf("[%s] Parsed file: %s, title: %s", logPrefix, file.Name, post.Title)
+		}(file)
+	}
+
+	wg.Wait()
+	log.Printf("[%s] Finished parsing all files, total posts: %d", logPrefix, len(posts))
+
+	sort.Slice(posts, func(i, j int) bool {
+		return posts[i].Date > posts[j].Date
+	})
+
+	return posts, nil
+}
+
 var httpClient = &http.Client{Timeout: 30 * time.Second}
 
 type GitHubFile struct {
