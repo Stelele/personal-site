@@ -227,9 +227,22 @@ func getHashnodeFeed() ([]Post, error) {
 			defer wg.Done()
 			log.Printf("Fetching file: %s", file.Name)
 
-			post, err := fetchAndParseHashnodePost(file)
+			resp, err := httpClient.Get(file.DownloadURL)
 			if err != nil {
 				log.Printf("Error fetching %s: %v", file.DownloadURL, err)
+				return
+			}
+			defer resp.Body.Close()
+
+			content, err := io.ReadAll(resp.Body)
+			if err != nil {
+				log.Printf("Error reading %s: %v", file.DownloadURL, err)
+				return
+			}
+
+			post, err := parseHashnodePost(content, file)
+			if err != nil {
+				log.Printf("Error parsing %s: %v", file.Name, err)
 				return
 			}
 
@@ -375,14 +388,8 @@ func parseMediumPost(content []byte, file GitHubFile) (Post, error) {
 	return post, nil
 }
 
-func fetchAndParseHashnodePost(file GitHubFile) (Post, error) {
-	resp, err := httpClient.Get(file.DownloadURL)
-	if err != nil {
-		return Post{}, err
-	}
-	defer resp.Body.Close()
-
-	doc, err := html.Parse(resp.Body)
+func parseHashnodePost(content []byte, file GitHubFile) (Post, error) {
+	doc, err := html.Parse(bytes.NewReader(content))
 	if err != nil {
 		return Post{}, err
 	}
