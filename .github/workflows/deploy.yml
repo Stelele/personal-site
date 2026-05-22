@@ -43,6 +43,16 @@ jobs:
           cd backend
           go build -o bin/
 
+      - name: Ensure bin directory exists
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.DROPLET_IP }}
+          username: ${{ secrets.DROPLET_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          port: 22
+          script: |
+            mkdir -p /var/www/personal-site/bin
+
       - name: Push binary to DigitalOcean
         uses: appleboy/scp-action@master
         with:
@@ -50,8 +60,8 @@ jobs:
           username: ${{ secrets.DROPLET_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           port: 22
-          source: "backend/bin"
-          target: "/var/www/personal-site"
+          source: "backend/bin/personal-site"
+          target: "/var/www/personal-site/bin"
 
       - name: Push service file to DigitalOcean
         uses: appleboy/scp-action@master
@@ -61,7 +71,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: 22
           source: "backend/goweb.service"
-          target: "/tmp/goweb.service"
+          target: "/var/www/personal-site/goweb.service"
 
       - name: Setup environment and restart service
         uses: appleboy/ssh-action@v1
@@ -80,8 +90,13 @@ jobs:
             CMS_API_URL=${{ secrets.CMS_API_URL }}
             EOF
             
+            # Clean up old backend folder if it exists
+            if [ -d /var/www/personal-site/backend ]; then
+              rm -rf /var/www/personal-site/backend
+            fi
+            
             # Install/update systemd service
-            sudo cp /tmp/goweb.service /etc/systemd/system/goweb.service
+            sudo cp /var/www/personal-site/goweb.service /etc/systemd/system/goweb.service
             sudo systemctl daemon-reload
             sudo systemctl restart goweb
 

@@ -8,7 +8,7 @@ User=www-data
 Group=www-data
 WorkingDirectory=/var/www/personal-site
 EnvironmentFile=/var/www/personal-site/.env
-ExecStart=/var/www/personal-site/bin/backend
+ExecStart=/var/www/personal-site/bin/personal-site
 Restart=always
 RestartSec=5
 
