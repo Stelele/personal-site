@@ -72,7 +72,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: 22
           source: "backend/goweb.service"
-          target: "/var/www/personal-site"
+          target: "/tmp"
 
       - name: Setup environment and restart service
         uses: appleboy/ssh-action@v1
@@ -82,6 +82,9 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: 22
           script: |
+            # Remove any existing goweb.service (file or directory)
+            rm -rf /var/www/personal-site/goweb.service
+            
             # Create .env with CMS secrets
             cat > /var/www/personal-site/.env << 'EOF'
             CMS_AUTH0_DOMAIN=${{ secrets.CMS_AUTH0_DOMAIN }}
@@ -91,8 +94,11 @@ jobs:
             CMS_API_URL=${{ secrets.CMS_API_URL }}
             EOF
             
-            # Install/update systemd service
-            sudo cp /var/www/personal-site/goweb.service /etc/systemd/system
+            # Copy service file from /tmp
+            cp /tmp/goweb.service /var/www/personal-site/goweb.service
+            
+            # Install systemd service
+            sudo cp /var/www/personal-site/goweb.service /etc/systemd/system/goweb.service
             sudo systemctl daemon-reload
             sudo systemctl restart goweb
 
