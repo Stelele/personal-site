@@ -40,13 +40,16 @@ type HashnodePost struct {
 	Tags       []string
 }
 
-type postsCache struct {
+type feedCache struct {
 	posts  []Post
 	loaded bool
 	mu     sync.RWMutex
 }
 
-var cache postsCache
+var (
+	mediumCache   = feedCache{}
+	hashnodeCache = feedCache{}
+)
 var httpClient = &http.Client{Timeout: 30 * time.Second}
 
 type GitHubFile struct {
@@ -72,18 +75,18 @@ func getRssFeed(url string) (string, error) {
 }
 
 func getMediumFeed() ([]Post, error) {
-	cache.mu.RLock()
-	if cache.loaded {
-		defer cache.mu.RUnlock()
-		return cache.posts, nil
+	mediumCache.mu.RLock()
+	if mediumCache.loaded {
+		defer mediumCache.mu.RUnlock()
+		return mediumCache.posts, nil
 	}
-	cache.mu.RUnlock()
+	mediumCache.mu.RUnlock()
 
-	cache.mu.Lock()
-	defer cache.mu.Unlock()
+	mediumCache.mu.Lock()
+	defer mediumCache.mu.Unlock()
 
-	if cache.loaded {
-		return cache.posts, nil
+	if mediumCache.loaded {
+		return mediumCache.posts, nil
 	}
 
 	posts, err := fetchAllPostsFromGitHub()
@@ -91,8 +94,8 @@ func getMediumFeed() ([]Post, error) {
 		return nil, err
 	}
 
-	cache.posts = posts
-	cache.loaded = true
+	mediumCache.posts = posts
+	mediumCache.loaded = true
 	return posts, nil
 }
 
