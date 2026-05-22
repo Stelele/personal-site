@@ -72,7 +72,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: 22
           source: "backend/service"
-          strip_components: 1
+          strip_components: 2
           target: "/tmp"
 
       - name: Setup environment and restart service
