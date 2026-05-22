@@ -181,71 +181,13 @@ func getMediumFeed() ([]Post, error) {
 }
 
 func getHashnodeFeed() ([]Post, error) {
-	log.Println("Fetching hashnode file list from GitHub")
-	apiURL := "https://api.github.com/repos/Stelele/hashnode-blog-backups/contents"
-	resp, err := httpClient.Get(apiURL)
-	if err != nil {
-		log.Printf("Error fetching file list: %v", err)
-		return nil, err
-	}
-	defer resp.Body.Close()
-	log.Printf("Got response from GitHub, status: %s", resp.Status)
-
-	var files []GitHubFile
-	if err := json.NewDecoder(resp.Body).Decode(&files); err != nil {
-		log.Printf("Error decoding file list: %v", err)
-		return nil, err
-	}
-	log.Printf("Found %d files in repo", len(files))
-
-	var wg sync.WaitGroup
-	var mu sync.Mutex
-	posts := make([]Post, 0, len(files))
-
-	for _, file := range files {
-		if !strings.HasSuffix(file.Name, ".html") {
-			continue
-		}
-
-		wg.Add(1)
-		go func(file GitHubFile) {
-			defer wg.Done()
-			log.Printf("Fetching file: %s", file.Name)
-
-			resp, err := httpClient.Get(file.DownloadURL)
-			if err != nil {
-				log.Printf("Error fetching %s: %v", file.DownloadURL, err)
-				return
-			}
-			defer resp.Body.Close()
-
-			content, err := io.ReadAll(resp.Body)
-			if err != nil {
-				log.Printf("Error reading %s: %v", file.DownloadURL, err)
-				return
-			}
-
-			post, err := parseHashnodePost(content, file)
-			if err != nil {
-				log.Printf("Error parsing %s: %v", file.Name, err)
-				return
-			}
-
-			mu.Lock()
-			posts = append(posts, post)
-			mu.Unlock()
-			log.Printf("Parsed file: %s, title: %s", file.Name, post.Title)
-		}(file)
-	}
-
-	wg.Wait()
-	log.Printf("Finished parsing all files, total posts: %d", len(posts))
-
-	sort.Slice(posts, func(i, j int) bool {
-		return posts[i].Date > posts[j].Date
+	return getCachedFeed(&hashnodeCache, func() ([]Post, error) {
+		return fetchGitHubRepoPosts(
+			"https://api.github.com/repos/Stelele/hashnode-blog-backups/contents",
+			parseHashnodePost,
+			"Hashnode",
+		)
 	})
-
-	return posts, nil
 }
 
 func fetchAllPostsFromGitHub() ([]Post, error) {
