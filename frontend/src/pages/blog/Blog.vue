@@ -133,9 +133,19 @@ const augmentedContent = computed(() => {
   doc.querySelectorAll("figcaption").forEach((caption) => {
     caption.style.textAlign = "center";
   });
+  doc.querySelectorAll("audio").forEach((audio) => {
+    audio.style.display = "block";
+    audio.style.marginLeft = "auto";
+    audio.style.marginRight = "auto";
+    audio.style.maxWidth = "400px";
+    audio.style.width = "100%";
+  });
 
   const serialized = new XMLSerializer().serializeToString(doc);
-  return DOMPurify.sanitize(serialized);
+  return DOMPurify.sanitize(serialized, {
+    ADD_TAGS: ['audio'],
+    ADD_ATTR: ['src', 'controls'],
+  });
 });
 
 const capitalizedSite = computed(() => {
