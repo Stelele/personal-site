@@ -5,7 +5,7 @@ import { generateTitleHash } from "@/helpers/generate-title-hash";
 interface MediumDetail {
   title: string;
   subtitle: string;
-  date: string;
+  publishDate: string;
   summary: string;
   coverImage: string;
   url: string;
@@ -26,8 +26,8 @@ export async function getMediumFeed(): Promise<Blog> {
       title: post.title,
       brief: post.subtitle,
       link: post.url,
-      publishDate: moment(post.date).isValid() ? moment(post.date).format() : "Never Published",
-      updateDate: moment(post.date).isValid() ? moment(post.date).format() : "Never Updated",
+      publishDate: moment(post.publishDate).isValid() ? moment(post.publishDate).format() : "Never Published",
+      updateDate: moment(post.publishDate).isValid() ? moment(post.publishDate).format() : "Never Updated",
       coverImage: post.coverImage,
       tags: [],
       content: post.content,

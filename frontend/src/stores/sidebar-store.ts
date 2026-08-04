@@ -18,7 +18,9 @@ export const useSideBarStore = defineStore("SideBarStore", () => {
   const currentLink = ref<TreeItem | undefined>();
 
   const blogNavs = computed<Detail[]>(() => {
-    return articlesStore.blogs.map((blog) => ({
+    return articlesStore.blogs
+      .filter((blog) => blog.slug !== "special")
+      .map((blog) => ({
       title: blog.name,
       icon: blog.icon,
       path: `/blog/${blog.slug}`,
@@ -57,9 +59,9 @@ export const useSideBarStore = defineStore("SideBarStore", () => {
         {
           label: "Why I blog",
           icon: "i-heroicons-question-mark-circle",
-          path: "/blog",
-          active: currentLink.value?.path === "/blog",
-          onSelect: () => navigateTo("/blog"),
+          path: "/why-i-blog",
+          active: currentLink.value?.path === "/why-i-blog",
+          onSelect: () => navigateTo("/why-i-blog"),
         },
         ...blogNavs.value.map((detail) => ({
           label: detail.title,

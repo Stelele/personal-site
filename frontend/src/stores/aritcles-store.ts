@@ -19,6 +19,10 @@ export const useArticlesStore = defineStore("ArticlesStore", () => {
     return findBlog(blogSlug)?.posts.find((p) => p.id === postId);
   }
 
+  function findPostBySlug(blogSlug: string, postSlug: string): Post | undefined {
+    return findBlog(blogSlug)?.posts.find((p) => p.link === postSlug);
+  }
+
   function getPostsByBlog(blogSlug: string): Post[] {
     return findBlog(blogSlug)?.posts || [];
   }
@@ -28,6 +32,7 @@ export const useArticlesStore = defineStore("ArticlesStore", () => {
     update,
     isDownloading,
     findPost,
+    findPostBySlug,
     getPostsByBlog,
     findBlog,
   };

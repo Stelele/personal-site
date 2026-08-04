@@ -6,7 +6,7 @@ export async function getCmsBlogList(): Promise<Blog[]> {
     const cmsBlogs = await cmsClient.GET('/blogs', {
         params: {
             query: {
-                slugs: ["progamming", "walking", "random"]
+                slugs: ["progamming", "walking", "random", "special"]
             }
         }
     })

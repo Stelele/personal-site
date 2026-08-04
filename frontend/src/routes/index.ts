@@ -5,6 +5,7 @@ const CV = () => import("@/pages/home/CV.vue");
 const Blog = () => import("@/pages/blog/Blog.vue");
 const AllPosts = () => import("@/pages/blog/AllPosts.vue");
 const WorkInProgress = () => import("@/pages/home/WorkInProgess.vue");
+const WhyIBlogPage = () => import("@/pages/blog/WhyIBlog.vue");
 
 const routes: RouteRecordRaw[] = [
   {
@@ -24,6 +25,20 @@ const routes: RouteRecordRaw[] = [
     path: "/blog",
     name: "Blog",
     component: WorkInProgress,
+  },
+  {
+    path: "/why-i-blog",
+    name: "WhyIBlog",
+    component: WhyIBlogPage,
+    meta: { title: "Why I blog", scrollToTop: true },
+  },
+  {
+    path: "/blog/special/:id",
+    redirect: "/why-i-blog",
+  },
+  {
+    path: "/blog/special",
+    redirect: "/why-i-blog",
   },
   {
     path: "/blog/:site/:id",
