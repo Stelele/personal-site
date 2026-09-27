@@ -24,6 +24,32 @@ push dates — plus the local READMEs and opencode session history.
 Every one of the 105 repos is accounted for in §10.2. The split is
 **53 shown / 52 excluded**, and the accounting must total 105.
 
+### 1.1 Scope, honestly
+
+The request was "a bunch of missing sections". This spec does **one** of them.
+`/blog` and `/books` (8 routes between them) are still `WorkInProgress.vue` after
+this lands. That was a deliberate scoping choice — projects first, because it is
+the section the evidence can fill almost entirely without asking him anything —
+but it means the underlying complaint is only partly addressed.
+
+Worth noting for whoever sequences the work: `/blog` is close to free. It would
+render every post already in the CMS plus the two archives, needing one new page
+and no new content. It is the highest remaining value per unit of effort on the
+site, and it is not in this spec.
+
+### 1.2 This adds maintenance, it does not remove it
+
+His stated pain is *"I never have time to update them."* Honest accounting: this
+spec hands him **53 records, 10 descriptions, 3 category intros, a ~500-word
+manifesto, and a `lastPushedAt` date per repo** to maintain. That is more
+hand-authored content than the four Giphy placeholders it replaces.
+
+What it buys: the content is written once, to a standard, instead of never. What
+it costs: a recurring edit. §5.2.1 addresses the stalest field, and §10.1 puts a
+refresh script in the deliverables. But the spec should not pretend that "curated
+data file" is the same thing as "self-maintaining" — it is not.
+
+
 ---
 
 ## 2. Decisions
@@ -94,11 +120,17 @@ frontend/src/
 MODIFIED
 frontend/src/routes/index.ts            new components + fix duplicate route name
 frontend/src/stores/aritcles-store.ts  try/catch/finally (§3, problem 3)
+frontend/src/stores/sidebar-store.ts   Projects children read from PROJECT_CATEGORIES
 frontend/package.json                   "build": "vue-tsc -b && vite build --mode production"
 frontend/AGENTS.md                      add src/data/ to Project Structure; correct build description
 ```
 
 `src/helpers/type.ts` gains the interfaces, next to the existing `Blog` / `Post`.
+
+`sidebar-store.ts` is in this list because §5.4 claims the registry is the single
+source for the sidebar's Projects children. Today those three entries are
+hardcoded at `sidebar-store.ts:87-107`; without this change the claim is false and
+the nav can drift from the page.
 
 Category data and its selectors live in **one** file, not two, so there is a
 single place to add a project.
@@ -126,7 +158,8 @@ export interface ProjectLink {
 
 export type ProjectStatus = "active" | "archived";
 
-interface ProjectBase {
+/** What is hand-written in projects.ts — no derived fields. */
+interface ProjectInput {
   id: string;                          // "stick-legends" — key + anchor
   title: string;
   category: ProjectCategory["slug"];
@@ -138,17 +171,44 @@ interface ProjectBase {
   coverImage?: string;                 // optional; expect none at launch
 }
 
-export interface FeaturedProject extends ProjectBase {
+interface FeaturedInput extends ProjectInput {
   featured: true;
   description: string;                 // 2–3 sentences — REQUIRED
 }
 
-export interface ArchiveProject extends ProjectBase {
+interface ArchiveInput extends ProjectInput {
   featured: false;
 }
 
-export type Project = FeaturedProject | ArchiveProject;
+/** What the app consumes — `status` is derived, see §5.2. */
+export interface Project {
+  id: string;
+  title: string;
+  category: ProjectCategory["slug"];
+  blurb: string;
+  stack: string[];
+  year: number;
+  lastPushedAt: string;
+  links: ProjectLink[];
+  coverImage?: string;
+  status: ProjectStatus;
+}
+
+export interface FeaturedProject extends Project {
+  featured: true;
+  description: string;
+}
+
+export interface ArchiveProject extends Project {
+  featured: false;
+}
 ```
+
+> The `ProjectInput` / `Project` split exists because `status` is **derived**,
+> not authored. Folding it into the input type would mean the hand-written
+> records claim a field they do not own, and `FeaturedProject` — which the card
+> reads `project.status` from — would not have it. That is a TS2339 the moment
+> `vue-tsc` runs, and it is the reason the two types are separate.
 
 ### 5.1 Why the discriminated union
 
@@ -180,6 +240,26 @@ export const PROJECTS: Project[] = RAW_PROJECTS.map((p) => ({
 - Change `ACTIVE_WINDOW_DAYS` and every project reclassifies on next build.
 - **Caveat:** `pushedAt` counts pushes to *any* branch, so one drive-by commit
   to an old repo flips it to `active`. It is still a fact, not a claim.
+
+### 5.2.1 `lastPushedAt` goes stale, and that is a real cost
+
+This is the honest weakness in decision #1. `lastPushedAt` is a hand-typed
+field, and he pushes often — 17 of the 53 roster repos moved in the last 90 days,
+31 of all 105 repos were pushed since 2026-01-01. So roughly a third of the
+roster will show a wrong `status` within a year, and nothing will warn him.
+
+A derived field is only self-maintaining if its input is. Three ways to close
+this, in ascending cost:
+
+| Option | Cost | Guarantee |
+|---|---|---|
+| **Throwaway refresh script** (recommended) | ~20 lines of `gh` + `jq`, run when he feels like it | He runs it, statuses correct. No new deps, curated file stays curated |
+| Fetch `pushedAt` from GitHub at build time | Needs a token in CI, a network call in `npm run build`, and a fallback for offline builds | Always correct, but contradicts decision #1 and adds a build-time failure mode |
+| Do nothing | Zero | Silently wrong in ~12 months |
+
+The spec does **not** pick one. Decision #1 was chosen deliberately over runtime
+GitHub fetching, and reopening it here would override that choice without asking.
+Default: throwaway refresh script, listed in §10.1 as a deliverable.
 
 ### 5.3 Selectors
 
@@ -299,7 +379,7 @@ UCard + 3 category index cards
 ```
 
 No new fetching. `special` is already in the hardcoded slug list at
-`src/helpers/blogs/cms.ts:12`, so a post added under it is picked up with zero
+`src/helpers/blogs/cms.ts:9`, so a post added under it is picked up with zero
 backend work.
 
 ### 7.1 Store error handling (decision #8)

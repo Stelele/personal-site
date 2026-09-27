@@ -61,10 +61,28 @@ feeds.go:182 fetchAllPostsFromGitHub     never called; getMediumFeed
                                          minus the cache, 58 dup lines
 ```
 
-607 lines: ~470 scrapers, ~70 dead, ~70 secret custody.
+607 lines in `feeds.go`, 155 in `cms.go`, 122 in `main.go` — **884 total**.
+
+| File | Lines | Role |
+|---|---|---|
+| `feeds.go` | 607 | ~470 scrapers, ~137 dead (`getRssFeed`, `fetchAllPostsFromGitHub`) |
+| `cms.go` | 155 | all of it secret custody (`getCmsToken` + proxy) |
+| `main.go` | 122 | routing, CORS, static config |
+
+Secret custody lives in `cms.go`, not `feeds.go`. The scrapers are 53% of the
+backend by line count and ~100% of its fragility.
 
 **Cost.** 54 of 146 commits (37%) touch `backend/` or `.github/workflows/deploy.yml`.
-8 of the last 15 are `strip_components` / service-path fixes.
+
+> Corrected framing, found in adversarial review: "8 of the last 15 commits are
+> deploy fixes" overstates a chronic tax. Those 8 landed in **a single burst on
+> 2026-05-22** (`c3611b0`, `f4dbc4e`, `4585c35`, `4d7429c`, `3d60fc8`, `6b3d195`),
+> plus one `.gitignore` newline on 2026-07-31. The Go deploy has been stable for
+> four months. The 37% lifetime figure is real; the *recurrence* claim is not.
+> What that actually justifies: the deploy pipeline is **untested and
+> undocumented**, so the next time it breaks it will break expensively. Deleting
+> the service removes that exposure; so would documenting it, at a fraction of the
+> cost of this migration.
 
 **Four defects found:**
 
@@ -99,6 +117,58 @@ real certificate.** No nginx change, no cert change, no droplet reconfiguration.
 Admin UI: `https://stelele.github.io/cms-system-frontend-build/` — **200, live**,
 and its deployed bundle calls `https://api-cms.giftmugweni.com`. This origin must
 be in the CORS allowlist, because the admin UI performs browser-side writes.
+
+### 3.2.1 An unexplained external origin — audit before deleting
+
+Found in adversarial review, and it is the single biggest unknown in this spec:
+
+```go
+// backend/main.go:111-120
+func isOriginAuthorised(origin string) bool {
+    switch origin {
+    case "http://localhost:5173":         return true
+    case "https://anglican.masvingo.org": return true   // ← ???
+        case "https://giftmugweni.com":       return true
+```
+
+`https://anglican.masvingo.org` is a third-party site, deliberately CORS-allowlisted
+against this API. **Nothing in this repository calls it.** The most likely
+explanations, in order of probability:
+
+1. A page on that site fetches `api.giftmugweni.com` for something — blog posts,
+   a donations list, an events feed. If so, **deleting the Go backend breaks it
+   silently**, and the breakage is on someone else's site.
+2. It is leftover from an experiment that is already dead.
+3. It was added defensively/pre-emptively and never used.
+
+**This must be resolved before step 7, not during it.** Neither spec can answer it
+from the repo — it needs the user, or access to that site's source. Gate:
+
+```
+BEFORE step 7   ask: does anglican.masvingo.org consume this API?
+                yes → that consumer must be migrated to /public/* first,
+                      or the origin stays alive as a Worker
+                no  → proceed, and drop it from the allowlist
+```
+
+If the answer is "yes", the migration grows a consumer-facing compatibility
+requirement and needs its own design pass. Do not discover this on deploy day.
+
+### 3.2.2 `api.giftmugweni.com` loses its only backend
+
+After step 7 the Go service is gone and that hostname has nothing behind it, so
+it will return **502** rather than 404. The spec previously claimed no infra work
+was needed; that is true for *adding* endpoints but not for *retiring* a host.
+
+Decide explicitly, and record it:
+
+| Option | Action | Notes |
+|---|---|---|
+| Repoint the hostname | Point `api.giftmugweni.com` at the CMS | Simplest. Requires the CMS to serve under that name, and `VITE_PRIV_API_URL` consumers to be repointed anyway |
+| Retire it | Remove the DNS record | Cleanest end state. Anything still resolving it gets a NXDOMAIN instead of a 502, which is a clearer signal |
+| Leave it 502 | Do nothing | Worst option — a live hostname that looks broken |
+
+Default: **retire the DNS record**, after §3.2.1 confirms nothing external uses it.
 
 ### 3.3 The CMS authorization gap
 
@@ -153,6 +223,36 @@ would land in one arbitrarily-ordered pile dated today.
 ---
 
 ## 5. `cms-system` changes
+
+### 5.0 `contentType` on the blog — BLOCKER, found in adversarial review
+
+The original draft of this spec missed this entirely, and it would have shipped a
+broken archive.
+
+```
+helpers/blogs/cms.ts:50       contentType: 'markdown'   ← hardcoded for EVERY CMS blog
+helpers/blogs/hashnode.ts:43  contentType: 'html'
+helpers/blogs/medium.ts       (sets none → Blog.vue:63 falls back to 'html')
+composables/usePostRenderer.ts:8   new MarkdownIt()     ← no { html: true }
+```
+
+`Blog.vue:63` reads `blog?.contentType ?? "html"`. Medium and Hashnode render as
+HTML today **only because those two helper modules exist and set it**. The moment
+those posts become CMS blogs, `cms.ts` stamps them `'markdown'`, and
+markdown-it's default `html: false` **escapes every tag** — the entire 30-post
+archive renders as literal `<p>…</p>` source. No error, no warning, just a site
+full of angle brackets.
+
+Fix: add a nullable `contentType` to the CMS `Blog` model, defaulting to
+`"markdown"`. The importer sets `"html"` on the two archive blogs.
+`PublicBlogResponse` carries it; `cms.ts` reads it instead of hardcoding.
+
+> Alternative considered and rejected: `new MarkdownIt({ html: true })`. One line
+> instead of a schema change, and `augmentedContent` DOMPurify-sanitizes the
+> output anyway (`usePostRenderer.ts:107`). Rejected because it silently changes
+> the HTML posture of *every* markdown post on the site, including the ones he
+> writes in the CMS, to solve a problem scoped to two legacy blogs. A per-blog
+> field makes the exception explicit and visible in data.
 
 ### 5.1 `publishedOn` on the post commands
 
@@ -324,6 +424,66 @@ Cloudflare Pages serves `_redirects` ahead of the SPA `404.html` fallback that
 `deploy.yml` sets up via `cp index.html 404.html`, so existing links, bookmarks
 and search rankings survive. 30 static lines beat a runtime redirect table.
 
+> **Caveat, from adversarial review.** `_redirects` does reach production — Vite
+> copies `frontend/public/` into `dist/`, and `rm -r out/*` does not match
+> dotfiles so the clone's `.git` survives for the push. But the SPA fallback
+> serves `404.html` **with HTTP status 404**, which means deep links like
+> `/blog/medium/<id>` are *already* returning 404 to crawlers today. So "search
+> rankings survive" is weaker than this spec claimed: those URLs may already be
+> soft-404'd and the rankings may already be lost. The redirects still protect
+> bookmarks and any residual equity, and fixing the status code (a real
+> `_redirects` catch-all → `/index.html 200`, or a Cloudflare Pages
+> `not_found_handling` setting) is a separate one-line improvement worth taking
+> while the file is being written.
+
+### 6.4 Importer fidelity risks
+
+Found in adversarial review. All three are "the importer runs green and the
+content is quietly wrong", which is the worst failure mode available.
+
+```
+RISK 1 — slug collision / silent under-import
+  feeds.go:600  generateTitleHash = FIRST 6 HEX CHARS of md5
+  16.7M space. Medium hashes the title, Hashnode the filename.
+  Birthday collision across 30 posts ≈ 3e-5 — low, but the failure is
+  not a crash: the colliding slug makes GET /posts/slug/{slug} return
+  200, so the importer SKIPS a post it never created (§6 step 3).
+  Idempotency-by-slug turns a collision into silent data loss.
+
+  MITIGATE: the importer must not treat "already exists" as proof it
+  imported that post. Record (slug → source filename) in its own report
+  and fail if a slug is claimed by two different source files. Also
+  assert global slug uniqueness across BOTH repos before writing.
+
+RISK 2 — Hashnode cover image is probably the wrong image
+  feeds.go:333  case "img" fires for the FIRST <img> in document order
+                with CoverImage == "" — whatever renders first on the
+                page (logo, avatar, banner), not the cover.
+  feeds.go:463  extractCDNImageURL regexes `url=([^&\s]+)` on srcset —
+                that is Medium's miro-proxy parameter format. Hashnode
+                srcset holds plain https://cdn.hashnode.com/... URLs, so
+                the regex misses and it silently falls back to src.
+
+  MITIGATE: verify against the real backup HTML before trusting it. If
+  the first <img> is not the cover, select by srcset/alt heuristics
+  inside the importer rather than fixing feeds.go — the parsers are
+  throwaway after this.
+
+RISK 3 — Medium canonicalUrl defaults to a raw GitHub URL
+  feeds.go:249  post.URL = file.DownloadURL
+  It is only overwritten at :289-291 if the <time class="dt-published">
+  node's parent is an <a>. If the backup HTML does not wrap it that way,
+  canonicalUrl stays as a raw.githubusercontent.com URL — and §5.2 wires
+  that value into BOTH the SEO <link rel="canonical"> and the visible
+  "View original article" link. Publishing a GitHub raw URL as canonical
+  is worse than publishing none.
+
+  MITIGATE: validate that every imported canonicalUrl matches
+  /^https:\/\/(hashnode\.dev|medium\.com)\// and fail the post
+  otherwise. Do not assume the happy path the QA checklist in §10
+  asserts.
+```
+
 ---
 
 ## 7. `personal-site` changes
@@ -331,15 +491,17 @@ and search rankings survive. 30 static lines beat a runtime redirect table.
 | Change | Detail |
 |---|---|
 | `helpers/downloader.ts` | `getBlogFeeds()` collapses from `Promise.all` over 3 sources to one CMS call |
-| `helpers/blogs/cms.ts` | drop the hardcoded `slugs: ["progamming", "walking", "random", "special"]` list (line 12) — fetch all public blogs. Set `link: post.canonicalUrl ?? post.slug` |
+| `helpers/blogs/cms.ts` | drop the hardcoded `slugs: ["progamming", "walking", "random", "special"]` list (line 9) — fetch all public blogs. Set `link: post.canonicalUrl ?? post.slug`. **Read `contentType` from the blog instead of hardcoding `'markdown'` — see §5.0, this is a blocker** |
 | `helpers/blogs/medium.ts` | **deleted** |
 | `helpers/blogs/hashnode.ts` | **deleted** |
 | `services/cms/index.ts` | drop the `VITE_PRIV_API_URL` prefix; point at the public base. No token, no secret, no token cache |
 | `frontend/.env` | remove `VITE_PRIV_API_URL` and the unused `VITE_CMS_URL`; one `VITE_CMS_URL=https://api-cms.giftmugweni.com` |
-| `.github/workflows/deploy.yml` | delete the entire `backend` job — build, scp, systemd, `strip_components`, service file, `.env` heredoc. Also drop the `backend` paths-filter |
+| `frontend/.env.local` | **also needs updating.** Untracked, holds `VITE_PRIV_API_URL=http://localhost:3000`. After `backend/` is deleted, `npm run dev` fails. Vite precedence means it also *overrides* `.env.production`, so a local `npm run build` currently tests the wrong host — a trap worth clearing now |
+| `.github/workflows/deploy.yml` | delete the entire `backend` job — build, scp, systemd, `strip_components`, service file, `.env` heredoc. Also drop the `backend` paths-filter. **And fix the frontend job's `sed`:** it currently substitutes `{{CMS_URL}}` → `https://api.giftmugweni.com/cms`, which is the Go proxy being deleted. Without this, prod `VITE_CMS_URL` points at a dead host even though `frontend/.env` was corrected |
 | `backend/collection.http` | **deleted** with `backend/` |
 | `frontend/public/_redirects` | **new** — 30 rules from the importer |
 | `backend/` | **deleted** after the importer is verified |
+| DNS | retire the `api.giftmugweni.com` record per §3.2.2, after §3.2.1 is resolved |
 
 `VITE_CMS_URL` is currently dead config: it is set in `deploy.yml`'s `sed` and in
 `frontend/.env`, but `CmsService` reads `VITE_PRIV_API_URL`. Confirmed by grep —
@@ -352,9 +514,14 @@ no reference anywhere in `frontend/src`.
 ```
 STEP                              REPO            REVERSIBLE?
 ────────────────────────────────   ────────────    ──────────────────────────
+0. resolve anglican.masvingo.org   —               GATE — see §3.2.1
+   (§3.2.1). If it consumes the
+   API, this spec needs a
+   consumer-migration pass first.
 1. publishedOn, canonicalUrl,      cms-system     additive
-   public endpoints, DTO,
-   query, CORS config + guard
+   contentType on Blog, public
+   endpoints, DTO, query,
+   CORS config + guard
 2. deploy the CMS                  infra          additive
 3. importer --dry-run              personal-site   no side effects
 4. importer (real run)             personal-site   idempotent, re-runnable
@@ -363,6 +530,7 @@ STEP                              REPO            REVERSIBLE?
    medium/hashnode helpers
 7. delete backend/ + the           personal-site   ← the cutover
    backend job in deploy.yml                      git revert
+8. retire api.giftmugweni.com DNS  infra          re-add the record
 ```
 
 Steps 1–6 are additive or revertible. The old Go service keeps serving through
@@ -370,6 +538,11 @@ step 6; cutover happens only after the CMS-served site is verified good.
 
 `medium-blogs-backup` and `hashnode-blog-backups` are **not** deleted. They remain
 the source archive and the importer's input.
+
+**Step 0 is a gate, not a task.** The spec cannot resolve §3.2.1 from the
+repository. If `anglican.masvingo.org` turns out to be a live consumer of this
+API, everything after it changes and the migration needs its own design pass
+before any code is written.
 
 ---
 
@@ -429,7 +602,7 @@ browser QA                             all 30 imported posts render
 |---|---|
 | `GET /scalar` is publicly reachable (302) | Publishes the OpenAPI document. Low risk for a content API, but it is endpoint-surface disclosure. Disabling in Production is a one-liner. Not in this spec. |
 | `frontend/.env` is git-tracked and contains `VITE_CMS_AUTH0_CLIENT_SECRET` | 27 chars vs the real 64-char secret in untracked `backend/.env` — a stale placeholder, not a live credential. But `VITE_*` vars are inlined into the public JS bundle regardless. Should be deleted and `.env*` gitignored. In the projects spec's §12; still not done. |
-| The `progamming` slug typo | Existing CMS blog slug, referenced only in `cms.ts:12`, which this spec removes. The blog itself keeps its typo'd slug — renaming it would break any existing URLs. |
+| The `progamming` slug typo | Existing CMS blog slug, referenced only in `cms.ts:9`, which this spec removes. The blog itself keeps its typo'd slug — renaming it would break any existing URLs. |
 | 30 archived posts have no edit UI for dates | Solved by §5.1. |
 | `build-your-own-x` fork is his stated learning philosophy | Referenced in the manifesto (projects spec §10.4) as evidence. It is a fork, so it stays out of the projects roster. |
 | Projects section spec | Separate spec, separate execution window. Its `try/catch` fix is a prerequisite for step 6 here (§9). |
