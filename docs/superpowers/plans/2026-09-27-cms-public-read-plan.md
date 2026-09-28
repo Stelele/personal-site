@@ -281,11 +281,27 @@ public class BlogContentTypeTests
         Assert.Equal(BlogContentType.Markdown, BlogContentType.OrDefault(null));
     }
 
+    [Theory]
+    [InlineData(null, BlogContentType.Markdown)]
+    [InlineData("", BlogContentType.Markdown)]
+    [InlineData("   ", BlogContentType.Markdown)]
+    [InlineData("bogus", BlogContentType.Markdown)]
+    [InlineData("html", BlogContentType.Html)]
+    [InlineData("markdown", BlogContentType.Markdown)]
+    public void OrDefault_MapsEveryInputToALegalValue(string? input, string expected)
+    {
+        Assert.Equal(expected, BlogContentType.OrDefault(input));
+    }
+
     [Fact]
     public void ContentType_RoundTripsThroughTheDatabase()
     {
         using var db = new TestDb();
         db.SeedBlog("Graphics", "graphics", BlogContentType.Html);
+
+        // Without this, Single() returns the tracked instance just saved and the
+        // assertion never reaches SQLite.
+        db.Db.ChangeTracker.Clear();
 
         Assert.Equal(BlogContentType.Html, db.Db.Blogs.Single().ContentType);
     }
@@ -312,8 +328,10 @@ namespace Domain.Blogs;
 /// The content kinds the renderer knows how to display. Kept as string constants
 /// rather than an enum because the wire contract is already these literals — the
 /// frontend's Blog type is `'html' | 'markdown'` — and a serialisation change
-/// would be a needless risk for a two-value set. The closed set is enforced by
-/// <see cref="IsValid"/> and by the command validators.
+/// would be a needless risk for a two-value set. The closed set is enforced at the
+/// write boundary by <see cref="Blog.Create"/>, which throws when
+/// <see cref="IsValid"/> fails, and at the read boundary by <see cref="OrDefault"/>,
+/// which coerces anything else to <see cref="Default"/>.
 /// </summary>
 public static class BlogContentType
 {
@@ -325,9 +343,13 @@ public static class BlogContentType
     public static bool IsValid(string? value) =>
         value is null || value is Markdown or Html;
 
-    /// <summary>Normalises null to the default so callers never branch on it.</summary>
+    /// <summary>
+    /// Maps any input to one of the two legal values, coercing null and anything
+    /// unrecognised to <see cref="Default"/>. A public read path calls this, so no
+    /// third value can reach the wire even if a row somehow holds one.
+    /// </summary>
     public static string OrDefault(string? value) =>
-        IsValid(value) ? value! : Default;
+        value is Markdown or Html ? value : Default;
 }
 ```
 
@@ -400,12 +422,12 @@ the `Icon` configuration:
 - [ ] **Step 7: Run the test to verify it passes**
 
 Run: `cd backend && dotnet test --filter BlogContentTypeTests`
-Expected: PASS — 8 cases (4 `Fact` + 4 `Theory` rows).
+Expected: PASS — 14 cases (4 `Fact` + the 4-row invalid theory + the 6-row `OrDefault` theory).
 
 - [ ] **Step 8: Run the full suite**
 
 Run: `cd backend && dotnet test`
-Expected: PASS — 45 total (35 pre-existing + 2 from Task 0 + 8 from Task 1).
+Expected: PASS — 51 total (35 pre-existing + 2 from Task 0 + 14 from Task 1).
 
 - [ ] **Step 9: Commit**
 
@@ -741,7 +763,7 @@ public record PostResponse(
 - [ ] **Step 8: Run the tests**
 
 Run: `cd backend && dotnet test`
-Expected: PASS — 50 total (35 pre-existing + 15 added by Tasks 0-2).
+Expected: PASS — 56 total (35 pre-existing + 21 added by Tasks 0-2).
 
 - [ ] **Step 9: Commit**
 
@@ -1190,7 +1212,7 @@ public class GetPublicPostBySlugQueryHandler(CmsDbContext db)
 - [ ] **Step 6: Run to verify it passes**
 
 Run: `cd backend && dotnet test --filter PublicQueryTests`
-Expected: PASS — 59 total, including the two draft-exclusion assertions.
+Expected: PASS — 65 total, including the two draft-exclusion assertions.
 
 - [ ] **Step 7: Commit**
 
@@ -1317,7 +1339,7 @@ Expected: BUILD SUCCEEDED, 0 warnings.
 - [ ] **Step 5: Run the full test suite**
 
 Run: `cd backend && dotnet test`
-Expected: PASS, 59 total.
+Expected: PASS, 65 total.
 
 - [ ] **Step 6: Commit**
 
@@ -1542,7 +1564,7 @@ Expected: PASS — 5 tests.
 - [ ] **Step 7: Run everything**
 
 Run: `cd backend && dotnet test`
-Expected: PASS, 64 total.
+Expected: PASS, 70 total.
 
 - [ ] **Step 8: Commit**
 
@@ -1710,12 +1732,12 @@ git commit -m "fix: correct public read surface found during end-to-end verifica
 
 **Test count** — the suite starts at **35 pre-existing tests** (verified in the
 worktree on 2026-09-27: `Passed! - Failed: 0, Passed: 35`). This plan adds
-Task 0 (2) + Task 1 (8) + Task 2 (5) + Task 4 (4) + Task 5 (5) + Task 7 (5) =
-**29 new**, for **64 total**. Tasks 3, 6 and 8 add no unit tests: the migration is
+Task 0 (2) + Task 1 (14) + Task 2 (5) + Task 4 (4) + Task 5 (5) + Task 7 (5) =
+**35 new**, for **70 total**. Tasks 3, 6 and 8 add no unit tests: the migration is
 verified end to end, and the endpoint registration is a compile-time concern.
 
-Running totals asserted in the plan: 37 after Task 0, 45 after Task 1, 50 after
-Task 2, 54 after Task 4, 59 after Task 5, 64 after Task 7.
+Running totals asserted in the plan: 37 after Task 0, 51 after Task 1, 56 after
+Task 2, 60 after Task 4, 65 after Task 5, 70 after Task 7.
 
 **Type consistency** — `BlogContentType` is used by `Blog.Create`, `PublicBlogResponse`, and the `BlogEntity` config; `SetPublishedOn` is defined in `Post` and called by both handlers; `CorsOriginPolicy.PolicyName` is used by both the `AddCors` registration and the `UseCors` call.
 
