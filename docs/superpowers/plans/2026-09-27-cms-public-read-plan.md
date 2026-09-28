@@ -763,7 +763,7 @@ public record PostResponse(
 - [ ] **Step 8: Run the tests**
 
 Run: `cd backend && dotnet test`
-Expected: PASS — 56 total (35 pre-existing + 21 added by Tasks 0-2).
+Expected: PASS — 56 total (35 pre-existing + 21 added by Tasks 0-2). *(actual: 56)*
 
 - [ ] **Step 9: Commit**
 
@@ -1212,7 +1212,7 @@ public class GetPublicPostBySlugQueryHandler(CmsDbContext db)
 - [ ] **Step 6: Run to verify it passes**
 
 Run: `cd backend && dotnet test --filter PublicQueryTests`
-Expected: PASS — 65 total, including the two draft-exclusion assertions.
+Expected: PASS — 65 total, including the two draft-exclusion assertions. *(actual: 66 — Task 4 added a fifth mapping test)*
 
 - [ ] **Step 7: Commit**
 
@@ -1339,7 +1339,7 @@ Expected: BUILD SUCCEEDED, 0 warnings.
 - [ ] **Step 5: Run the full test suite**
 
 Run: `cd backend && dotnet test`
-Expected: PASS, 65 total.
+Expected: PASS, 65 total. *(actual: 66)*
 
 - [ ] **Step 6: Commit**
 
@@ -1564,7 +1564,7 @@ Expected: PASS — 5 tests.
 - [ ] **Step 7: Run everything**
 
 Run: `cd backend && dotnet test`
-Expected: PASS, 70 total.
+Expected: PASS — 76 total, 0 failed. This is the CI gate: `dotnet build --configuration Release` then `dotnet test --configuration Release --no-build`.
 
 - [ ] **Step 8: Commit**
 
@@ -1730,14 +1730,40 @@ git commit -m "fix: correct public read surface found during end-to-end verifica
 | CORS config + Production guard | 7 |
 | Verification | 8 |
 
-**Test count** — the suite starts at **35 pre-existing tests** (verified in the
-worktree on 2026-09-27: `Passed! - Failed: 0, Passed: 35`). This plan adds
-Task 0 (2) + Task 1 (14) + Task 2 (5) + Task 4 (4) + Task 5 (5) + Task 7 (5) =
-**35 new**, for **70 total**. Tasks 3, 6 and 8 add no unit tests: the migration is
-verified end to end, and the endpoint registration is a compile-time concern.
+**Test count** — the suite starts at **35 pre-existing tests**. Final state is
+**76 passing, 0 failing**, verified with the exact CI command. This plan added
+41: Task 0 (2), Task 1 (14), Task 2 (5), Task 4 (5), Task 5 (5), Task 7 (5).
+Tasks 3, 6 and 8 add none — the migration and the endpoints are verified end to
+end over HTTP instead.
 
-Running totals asserted in the plan: 37 after Task 0, 51 after Task 1, 56 after
-Task 2, 60 after Task 4, 65 after Task 5, 70 after Task 7.
+Observed running totals: 37 → 51 → 56 → 66 → 71 → 76.
+
+**Eight defects in this plan's own specified code, all found by review before
+they shipped.** Recorded here because the plan is the artifact a future reader
+trusts:
+
+| # | Where | Defect | Resolution |
+|---|---|---|---|
+| 1 | Task 1 `BlogContentType.OrDefault` | `IsValid(value) ? value! : Default` returns `null` for `null` input, because `IsValid(null)` is `true` and `!` only suppresses the warning. Its own required test could not pass | One explicit condition: `value is Markdown or Html ? value : Default` |
+| 2 | Task 1 class summary | Claimed the closed set is "enforced by the command validators". None exist for `contentType` and none are planned | Reworded to `Blog.Create` on write, `OrDefault` on read |
+| 3 | Task 2 test code | Named arguments `isPublished:` / `publishedOn:` against record params `IsPublished` / `PublishedOn` — C# is case-sensitive, so the file did not compile | Renamed at all four call sites |
+| 4 | Task 2 test code | `validator.Validate(command)` assigned to a var then used in `Assert.Contains` — FluentValidation 12's `ValidationResult` is not `IEnumerable<ValidationFailure>` | Append `.Errors` |
+| 5 | Task 2 `CreatePostCommand` | The plan's replacement record silently dropped 8 `[JsonPropertyName]` attributes, making the published wire contract an implicit consequence of `JsonSerializerDefaults.Web` | Attributes restored on both commands; verified all 21 names serialise camelCase |
+| 6 | Task 3 Step 4 grep | Expected 2 matches for the two new column names; the `Down()` rollback references them too, so 4 is correct | Expectation corrected |
+| 7 | Task 7 test | `FakeEnvironment` as a positional `record` cannot implement `IHostEnvironment`, whose `EnvironmentName` is `{ get; set; }` not `init` — CS8854 | Explicit class with a settable property |
+| 8 | Task 7 `Config()` helper | Keys built as `Cors:AllowedOrigins[{i}]` never bind — .NET splits child sections on `:` only, so `GetSection` saw nothing. `Production_WithNoOrigins_Throws` would have passed for the wrong reason | Keys changed to `Cors:AllowedOrigins:{i}` |
+
+**Two environment traps, both worth knowing independently of this plan:**
+
+- `dotnet ef` is not on `PATH` by default. `~/.dotnet/tools` must be added, and
+  the version must be 9.x to match EF Core 9.0.11 — installing 9.x over an
+  existing 10.x requires uninstalling the 10.x tool first.
+- `Host/Properties/launchSettings.json` hard-sets
+  `ASPNETCORE_ENVIRONMENT=Development` and **overrides the shell variable**. So
+  `ASPNETCORE_ENVIRONMENT=Production dotnet run --project Host/Host.csproj`
+  silently ran Development until `--no-launch-profile` was added. This was
+  observed for real: without the flag, the Production CORS guard did not fire
+  and the app started as Development.
 
 **Type consistency** — `BlogContentType` is used by `Blog.Create`, `PublicBlogResponse`, and the `BlogEntity` config; `SetPublishedOn` is defined in `Post` and called by both handlers; `CorsOriginPolicy.PolicyName` is used by both the `AddCors` registration and the `UseCors` call.
 
