@@ -118,9 +118,7 @@ Admin UI: `https://stelele.github.io/cms-system-frontend-build/` — **200, live
 and its deployed bundle calls `https://api-cms.giftmugweni.com`. This origin must
 be in the CORS allowlist, because the admin UI performs browser-side writes.
 
-### 3.2.1 An unexplained external origin — audit before deleting
-
-Found in adversarial review, and it is the single biggest unknown in this spec:
+### 3.2.1 The unexplained external origin — RESOLVED, no external consumers
 
 ```go
 // backend/main.go:111-120
@@ -131,28 +129,34 @@ func isOriginAuthorised(origin string) bool {
         case "https://giftmugweni.com":       return true
 ```
 
-`https://anglican.masvingo.org` is a third-party site, deliberately CORS-allowlisted
-against this API. **Nothing in this repository calls it.** The most likely
-explanations, in order of probability:
+`https://anglican.masvingo.org` was a third-party site, deliberately
+CORS-allowlisted against this API, called by nothing in this repository.
+**Resolved 2026-09-27. The Go backend has no consumers other than this site's own
+frontend.** Evidence:
 
-1. A page on that site fetches `api.giftmugweni.com` for something — blog posts,
-   a donations list, an events feed. If so, **deleting the Go backend breaks it
-   silently**, and the breakage is on someone else's site.
-2. It is leftover from an experiment that is already dead.
-3. It was added defensively/pre-emptively and never used.
+| Call path | Verdict | How |
+|---|---|---|
+| Browser | **Disproven** | `anglican.masvingo.org` is a Vite/Vue SPA — single 481,017-byte bundle, **0 dynamic imports**, no lazy chunks, service worker 404. Grepped for `giftmugweni`, `api.giftmugweni`, `/medium-posts`, `/hashnode-posts`, `/cms/blogs`, `/feed` → zero hits. External hosts it actually calls: `fetchrss.com`, `leafletjs.com`, `vuejs.org`, `img.daisyui.com`, `www.facebook.com`. |
+| Server-side | **Ruled out** | Direct confirmation from the user, who has knowledge of that DigitalOcean app. |
+| CORS entry | **Fossil** | CORS is a browser-only mechanism; a server-to-server call ignores `isOriginAuthorised` entirely. The entry therefore only ever mattered to a browser caller, and the current browser bundle makes none. |
 
-**This must be resolved before step 7, not during it.** Neither spec can answer it
-from the repo — it needs the user, or access to that site's source. Gate:
+The browser negative is trustworthy because Vite inlines `import.meta.env.VITE_*`
+at build time — verified by dumping the CMS admin bundle, where
+`https://api-cms.giftmugweni.com` appears as a literal string in the compiled JS.
+A `VITE_API_URL` aimed at this backend would be visible in the anglican bundle. It
+is not, and that bundle is the whole application.
 
-```
-BEFORE step 7   ask: does anglican.masvingo.org consume this API?
-                yes → that consumer must be migrated to /public/* first,
-                      or the origin stays alive as a Worker
-                no  → proceed, and drop it from the allowlist
-```
+**Consequences:**
 
-If the answer is "yes", the migration grows a consumer-facing compatibility
-requirement and needs its own design pass. Do not discover this on deploy day.
+- No consumer-migration work. No compatibility shim. No pre-work.
+- `api.giftmugweni.com` may be retired at cutover (§3.2.2).
+- The observer backend once proposed for this purpose is **dropped**. It existed
+  to settle an uncertainty that is now settled by better evidence. A 60-line
+  service kept alive for weeks to detect a caller that provably does not exist
+  is a worse trade than deleting the 607 lines outright.
+
+> If a future caller appears, the fix is to point it at `/public/*` — which
+> exists after this migration. Nothing needs to be kept alive for that.
 
 ### 3.2.2 `api.giftmugweni.com` loses its only backend
 
@@ -164,11 +168,12 @@ Decide explicitly, and record it:
 
 | Option | Action | Notes |
 |---|---|---|
-| Repoint the hostname | Point `api.giftmugweni.com` at the CMS | Simplest. Requires the CMS to serve under that name, and `VITE_PRIV_API_URL` consumers to be repointed anyway |
-| Retire it | Remove the DNS record | Cleanest end state. Anything still resolving it gets a NXDOMAIN instead of a 502, which is a clearer signal |
-| Leave it 502 | Do nothing | Worst option — a live hostname that looks broken |
+| Retire it | Remove the DNS record | **Chosen.** §3.2.1 confirms nothing external uses the API, so there is no consumer to migrate. A removed record returns NXDOMAIN, which is a clearer signal to a future caller than a 502 |
+| Repoint the hostname | Point `api.giftmugweni.com` at the CMS | Only needed if some client still targets that name. Nothing does |
+| Leave it 502 | Do nothing | Rejected — a live hostname that looks broken |
 
-Default: **retire the DNS record**, after §3.2.1 confirms nothing external uses it.
+Also remove the `https://anglican.masvingo.org` case from `isOriginAuthorised` in
+the same change, since `main.go` is deleted outright.
 
 ### 3.3 The CMS authorization gap
 
@@ -514,10 +519,6 @@ no reference anywhere in `frontend/src`.
 ```
 STEP                              REPO            REVERSIBLE?
 ────────────────────────────────   ────────────    ──────────────────────────
-0. resolve anglican.masvingo.org   —               GATE — see §3.2.1
-   (§3.2.1). If it consumes the
-   API, this spec needs a
-   consumer-migration pass first.
 1. publishedOn, canonicalUrl,      cms-system     additive
    contentType on Blog, public
    endpoints, DTO, query,
@@ -536,13 +537,11 @@ STEP                              REPO            REVERSIBLE?
 Steps 1–6 are additive or revertible. The old Go service keeps serving through
 step 6; cutover happens only after the CMS-served site is verified good.
 
+There is **no step 0 and no gate.** §3.2.1 is resolved. The migration cannot be
+blocked by a consumer, because there is no consumer.
+
 `medium-blogs-backup` and `hashnode-blog-backups` are **not** deleted. They remain
 the source archive and the importer's input.
-
-**Step 0 is a gate, not a task.** The spec cannot resolve §3.2.1 from the
-repository. If `anglican.masvingo.org` turns out to be a live consumer of this
-API, everything after it changes and the migration needs its own design pass
-before any code is written.
 
 ---
 

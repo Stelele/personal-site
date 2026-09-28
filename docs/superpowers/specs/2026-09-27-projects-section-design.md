@@ -1,54 +1,61 @@
-# Projects Section — Design Spec
+# Projects Section — Design Spec (rev 2)
 
 **Date:** 2026-09-27
-**Scope:** `/projects` (manifesto) + `/projects/:type` (3 category pages)
-**Out of scope:** `/blog` landing, `/books` (7 genres + "Why I read books"), `WorkInProgess.vue` itself
+**Supersedes:** rev 1 of this spec (the TypeScript data-file design)
+**Sibling spec:** `2026-09-27-cms-consolidation-design.md`
+
+> **What changed in rev 2.** Rev 1 put all project content in
+> `src/data/projects.ts` — 53 records, 10 descriptions, 3 category intros,
+> hand-typed `lastPushedAt` per repo, and a discriminated union to keep it honest.
+>
+> The user asked for **a mini-article for every project** — what it does, why it
+> was made, current state, concepts worked on — and for that content to live in
+> the CMS as **one source of truth**. That is a different and better design: it
+> makes the content editable in a web UI instead of a code editor, and it moves
+> the structure from TypeScript types into a typed C# entity where the compiler
+> enforces it.
+>
+> Almost everything in rev 1's §5 (the data model), §10.1 (blurbs) and §5.2
+> (derived status) is deleted. The roster and the curation decisions survive.
 
 ---
 
 ## 1. Goal
 
 ```
-TODAY                              AFTER
-──────────────────────────────────────────────────────────────────────────────
-/projects          ┌────────┐      /projects          manifesto prose (CMS) +
-                  │  WIP   │  →                     3 category index cards
-/projects/:type    └────────┘      /projects/:type    featured cards + archive
-  3 routes, 1 WIP  (x3)           4 routes, all real
+53 mini-articles, one source of truth, in the CMS.
+
+  /projects/game-dev   17 project articles
+  /projects/graphics    9 project articles
+  /projects/business-case  27 project articles
+  /projects            the manifesto + category index
+
+Each article answers, from the actual source code where the README does not:
+  · what it does
+  · why it was made
+  · what state it's in now
+  · what concepts were worked on or learnt
 ```
-
-Fill the four dead `/projects*` routes using evidence already published in the
-`Stelele` GitHub account — **105 public repos** with descriptions, languages and
-push dates — plus the local READMEs and opencode session history.
-
-Every one of the 105 repos is accounted for in §10.2. The split is
-**53 shown / 52 excluded**, and the accounting must total 105.
 
 ### 1.1 Scope, honestly
 
-The request was "a bunch of missing sections". This spec does **one** of them.
-`/blog` and `/books` (8 routes between them) are still `WorkInProgress.vue` after
-this lands. That was a deliberate scoping choice — projects first, because it is
+The original request was "a bunch of missing sections". This spec does **one**.
+`/blog` and `/books` (8 routes between them) remain `WorkInProgress.vue`
+afterwards. That was a deliberate scoping choice — projects first, because it is
 the section the evidence can fill almost entirely without asking him anything —
-but it means the underlying complaint is only partly addressed.
+but the underlying complaint is only partly addressed.
 
-Worth noting for whoever sequences the work: `/blog` is close to free. It would
-render every post already in the CMS plus the two archives, needing one new page
-and no new content. It is the highest remaining value per unit of effort on the
-site, and it is not in this spec.
+Worth noting for whoever sequences the work: **`/blog` is close to free.** It
+renders every post already in the CMS plus the two archives, needing one new page
+and no new content. Highest remaining value per unit of effort on the site.
 
-### 1.2 This adds maintenance, it does not remove it
+### 1.2 It is a net increase in authored content
 
-His stated pain is *"I never have time to update them."* Honest accounting: this
-spec hands him **53 records, 10 descriptions, 3 category intros, a ~500-word
-manifesto, and a `lastPushedAt` date per repo** to maintain. That is more
-hand-authored content than the four Giphy placeholders it replaces.
-
-What it buys: the content is written once, to a standard, instead of never. What
-it costs: a recurring edit. §5.2.1 addresses the stalest field, and §10.1 puts a
-refresh script in the deliverables. But the spec should not pretend that "curated
-data file" is the same thing as "self-maintaining" — it is not.
-
+Rev 1 replaced four Giphy placeholders with 53 records. Rev 2 replaces them with
+53 *articles*. That is the trade the user asked for and it is worth naming: this
+is the largest single content item across both specs, and it is only tractable
+because the content is derivable from source code — many repos are already cloned
+locally, and the rest can be cloned.
 
 ---
 
@@ -56,574 +63,622 @@ data file" is the same thing as "self-maintaining" — it is not.
 
 | # | Decision | Choice | Why |
 |---|---|---|---|
-| 1 | Project data source | Curated TS file | Exactly **1 of 80** repos inspected carries GitHub topics (`shader-land`). Descriptions unreliable — `fountain-of-life` and `images-to-spritesheet` still have untouched Vite-template READMEs. Category assignment and blurb are editorial and must be hand-written regardless. |
-| 2 | Manifesto prose location | CMS `special` blog post | Existing `WhyIBlog.vue` precedent. Gets the CMS editor, cover image, article SEO. |
-| 3 | Project entry depth | Full card — blurb, stack, links, optional image | Matches existing `CV.vue` depth. |
-| 4 | Volume | Featured + full archive per category | 10 hand-written descriptions; 53 browsable. 53 equal cards is too much copy and reads as a dump. |
-| 5 | Page architecture | Option A — generic page + typed registry | One layout, registry-driven. B/C buy flexibility nobody asked for. |
-| 6 | `status` field | **Derived** from `lastPushedAt`, 365-day window | Removes a hand-maintained field that would be wrong on day one. |
-| 7 | Type safety | Fix 3 pre-existing errors, wire `vue-tsc -b` into `npm run build` | Without it the discriminated union enforces nothing. |
-| 8 | Store error handling | `try/catch/finally` in `updatePosts` | Pre-existing infinite-skeleton bug; a new page should not inherit it. |
+| 1 | Where project content lives | **The CMS.** Nothing about a project lives in two places | Asked for explicitly. Also puts prose in an editor instead of a code file |
+| 2 | Data structure | **`Project : Post`**, typed C# inheritance | Rev 1's alternative was a `metadata` JSON column. Rejected: a free-form blob loses type information, validates nothing, and cannot be refactored safely — for a core domain concept that is the wrong trade |
+| 3 | Category representation | **One blog per category** — the blog *is* the category | `Project` already inherits `BlogId`. The three category intros become `Blog.Description`, editable in the CMS. `/projects/game-dev` becomes a blog query. The sidebar already groups by blog |
+| 4 | Write boundary | **`Blog.Kind` discriminator**; post endpoints reject project blogs, project endpoints reject standard blogs | Asked for. Complementary, not conditional — a blog is one or the other, and which endpoint may write into it is determined by `Kind` |
+| 5 | Listing vs article payload | Separate `ProjectSummaryResponse` (no `content`) and `ProjectResponse` (full) | 53 articles in one payload is ~150KB for a card grid. A DTO boundary means the listing physically cannot render a body it was not sent |
+| 6 | `status` | Computed **server-side** in `ProjectResponse` | In rev 1 it was derived in TypeScript from a hand-typed date. Now that the date is a typed CMS column, the derivation belongs with the data. The frontend stops computing it and cannot get it wrong |
+| 7 | Manifesto placement | **Into the `projects` blog**, not `special` | One place for all project content. Breaks the `special`-blog pattern used by `why-i-blog`; accepted for coherence |
+| 8 | Admin UI | New project editor form | Asked for and accepted. Inheritance saves the markdown editor, publish toggle, file attachments and cover image — not the form for the typed fields |
+| 9 | Sequencing | CMS work first; frontend work can start against a typed interface | See §9 |
 
 ---
 
-## 3. Current state
+## 3. What the CMS already gives us
 
-Three live problems to fix as part of this work:
-
-```
-PROBLEM 1 — duplicate route names  (Vue Router keys on name; collision warns)
-  /projects         name:"Projects"
-  /projects/:type   name:"Projects"      ← same name
-
-PROBLEM 2 — no type checking in CI or build
-  package.json  "build": "vite build --mode production"
-  AGENTS.md     claims vue-tsc runs first            ← documentation is wrong
-  npx vue-tsc -b  →  3 errors (below)
-
-PROBLEM 3 — unbounded loading state
-  App.vue onBeforeMount → articlesStore.update()
-    → updatePosts()  isDownloading = true
-    → await getBlogFeeds()          ← no try/catch in downloader.ts:7
-    → isDownloading = false         ← never reached on rejection
-  RESULT: backend/CMS down ⇒ skeleton spins forever, site-wide
-```
-
-### 3.1 The three type errors
-
-| File | Line | Code | Problem |
-|---|---|---|---|
-| `src/components/PageSearch.vue` | 35:32 | TS2345 | `NavigationMenuItem` not assignable to `TreeItem` — Nuxt UI v4 type drift |
-| `src/composables/usePlyrAudio.ts` | 1:48 | TS6133 | `onMounted` imported, never read |
-| `src/routes/index.ts` | 86:3 | TS2322 | `Element \| null` not assignable to `HTMLElement \| null` |
-
-All are one-line fixes. The `routes/index.ts` one is in `getContentArea()`,
-which already filters on `el.tagName === 'DIV'` — narrow the `Element[]` to
-`HTMLElement[]` rather than casting.
-
----
-
-## 4. Architecture
+Verified against `~/Documents/code-projects/cms-system`, 2026-09-27.
 
 ```
-NEW
-frontend/src/
-├── data/
-│   └── projects.ts                    PROJECT_CATEGORIES + PROJECTS + 3 selectors
-├── components/projects/
-│   ├── ProjectCard.vue                props: project: FeaturedProject
-│   └── ProjectArchiveList.vue         props: projects: ArchiveProject[]
-└── pages/projects/
-    ├── ProjectsManifesto.vue          /projects
-    └── ProjectsByType.vue             /projects/:type
+Domain/Posts/Post.cs
+  Guid BlogId · Title · Slug · Content(markdown) · Description?
+  string Tag              ← ONE required string, validator: NotEmpty()
+  CoverImageUrl? · PublishedOn? · IsPublished · ICollection<FileItem>
+  : Base (Id, CreatedOn, UpdatedOn, domain events)
 
-MODIFIED
-frontend/src/routes/index.ts            new components + fix duplicate route name
-frontend/src/stores/aritcles-store.ts  try/catch/finally (§3, problem 3)
-frontend/src/stores/sidebar-store.ts   Projects children read from PROJECT_CATEGORIES
-frontend/package.json                   "build": "vue-tsc -b && vite build --mode production"
-frontend/AGENTS.md                      add src/data/ to Project Structure; correct build description
+Infrastructure/Models/PostEntity.cs
+  class PostEntity : IEntityTypeConfiguration<Post>   ← NOT a separate class
+Infrastructure/Models/CmsDbContext.cs
+  DbSet<Post> Posts;  modelBuilder.Entity<Post>()    ← domain entity IS the EF entity
+  builder.HasIndex(b => new { b.BlogId, b.Slug }).IsUnique()
+  DateTimeOffsetToBinaryConverter applied to all DateTimeOffset properties
 ```
 
-`src/helpers/type.ts` gains the interfaces, next to the existing `Blog` / `Post`.
+Two findings that make rev 2 cheap:
 
-`sidebar-store.ts` is in this list because §5.4 claims the registry is the single
-source for the sidebar's Projects children. Today those three entries are
-hardcoded at `sidebar-store.ts:87-107`; without this change the claim is false and
-the nav can drift from the page.
+**There is no separate persistence layer.** `PostEntity` is a fluent
+*configuration* for the domain `Post`; handlers query `db.Posts` directly. So
+`Project : Post` is a plain domain change, and EF Core's default
+**Table-Per-Hierarchy** gives one `Posts` table with a discriminator plus nullable
+project columns — **one migration, no data backfill, existing posts untouched.**
 
-Category data and its selectors live in **one** file, not two, so there is a
-single place to add a project.
+**Slugs are unique per blog, not globally** (`HasIndex(new { BlogId, Slug })`).
+That narrows the collision risk flagged in the migration spec's §6.4.
 
----
+### 3.1 What the CMS cannot hold today
 
-## 5. Data model
-
-```ts
-// src/helpers/type.ts
-
-export interface ProjectCategory {
-  slug: "business-case" | "graphics" | "game-dev";
-  label: string;        // "Game Dev Projects"   — sidebar
-  shortLabel: string;   // "Game Dev"            — breadcrumb, section header
-  icon: string;         // "i-ph-game-controller"
-  intro: string;        // 2–3 sentences, per category
-  accent: "primary" | "secondary" | "tertiary";
-}
-
-export interface ProjectLink {
-  label: string;        // "Source" | "Live Demo" | "Write-up"
-  url: string;
-}
-
-export type ProjectStatus = "active" | "archived";
-
-/** What is hand-written in projects.ts — no derived fields. */
-interface ProjectInput {
-  id: string;                          // "stick-legends" — key + anchor
-  title: string;
-  category: ProjectCategory["slug"];
-  blurb: string;                       // one line — the archive row
-  stack: string[];
-  year: number;
-  lastPushedAt: string;                // ISO date, from GitHub
-  links: ProjectLink[];                // always ≥ 1, always includes Source
-  coverImage?: string;                 // optional; expect none at launch
-}
-
-interface FeaturedInput extends ProjectInput {
-  featured: true;
-  description: string;                 // 2–3 sentences — REQUIRED
-}
-
-interface ArchiveInput extends ProjectInput {
-  featured: false;
-}
-
-/** What the app consumes — `status` is derived, see §5.2. */
-export interface Project {
-  id: string;
-  title: string;
-  category: ProjectCategory["slug"];
-  blurb: string;
-  stack: string[];
-  year: number;
-  lastPushedAt: string;
-  links: ProjectLink[];
-  coverImage?: string;
-  status: ProjectStatus;
-}
-
-export interface FeaturedProject extends Project {
-  featured: true;
-  description: string;
-}
-
-export interface ArchiveProject extends Project {
-  featured: false;
-}
-```
-
-> The `ProjectInput` / `Project` split exists because `status` is **derived**,
-> not authored. Folding it into the input type would mean the hand-written
-> records claim a field they do not own, and `FeaturedProject` — which the card
-> reads `project.status` from — would not have it. That is a TS2339 the moment
-> `vue-tsc` runs, and it is the reason the two types are separate.
-
-### 5.1 Why the discriminated union
-
-`featured: true` without a `description` **does not compile**. This turns
-"featured entries get real write-ups" from a convention that quietly rots into
-a build failure. Depends on decision #7 — without `vue-tsc` in the build, this
-is decorative.
-
-### 5.2 Derived status
-
-```ts
-const ACTIVE_WINDOW_DAYS = 365;
-
-function deriveStatus(lastPushedAt: string): ProjectStatus {
-  const cutoff = Date.now() - ACTIVE_WINDOW_DAYS * 86_400_000;
-  const pushed = new Date(lastPushedAt).getTime();
-  return Number.isNaN(pushed) || pushed < cutoff ? "archived" : "active";
-}
-
-const RAW_PROJECTS: Project[] = [ /* …53 records… */ ];
-
-export const PROJECTS: Project[] = RAW_PROJECTS.map((p) => ({
-  ...p,
-  status: deriveStatus(p.lastPushedAt),
-}));
-```
-
-- Unparseable date → `"archived"`. Fails closed; never claims "active".
-- Change `ACTIVE_WINDOW_DAYS` and every project reclassifies on next build.
-- **Caveat:** `pushedAt` counts pushes to *any* branch, so one drive-by commit
-  to an old repo flips it to `active`. It is still a fact, not a claim.
-
-### 5.2.1 `lastPushedAt` goes stale, and that is a real cost
-
-This is the honest weakness in decision #1. `lastPushedAt` is a hand-typed
-field, and he pushes often — 17 of the 53 roster repos moved in the last 90 days,
-31 of all 105 repos were pushed since 2026-01-01. So roughly a third of the
-roster will show a wrong `status` within a year, and nothing will warn him.
-
-A derived field is only self-maintaining if its input is. Three ways to close
-this, in ascending cost:
-
-| Option | Cost | Guarantee |
+| Need | Blocker | Resolution |
 |---|---|---|
-| **Throwaway refresh script** (recommended) | ~20 lines of `gh` + `jq`, run when he feels like it | He runs it, statuses correct. No new deps, curated file stays curated |
-| Fetch `pushedAt` from GitHub at build time | Needs a token in CI, a network call in `npm run build`, and a fallback for offline builds | Always correct, but contradicts decision #1 and adds a build-time failure mode |
-| Do nothing | Zero | Silently wrong in ~12 months |
+| Structured project fields | No metadata field; `Tag` is one required string | `Project : Post` adds typed columns |
+| Per-blog content kind | No `contentType`; `cms.ts:50` hardcodes `'markdown'` and `usePostRenderer.ts:8` builds `MarkdownIt()` with no `{html: true}` | **Migration spec §5.0** — nullable `contentType` on `Blog`. Blocks this spec too |
+| Set a publication date | `publishedOn` is on the response but on no command | **Migration spec §5.1** |
+| Store a canonical URL | No field | **Migration spec §5.2** |
+| Read anything anonymously | 18 endpoints, 18 `RequireAuthorization`, 0 `AllowAnonymous` | **Migration spec §5.3–5.4** |
 
-The spec does **not** pick one. Decision #1 was chosen deliberately over runtime
-GitHub fetching, and reopening it here would override that choice without asking.
-Default: throwaway refresh script, listed in §10.1 as a deliverable.
-
-### 5.3 Selectors
-
-```ts
-projectsByCategory(slug: string): Project[]          // all, year desc
-featuredProjects(slug: string): FeaturedProject[]
-archiveProjects(slug: string): ArchiveProject[]
-```
-
-### 5.4 Registry
-
-`PROJECT_CATEGORIES` is the single source for page header, intro, icon, accent
-**and** the sidebar's Projects children. Nav and page cannot disagree.
-
-| slug | label | shortLabel | icon | accent |
-|---|---|---|---|---|
-| `game-dev` | Game Dev Projects | Game Dev | `i-ph-game-controller` | primary |
-| `graphics` | Graphics Projects | Graphics | `i-ph-polygon` | secondary |
-| `business-case` | Business Case Projects | Business Case | `i-heroicons-briefcase` | tertiary |
-
-`accent` is applied in exactly two places, both via `@nuxt/ui` `color` props
-rather than custom CSS: the page-header icon, and the featured-card status chip
-(`active` only — `archived` is always neutral `gray`, so the chip reads as
-"still being worked on" and never as a quality judgement).
-
-`/projects` ("Why I do projects") stays a hand-written entry in
-`sidebar-store.ts` — it is not a category.
+**This spec depends on the migration spec's CMS work.** Not on its sequencing or
+its deletion of the Go backend — only on the CMS-side additions. See §9.
 
 ---
 
-## 6. Components & layout
+## 4. Target architecture
 
 ```
-/projects/game-dev
-┌──────────────────────────────────────────────────────────┐
-│ Home › Projects › Game Dev                    UBreadcrumb │
-│ Game Dev Projects                            UPageHeader  │
-│ <intro — from the registry's `intro` field>               │
-│ ────────────────────────────────────────────────────────  │
-│ FEATURED                                                  │
-│ ┌────────────────────┐ ┌────────────────────┐             │
-│ │ [coverImage]       │ │ [coverImage]       │  optional  │
-│ │ Stick Legends  ●   │ │ Go ASCII  ●        │             │
-│ │ blurb, one line    │ │ blurb, one line    │             │
-│ │ 2–3 sentence desc… │ │ 2–3 sentence desc… │             │
-│ │ [TS] [Go]          │ │ [Go]               │  UBadge    │
-│ │ 2025   Source ↗    │ │ 2025   Source ↗    │            │
-│ └────────────────────┘ └────────────────────┘             │
-│ ────────────────────────────────────────────────────────  │
-│ ARCHIVE · 14                                              │
-│ Combat Gods              TypeScript        2024      ↗    │
-│ Handmade Combat Gods     TypeScript        2024      ↗    │
-│ 1-BIT Jam #4             TypeScript        2024      ↗    │
-└──────────────────────────────────────────────────────────┘
+                        CMS  (api-cms.giftmugweni.com)
+                        ────────────────────────────────────────────────
+  Blog "game-dev"       name "Game Dev Projects"   icon i-ph-game-controller
+     Kind = Project     description = <category intro>
+     └── 17 × Project : Post
+           Content (markdown mini-article)
+           Description (one-line blurb, the archive row)
+           Stack[] · Year · LastPushedAt · Links[] · CoverImageUrl
+           PublishedOn · IsPublished · Files → R2
+           + "why-i-projects"          ← the manifesto
+
+  Blog "graphics"       9 × Project
+  Blog "business-case"  27 × Project
+  Blog "special"        "why-i-blog"
+
+                        ▼  GET /public/projects          → ProjectSummaryResponse[]
+                        ▼  GET /public/projects/{slug}   → ProjectResponse
+  frontend  ────────────┴── Cloudflare Pages, static
+  TypeScript
+  ────────────
+  routes/index.ts                  /projects · /projects/:type · /projects/:type/:slug
+  stores/projects-store.ts         fetches + caches the CMS project list
+  components/ArticleView.vue       SHARED with Blog.vue (§7.4)
+  components/projects/*            ProjectCard · ProjectArchiveList · ProjectHeader
+  stores/sidebar-store.ts          category labels/icons/paths only — no content
 ```
 
-| Component | Responsibility | Logic? |
-|---|---|---|
-| `ProjectsByType.vue` | `route.params.type` → registry lookup; header, featured grid, archive | route read only |
-| `ProjectCard.vue` | `UCard` + cover, status chip, blurb, description, stack badges, link buttons | none |
-| `ProjectArchiveList.vue` | one compact row per project; whole row is the link | none |
-| `ProjectsManifesto.vue` | CMS post + 3 category index cards | store read only |
+**Nothing in TypeScript holds project content.** The only project-adjacent data
+left in the frontend is route chrome: which category slug maps to which label,
+icon and path.
 
-All deciding lives in `projects.ts`. The page components are dumb prop-driven
-renderers — nothing in them is worth a unit test, and the logic is all in one
-testable file.
+---
 
-### 6.1 Reused as-is (matching existing usage)
+## 5. `cms-system` — domain and data
 
-`UBreadcrumb` with explicit `items` (per AGENTS.md — never auto-generated from
-routes), `UPageHeader` (as in `CV.vue` and `AllPosts.vue`), `UCard variant="subtle"`,
-`UBadge variant="soft" color="primary"`, `useSeoMeta` per page, `PostSkeleton`
-for the CMS loading state, `usePostRenderer` for markdown → sanitized HTML.
+### 5.1 `Project`
 
-### 6.2 Deliberately not reused
+```csharp
+public enum ProjectCategory { GameDev, Graphics, BusinessCase }   // see §5.2
 
-- **`UBlogPost`** (used in `AllPosts.vue`) — built around `:to` for internal
-  routing plus a date badge. Project cards link *out* to GitHub and show a year.
-  Wrong shape.
-- **`Giphy.vue`** — the WIP placeholder is removed for `/projects`. The file
-  stays in the codebase; `/books` and `/blog` still use it.
+public class ProjectLink
+{
+    public string Label { get; set; } = string.Empty;   // "Source" | "Live Demo" | "Write-up"
+    public string Url   { get; set; } = string.Empty;
+}
 
-### 6.3 Routes
+public class Project : Post
+{
+    public ProjectCategory Category { get; set; }
+    public List<string> Stack { get; set; } = [];
+    public int Year { get; set; }
+    public DateTimeOffset? LastPushedAt { get; set; }
+    public List<ProjectLink> Links { get; set; } = [];
+}
+```
+
+Inherits everything: slug, title, content, description, cover image, publish
+dates, file attachments, domain events. `Tag` is **not** used by a project —
+`Category` replaces it (see §5.4).
+
+`Project.Create(...)` mirrors `Post.Create(...)` and takes the project fields.
+`ProjectStatus` is **not** a stored column; it is computed (§5.8).
+
+### 5.2 Category comes from the blog, so why an enum?
+
+Decision #3 makes the blog the category, which raises the obvious question: if
+`BlogId` already implies the category, is `Project.Category` redundant?
+
+**It is kept, deliberately, as a denormalised read field.** Three reasons:
+
+1. `ProjectResponse` is a flat DTO consumed by a paginated listing. Resolving the
+   blog per project to fill one field is a needless join on the hot path.
+2. It makes `Blog.Kind` and `Project.Category` mutually assertable — a validation
+   rule that a project's category matches its blog's slug. That is exactly the
+   kind of invariant a closed enum can enforce and a string cannot.
+3. It is how the archive-query endpoint filters without joining.
+
+The validator is the enforcement point, not the database:
+
+```csharp
+RuleFor(x => x.Category)
+    .IsInEnum()
+    .Must((cmd, cat) => ProjectBlogs.SlugFor(cat) == BlogSlugFor(cmd.BlogId))
+    .WithMessage("Project.Category must match the blog it is created in.");
+```
+
+`ProjectBlogs` is a small static registry — the three slugs, their labels, icons
+and the enum mapping — so the frontend, the CMS and the importer all agree on one
+table of three rows.
+
+### 5.3 EF configuration
+
+```csharp
+// Infrastructure/Models/ProjectEntity.cs   ← matches the existing naming pattern
+public class ProjectEntity : IEntityTypeConfiguration<Project>
+{
+    public void Configure(EntityTypeBuilder<Project> builder)
+    {
+        builder.Property(b => b.Category).IsRequired();
+        builder.Property(b => b.Year).IsRequired();
+        builder.Property(b => b.LastPushedAt).IsRequired(false);
+        builder.Property(b => b.Stack).HasConversion(
+            v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+            v => JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions?)null) ?? []);
+        builder.Property(b => b.Links).HasConversion(
+            v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+            v => JsonSerializer.Deserialize<List<ProjectLink>>(v, (JsonSerializerOptions?)null) ?? []);
+
+        builder.HasIndex(b => new { b.BlogId, b.Year }).IsDescending(false, true);
+    }
+}
+```
+
+`Stack` and `Links` are value-converted to JSON **columns**, not free-form
+`metadata`. The difference matters and is the whole point of decision #2: the
+value is serialised, but the *shape* is enforced by `List<string>` and
+`List<ProjectLink>` at the domain and command boundary, so nothing arbitrary can
+get in. There is no `metadata` bag to read at runtime and no way to store a
+category as a typo.
+
+`CmsDbContext` gains `DbSet<Project> Projects` and a
+`modelBuilder.Entity<Project>()` configuration call. TPH is the default, so the
+existing `Posts` table gains a discriminator plus five nullable/required columns.
+
+`CmsDbContext.OnModelCreating` already applies `DateTimeOffsetToBinaryConverter`
+by reflecting over entity CLR types, so `LastPushedAt` is covered automatically.
+That loop runs over `modelBuilder.Model.GetEntityTypes()`, which will include
+`Project` once it is in the model — no extra work.
+
+**One EF migration.** Additive. No existing row is touched: a discriminator is
+null for every current post, so they all remain `Post`.
+
+### 5.4 `Blog.Kind` — the write boundary
+
+```csharp
+public enum BlogKind { Standard = 0, Project = 1 }
+
+public class Blog : Base
+{
+    // ...existing...
+    public BlogKind Kind { get; set; } = BlogKind.Standard;
+}
+```
+
+Complementary validation, not a conditional skip:
+
+```
+CreatePostCommand / UpdatePostCommand / DeletePostCommand
+  → resolve BlogId; reject if blog.Kind == Project
+
+CreateProjectCommand / UpdateProjectCommand / DeleteProjectCommand
+  → resolve BlogId; reject if blog.Kind != Project
+```
+
+A blog is `Standard` **or** `Project`, never both, and `Kind` alone determines
+which endpoint family may write into it. Consequences:
+
+- You cannot create a bare `Post` in `game-dev` — no row with a project slug and
+  no stack/year.
+- You cannot create a `Project` in `medium` — no project in an archive blog.
+- A project cannot be written through the post endpoint, so its typed fields
+  cannot be skipped.
+
+The same rule is enforced in the UI (§6): the post editor routes are not
+registered for `Kind == Project` blogs, and the project editor is not registered
+for `Standard` ones. The UI is not the security boundary — the validators are —
+but a UI that offers the wrong form is a UI that produces the wrong data.
+
+`Tag` is relaxed for projects only:
+
+```csharp
+RuleFor(x => x.Tag).NotEmpty().When(cmd => IsStandardBlog(cmd.BlogId));
+```
+
+Without this, a project would be forced to duplicate its category into `Tag` —
+two fields that must agree, and therefore a bug waiting to happen.
+
+### 5.5 DTOs
+
+```csharp
+public sealed record ProjectSummaryResponse(
+    Guid Id, Guid BlogId, string Slug, string Title,
+    string? Description, ProjectCategory Category,
+    List<string> Stack, int Year, DateTimeOffset? LastPushedAt,
+    List<ProjectLink> Links, string? CoverImageUrl,
+    DateTimeOffset? PublishedOn, ProjectStatus Status);
+// deliberately absent: Content
+
+public sealed record ProjectResponse(
+    Guid Id, Guid BlogId, string Slug, string Title,
+    string Content, string? Description, ProjectCategory Category,
+    List<string> Stack, int Year, DateTimeOffset? LastPushedAt,
+    List<ProjectLink> Links, string? CoverImageUrl,
+    DateTimeOffset? PublishedOn, ProjectStatus Status);
+
+public enum ProjectStatus { Active, Archived }
+```
+
+`ProjectSummaryResponse` omits `Content` — that is the payload decision (#5).
+`PublicProjectResponse` is unnecessary: `ProjectResponse` is already a boundary
+DTO that excludes `IsPublished`, `CreatedOn` and `UpdatedOn` by construction.
+
+Both expose `FromDomain(Project)` static factories, matching `PostResponse.FromDomain`.
+
+### 5.6 `status` computed server-side
+
+```csharp
+public static class ProjectStatusRules
+{
+    public const int ActiveWindowDays = 365;
+
+    public static ProjectStatus Derive(DateTimeOffset? lastPushedAt) =>
+        lastPushedAt is { } pushed &&
+        pushed >= DateTimeOffset.UtcNow.AddDays(-ActiveWindowDays)
+            ? ProjectStatus.Active
+            : ProjectStatus.Archived;
+}
+```
+
+- Null or absent → `Archived`. Fails closed; never claims `Active`.
+- Unparseable input cannot reach here — the column is typed.
+- Changing the window reclassifies everything, with no data migration.
+- **Known limitation, stated honestly:** `LastPushedAt` is still entered by hand,
+  and the user pushes often — 17 of the 53 roster repos moved in the last 90 days.
+  So the field goes stale within about a year and nothing warns him. In rev 1 this
+  was a silent decay in TypeScript; in rev 2 it is a visible column in a CMS form
+  he opens when he updates a project. A throwaway `gh`/`jq` refresh script (§8.3)
+  is the cheap fix. This spec does not automate it.
+
+### 5.7 Handlers and endpoints
+
+```
+Application/Projects/
+  CreateProjectCommand.cs  + Handler   (validates Kind + Category match)
+  UpdateProjectCommand.cs  + Handler
+  DeleteProjectCommand.cs  + Handler
+  GetProjectsQuery.cs      + Handler   (optional: BlogId filter, published-only)
+  GetProjectBySlugQuery.cs + Handler
+  ProjectResponse.cs · ProjectSummaryResponse.cs · ProjectLink.cs
+
+Api/Endpoints/Projects/ProjectEndpoints.cs
+  MapGet    /projects                      → ProjectSummaryResponse[]
+  MapGet    /projects/{slug}               → ProjectResponse
+  MapPost   /projects                      CreateProjectCommand
+  MapPut    /projects/{id}                 UpdateProjectCommand
+  MapDelete /projects/{id}                 DeleteProjectCommand
+```
+
+Public mirrors, `.AllowAnonymous()`, mirroring §5.3–5.4 of the migration spec:
+
+```
+  MapGet /public/projects                  → ProjectSummaryResponse[]
+  MapGet /public/projects/{slug}           → ProjectResponse
+```
+
+Both hard-filter `IsPublished` in the `Where` clause — the same rule as
+`GetPublicPostsQuery`, not a parameter a handler can forget.
+
+The listing endpoint supports `?category=game-dev` and `?year=2025`; both map to
+`Where` clauses. The frontend fetches once and filters client-side, because
+53 records in `ProjectSummaryResponse` form is small.
+
+### 5.8 Blog seed data
+
+```
+Blog "game-dev"        Kind=Project  name "Game Dev Projects"        icon i-ph-game-controller
+Blog "graphics"        Kind=Project  name "Graphics Projects"         icon i-ph-polygon
+Blog "business-case"   Kind=Project  name "Business Case Projects"    icon i-heroicons-briefcase
+```
+
+`description` is the category intro, editable in the CMS. Created by the
+importer (§8) or by hand — either way once, not per post.
+
+---
+
+## 6. `cms-system` — admin UI
+
+Inheritance saves the markdown editor, the publish toggle, file attachment and
+cover-image upload. It does **not** save the form for the typed fields. New work in
+`cms-system/frontend`:
+
+```
+1. Project editor form        Title · Slug · Content(markdown) · Description
+                              Category (select, 3 options) · Stack (tag input)
+                              Year (number) · LastPushedAt (date) ·
+                              Links (repeatable label+url) · CoverImage
+2. Project list view          reuses the post list; adds Stack/Year/Status columns
+3. Blog form gains `Kind`     Project blogs are not offered a plain-post editor
+4. Route guards               post editor routes reject Kind==Project blogs and
+                              vice versa — mirroring the API validators, not
+                              replacing them
+```
+
+Roughly the metadata form plus three wiring changes. The markdown editing
+experience, which is the part that actually matters for writing 53 articles, is
+inherited unchanged.
+
+---
+
+## 7. `personal-site` — frontend
+
+### 7.1 Routes
 
 ```
 BEFORE                                    AFTER
-──────────────────────────────────────     ───────────────────────────────────
-/projects        name:"Projects"  WIP      /projects        name:"Projects"
-                                          component: ProjectsManifesto
-
-/projects/:type  name:"Projects"  WIP ⚠    /projects/:type  name:"ProjectsByType"
-                                          component: ProjectsByType
+──────────────────────────────────────     ─────────────────────────────────────
+/projects        name:"Projects"  WIP      /projects          name:"Projects"
+                                          component: ProjectsIndex.vue
+/project/:type    name:"Projects"  WIP ⚠   /projects/:type    name:"ProjectCategory"
+                                          component: ProjectCategory.vue
+                                          /projects/:type/:slug  name:"Project"
+                                          component: ProjectArticle.vue
 ```
 
-`/books`, `/blog`, and all other routes are untouched.
+Also fixes the live duplicate-route-name bug: `/projects` and `/projects/:type`
+are both currently `name: "Projects"`, which Vue Router treats as a key collision.
 
----
+`WorkInProgess.vue` is retained — `/books` and `/blog` still use it.
 
-## 7. Data flow
+### 7.2 Store
 
-```
-/projects  (manifesto)                /projects/:type
-─────────────────────────────         ──────────────────────────────
-CMS "special" blog                    src/data/projects.ts  (bundled, sync)
-  ↓ App.vue onBeforeMount                ↓
-    → articlesStore.update()           PROJECT_CATEGORIES[route.params.type]
-      ← ONE global fetch, exists           ↓
-        already                           featuredProjects() / archiveProjects()
-  ↓
-findPostBySlug("special",                    ↓
-              "why-i-projects")        render
-  ↓
-usePostRenderer
-  (md → DOMPurify → v-html)
-  ↓
-UCard + 3 category index cards
-```
+New `stores/projects-store.ts`: fetches `ProjectSummaryResponse[]` once, exposes
+`byCategory`, `featured(slug)`, `archive(slug)`, `find(slug)`, and
+`isDownloading`. Separate from `articlesStore` because the two have different
+sources, lifetimes and failure modes — a CMS project outage should not put a
+skeleton on the blog pages.
 
-No new fetching. `special` is already in the hardcoded slug list at
-`src/helpers/blogs/cms.ts:9`, so a post added under it is picked up with zero
-backend work.
+### 7.3 Components
 
-### 7.1 Store error handling (decision #8)
-
-```ts
-async function updatePosts(blogs: Ref<Blog[]>, isDownloading: Ref<boolean>) {
-  isDownloading.value = true;
-  try {
-    blogs.value = await getBlogFeeds();
-  } catch (error) {
-    console.error("Failed to load blog feeds", error);
-    blogs.value = [];
-  } finally {
-    isDownloading.value = false;
-  }
-}
-```
-
-Touches shared code. On failure the store lands empty and `isDownloading` goes
-false, so pages render their not-found/empty states instead of spinning
-forever. Fixes the whole site, not just `/projects`.
-
----
-
-## 8. Edge cases
-
-| Case | Behaviour |
+| Component | Renders |
 |---|---|
-| `/projects/nonsense` (unknown `:type`) | Friendly card listing the 3 real categories. Not a silent blank page, not a redirect. |
-| `why-i-projects` not yet in CMS | "Still being written" + the 3 category cards. `usePostRenderer` already exposes `isNotFound`. |
-| Backend / CMS down | Store lands empty via §7.1 ⇒ same "still being written" state. No infinite skeleton. |
-| Category has 0 featured | Featured section omitted entirely — no empty heading. |
-| Category has 0 archive | Archive section omitted entirely. |
-| Empty `stack` | Badge row hidden. |
-| Empty `links` | Link row hidden. (`links` is typed non-optional; the guard is for hand-edited data.) |
-| Unparseable `lastPushedAt` | `deriveStatus` → `"archived"`. |
-| Markdown contains `<audio>` | `usePostRenderer` already preserves it — inherited, not re-implemented. |
+| `ProjectsIndex.vue` | Manifesto (`findPostBySlug(blogSlugOf("game-dev"), "why-i-projects")`) + 3 category index cards with counts |
+| `ProjectCategory.vue` | Blog header (name, description, icon from the CMS blog) + featured grid + archive |
+| `ProjectCard.vue` | `UCard`, optional cover, status chip, blurb, stack badges, year, links |
+| `ProjectArchiveList.vue` | One row per project: title · stack · year · external icon |
+| `ProjectArticle.vue` | `ArticleView` + project header block (stack, year, state, links) |
+| `ArticleView.vue` | **Shared with `Blog.vue`** — see §7.4 |
 
----
+`status` arrives from the server and is rendered as a chip. Per decision #2 in
+rev 1, `active` uses the category accent and `archived` is always neutral grey, so
+the chip reads as "still being worked on" and never as a quality judgement.
 
-## 9. Type safety (decision #7)
+### 7.4 `ArticleView` extraction
 
-Fix the three errors in §3.1, then:
+A project article is structurally identical to a blog post: breadcrumb, title,
+date, cover, prose, code highlighting, images, audio, SEO, JSON-LD. The only
+differences are the project header block and the breadcrumb trail.
 
-```json
-"build": "vue-tsc -b && vite build --mode production"
+So `ArticleView.vue` is extracted from `Blog.vue` and both consume it, rather than
+copy-pasting a post page into a second one. `usePostRenderer` is reused unchanged.
+
+### 7.5 Deleted from rev 1
+
+```
+src/data/projects.ts                    the 53-record data file
+src/data/project-categories.ts          never existed (folded in rev 1)
+ProjectInput / Project / FeaturedProject / ArchiveProject   the discriminated union
+featured: true | false                  replaced by Blog membership + curation order
+deriveStatus() in TypeScript            moved server-side (§5.6)
 ```
 
-This makes AGENTS.md's documented build behaviour true and gates deploys on
-types. Also correct the `Build Commands` block in `frontend/AGENTS.md`, which
-already claims this behaviour but is wrong.
+### 7.6 Also in scope — the rev 1 shared-code fixes
+
+Unchanged from rev 1 and still required:
+
+| Fix | Why |
+|---|---|
+| `try/catch/finally` in `updatePosts` | A rejection currently leaves `isDownloading === true` forever — a permanent site-wide skeleton. **Also a prerequisite for the migration cutover** |
+| 3 pre-existing `vue-tsc` errors | `PageSearch.vue:35`, `usePlyrAudio.ts:1`, `routes/index.ts:86` |
+| `"build": "vue-tsc -b && vite build --mode production"` | Without it, no type in either spec is actually enforced |
+| `sidebar-store.ts` reads category labels/icons from a shared table | Otherwise nav and page drift |
 
 ---
 
-## 10. Content plan
+## 8. The 53 mini-articles
 
-### 10.1 Ownership
+### 8.1 What each article contains
+
+A consistent structure, so 53 articles read as one body of work rather than 53
+unrelated pages:
+
+```markdown
+# <Title>
+
+<One-paragraph blurb — this is also the card's Description.>
+
+## What it does
+## Why I made it
+## Where it's at now
+## What I learned          ← the part a README cannot supply
+
+**Stack:** TypeScript · PixiJS      **Year:** 2025      **State:** active
+```
+
+"What I learned" is the section the user cannot get from the code. Everything
+else is derivable.
+
+### 8.2 Who writes what
 
 | Author | Deliverable |
 |---|---|
-| Agent, user edits | 3 category `intro` strings, labels, icons, accents |
-| Agent, user edits | 53 project records: id, title, category, blurb, stack, year, `lastPushedAt`, links, `featured` |
-| Agent, user edits | 10 × `description` (2–3 sentences, featured only) |
-| Agent, user pastes | ~500-word `why-i-projects` markdown for the CMS `special` blog |
-| Agent | Per-category `useSeoMeta` copy (title, description, OG, Twitter) |
-| **User decides** | The 3 category intros are his voice — expect to rewrite |
-| **User verifies** | The 10 descriptions are synthesis of README + code + session history — correct anything that misrepresents intent |
-| **User confirms** | The featured picks in §10.3 |
+| Agent | 53 drafts assembled from source: README where it is real, `package.json`/`.csproj`/`go.mod` for the stack, entry points and route tables for "what it does", commit history for "where it's at now" |
+| Agent | Flags each article where intent had to be inferred, and asks rather than inventing |
+| **User** | Rewrites "What I learned" — the intent a repository cannot record |
+| **User** | Corrects "Why I made it" wherever the draft guessed |
+| **User** | Confirms or changes the roster (§8.4) |
+| Importer | Creates the 53 `Project` rows with typed fields, then the articles are edited in the CMS UI |
 
-### 10.2 Roster — 53 of 105 shown
+The split matters: a plausible-sounding invented rationale is worse than an empty
+section, because he will not remember which parts were guesses.
 
-**Game Dev — 17**
+### 8.3 A refresh script for `LastPushedAt`
 
-`stick-legends` · `gameboy-emulator` · `1-bit-jam-4` · `combat-gods` ·
-`handmade-combat-gods` · `web-game-engine` · `godot-pong` · `pixijs-pong` ·
-`pixijs-breakout` · `pixijs-flappy-bird` · `pixijs-games-template` ·
-`learn-pixi-js` · `flappy-bird` · `ping-pong` · `breakout` · `js-ping-pong` ·
-`raylib-playground`
+~20 lines of `gh` + `jq`, throwaway, not committed. It prints the current
+`pushedAt` for every repo in the roster so the CMS column can be updated in one
+pass. This is the answer to §5.6's staleness problem, and it is deliberately not
+a build-time GitHub fetch — that would reintroduce the network dependency rev 1
+was right to reject.
 
-**Graphics — 9**
+### 8.4 Roster — 53 of 105 shown
 
-`shader-land` ★1 · `article-11-code` · `webgpu-shader-art` · `web-gpu-first-app` ·
-`blog-webgpu-hello-world` · `webgpu-template` · `images-to-spritesheet` ·
-`manim-animations` · `go-ascii-renderer`
+Unchanged from rev 1 §10.2. Every one of the 105 public repos is accounted for,
+and the split must total 105.
 
-**Business Case — 27**
+**Game Dev — 17** · `stick-legends` `gameboy-emulator` `1-bit-jam-4` `combat-gods`
+`handmade-combat-gods` `web-game-engine` `godot-pong` `pixijs-pong` `pixijs-breakout`
+`pixijs-flappy-bird` `pixijs-games-template` `learn-pixi-js` `flappy-bird` `ping-pong`
+`breakout` `js-ping-pong` `raylib-playground`
 
-`cms-system` · `erpnext-dashboard` ★2 · `class-booking-system` · `point-of-sale` ·
-`fountain-of-life` · `nbi-website` · `voice-generation-site` · `frappe-pesepay` ·
-`pesepay` · `hotspot-cafe-config` · `frappe-radiusdesk` ·
-`erpnext-cashbook-reconciliation` · `stock-reconciliation` ★1 ·
-`erpnext-point-of-sale-expenses` · `erpnext-market-survey` ·
-`awesome_restaurant` · `awesome_dashboard_scripts` · `awesome-butchery` ·
-`holdings-operations-management` · `background-changer` · `nbi-satellite` ·
-`nbi-satellite-2` · `document-convertor` · `quickbooks-excel-uploader` ·
-`pause-audio` · `whatsapp-church-bus-bookings` · `frappe-self-host`
+**Graphics — 9** · `shader-land`★1 `article-11-code` `webgpu-shader-art`
+`web-gpu-first-app` `blog-webgpu-hello-world` `webgpu-template`
+`images-to-spritesheet` `manim-animations` `go-ascii-renderer`
 
-#### Excluded — 52
+**Business Case — 27** · `cms-system` `erpnext-dashboard`★2 `class-booking-system`
+`point-of-sale` `fountain-of-life` `nbi-website` `voice-generation-site` `frappe-pesepay`
+`pesepay` `hotspot-cafe-config` `frappe-radiusdesk` `erpnext-cashbook-reconciliation`
+`stock-reconciliation`★1 `erpnext-point-of-sale-expenses` `erpnext-market-survey`
+`awesome_restaurant` `awesome_dashboard_scripts` `awesome-butchery`
+`holdings-operations-management` `background-changer` `nbi-satellite` `nbi-satellite-2`
+`document-convertor` `quickbooks-excel-uploader` `pause-audio`
+`whatsapp-church-bus-bookings` `frappe-self-host`
 
-| Group | n | Repos |
-|---|---|---|
-| Forks | 3 | `erpnext` · `agriculture` · `build-your-own-x` |
-| **Secrets** | 1 | `hotspot-droplet-backup` — its own description reads *"contains secrets - never make public"*. Must never appear on the site. |
-| Deploy artifacts | 6 | `personal-site-build` · `cms-system-frontend-build` · `fountain-of-life-build` · `nbi-site-build` · `voice-generation-site-built` · `njeremoto-dashboard-build` |
-| Superseded / personal | 7 | `personal-site` (this site) · `personal-blog-portfolio` (2023 Astro) · `dotfiles` · `lazy-vim-config` · `multi-agent-opencode-swarm` · `medium-blogs-backup` · `hashnode-blog-backups` |
-| Bootcamp / scratch | 8 | `zaio-week3-react` · `zaio-week3-rest-api` · `zaio-week3-nodejs` · `zaio-week4-node-js-api` · `zaio-first-project` · `test-react` · `gifts-blog` · `youtube-transcript-downloder-scripts` |
-| UCT coursework | 19 | `CSC3022F-ML-Assignment-1/2/3` · `CSC3022F-Assignment-2/3` · `CSC3022-Assignment-1` · `EEE4120F-YODA` · `EEE4120F-Pracs` · `EEE4120-Prac-4` · `EEE4114F-PROJECT` · `EEE3096S-Mini-Project` · `eee3096s-wp3` · `eee3096s_consolidation` · `eee3096S-prac3-preprac` · `csc2002s_assignment1/2/3` · `csc2002-assignment1` · `csc2001-assignment2` |
-| Student era / hackathon | 2 | `FirabaseTryout` · `FirewallHackathon` (2019 Allan Gray hackathon) |
-| Junk | 2 | `test- ` · `FirewallHackathon2` (description: `"asdfa"`) |
-| Unclassifiable | 4 | `pets` · `distinctstore.pos` · `papi_iot` · `raspberrypi-infragram-camera` |
+**Excluded — 52.** Forks (3) · secrets (1, `hotspot-droplet-backup` — its own
+description says *"contains secrets - never make public"*) · deploy artifacts (6) ·
+superseded/personal (7) · bootcamp/scratch (8) · UCT coursework (19) ·
+student-era/hackathon (2) · junk (2) · unclassifiable (4: `pets`,
+`distinctstore.pos`, `papi_iot`, `raspberrypi-infragram-camera`★1 — **default
+excluded**, recommend Graphics).
 
-**53 + 52 = 105.** Any repo not in this table is a bug in the roster.
+Curation stands as decided in rev 1: 19 auto-generated assignment repos excluded
+on principle, because they would dominate the archive and bury the self-directed
+work. That is a judgement call, and it is his to reverse — `csc2001-assignment2`
+and `csc2002-assignment1` (AVL vs BST benchmarks) are the two worth adding back if
+he wants his degree work represented.
 
-> **Counting note.** `gh repo list Stelele` (REST) reports 105 public repos and is
-> the authoritative list. The GraphQL `repositories` connection silently caps at
-> 80 for this account, omitting 25 — all coursework, personal repos, build
-> artifacts, and `hotspot-droplet-backup`. Topics could only be verified on the
-> 80 GraphQL exposes, but all 25 omitted repos are excluded on other grounds, so
-> decision #1 is unaffected. Do not use GraphQL to enumerate this account.
-
-Coursework is excluded on principle, not taste: 19 auto-generated assignment
-repos would dominate the archive and bury the self-directed work that actually
-says something. `csc2001-assignment2` and `csc2002-assignment1` are the
-strongest of the set (AVL vs BST benchmarks) and would be reasonable
-archive entries if he wants his academic work represented.
-
-#### The 4 unclassifiable repos
-
-None of these has a usable description, so no honest blurb can be written
-without input. **Default: excluded.**
-
-| Repo | Date | Lang | Note |
-|---|---|---|---|
-| `pets` | 2025-02-24 | Go | No description. |
-| `distinctstore.pos` | 2025-03-03 | JS | No description. |
-| `papi_iot` | 2024-12-07 | Python | No description. |
-| `raspberrypi-infragram-camera` ★1 | 2021-11-06 | CSS | *"Raspberry Pi Based Infragram Camera for Agricultural Applications"* — has a real description and a star, but is a 2021 UCT-era hardware project. **Recommend: Graphics, archived.** Reversible with one word. |
-
-### 10.3 Featured picks — 10
-
-| Category | Project | lastPushedAt | Derived status | Why |
-|---|---|---|---|---|
-| Game Dev | `stick-legends` | 2025-10-30 | active | The one still being chased; own description admits it |
-| Game Dev | `1-bit-jam-4` | 2024-10-03 | archived | Shipped under a real jam deadline, public itch.io page |
-| Game Dev | `combat-gods` | 2024-12-13 | archived | Pairs with `handmade-combat-gods` as a before/after |
-| Graphics | `shader-land` | 2025-02-08 | archived | Flagship WebGPU work, ★1 |
-| Graphics | `go-ascii-renderer` | 2025-10-18 | active | 3 working programs, best README in the account |
-| Graphics | `manim-animations` | 2025-04-02 | archived | Different medium — shows range |
-| Business | `cms-system` | 2026-08-04 | active | Powers *this very site* |
-| Business | `erpnext-dashboard` | 2026-08-18 | active | Most-starred, full product, real tech-stack doc |
-| Business | `class-booking-system` | 2026-09-26 | active | Real client, real money via PesePay/Ecocash |
-| Business | `fountain-of-life` | 2026-08-16 | active | Non-commercial work — shows range |
-
-Resulting mix: 6 `active`, 4 `archived`. Honest rather than flattering.
-
-### 10.4 Manifesto direction
-
-The `why-i-projects` post is built on a thesis the GitHub account already
-argues for, not on generic "I love to learn" copy:
-
-```
-  LEARN BY REBUILDING              →  build-your-own-x
-                                   →  combat-gods → handmade-combat-gods
-                                   →  gameboy-emulator
-
-  GO DEEP, NOT WIDE                →  web-gpu-first-app → blog-webgpu-hello-world
-                                       → webgpu-template → shader-land
-                                   →  learn-pixi-js → pixijs-* → raylib-playground
-
-  THEN SHIP IT FOR SOMEONE         →  cms-system (this site)
-                                   →  erpnext-dashboard, class-booking-system
-                                   →  ERPNext self-hosting + PesePay/Ecocash
-```
-
-Draft delivered as a paste-ready markdown block. **Not** written to the
-production CMS — the user pastes it into the `special` blog admin UI.
-
-### 10.5 Cover images
-
-`coverImage` is typed optional and **expected to be empty at launch.** No
-screenshots can be sourced, and generated placeholder art would look worse than
-no art. Cards render image-less until files are dropped into
-`public/assets/projects/`. The field exists so that is a one-file change, not a
-refactor.
+**Featured vs archive** survives as a curation concept, but is no longer a
+type-level distinction. It becomes an explicit ordering on the listing — the
+first N by a hand-set `featured` order in the admin UI, or simply the most recent
+by year. Simplest: **archive is everything, ordered by year desc; the first 3–4
+per category are additionally surfaced as cards.** No new field.
 
 ---
 
-## 11. Verification
-
-No test framework is installed, and none is added. The meaningful assertions
-are compile-time or one-shot invariants.
+## 9. Sequencing
 
 ```
-GATE                              CHECK
-──────────────────────────────   ───────────────────────────────────────────
-npx vue-tsc -b                    0 errors (after §3.1 fixes)
-npm run lint                      clean
-npm run format:check              clean
-npm run build                     succeeds (now type-gated)
-throwaway node script             every category ≥ 1 project
-                                  every project.category is a valid slug
-                                  no duplicate ids
-                                  every featured has a non-empty description
-                                  PROJECTS.length === 53
-                                  every slug is unique across all 53
-                                  none of the 52 excluded names appears
-browser QA (chrome-devtools)      4 routes render populated
-                                  /projects/nonsense → friendly card
-                                  unknown CMS post → "still being written"
-                                  empty-stack / empty-links guards
-                                  status chips match the 365-day rule
-                                  375px width, no horizontal scroll
-                                  dark + light mode
+CAN START NOW — frontend only, no CMS dependency
+  · duplicate route name fix                    routes/index.ts
+  · try/catch/finally in updatePosts            aritcles-store.ts
+  · the 3 vue-tsc errors + vue-tsc in the build package.json
+  · sidebar-store category wiring               sidebar-store.ts
+  · ArticleView.vue extraction from Blog.vue
+  · ProjectCard / ProjectArchiveList / project
+    page shells, written against a typed
+    ProjectSummaryResponse interface
+
+BLOCKED — needs the CMS first
+  · Project entity, EF migration, Blog.Kind, DTOs, handlers,
+    endpoints, public reads                     cms-system
+  · the project editor form                     cms-system/frontend
+  · the 53 Project rows and their articles      importer
+  · anything that loads real project content    frontend
+
+SHARED WITH THE MIGRATION SPEC
+  · contentType on Blog          ← without it, articles cannot render
+  · publishedOn, canonicalUrl    ← archive and SEO
+  · the anonymous read path      ← 18/18 endpoints currently require auth
+  · the updatePosts try/catch    ← a prerequisite for the migration cutover
 ```
 
-The invariant script is throwaway — not committed. The invariants cannot rot,
-because TypeScript and the build gate catch them.
+This spec does **not** depend on the migration deleting the Go backend. It
+depends only on the CMS-side additions. They can be built in either order, and
+the shared work should be done once.
 
 ---
 
-## 12. Out of scope / follow-ups
+## 10. Verification
+
+```
+CMS                                    FRONTEND
+────────────────────────────────────   ─────────────────────────────────────────
+dotnet build --configuration Release   npx vue-tsc -b          0 errors
+dotnet test  --configuration Release   npm run lint            clean
+one migration, additive, no data      npm run format:check    clean
+  backfill on existing posts           npm run build           succeeds
+
+dotnet ef migrations has-pending-     throwaway script
+  changes → False                      · 53 projects, 3 per
+                                         project blog category
+POST /blogs anonymous                   matches its blog
+POST /blogs anonymous on a draft       no duplicate slugs
+POST /posts into a project blog        no Project row with a
+  → 400 (the boundary)                   null/empty Stack
+POST /projects into a standard        status matches the 365-day
+  blog → 400 (the boundary)             rule for every row
+GET /public/projects                   every one of 53 articles
+  excludes drafts                       renders with code blocks
+GET /public/projects/{slug}           no escaped HTML (contentType)
+  excludes drafts                     stack badges, year, links
+Project.Category mismatch              canonical points at the source
+  → validation error                  404 for an unknown :type and
+                                         an unknown :slug
+                                      /blog/* and /cv unaffected
+                                      375px, no horizontal scroll
+                                      dark + light
+```
+
+---
+
+## 11. Out of scope / follow-ups
 
 | Item | Note |
 |---|---|
-| `/blog` landing page | Still `WorkInProgress.vue`. Separate spec. |
-| `/books` + 7 genres + "Why I read books" | Still `WorkInProgress.vue`. Separate spec. GitHub cannot supply book opinions — needs direct input. |
-| `frontend/.env` is git-tracked and contains `VITE_CMS_AUTH0_CLIENT_SECRET` | 27 chars vs the real 64-char secret in untracked `backend/.env`, so it looks like a stale placeholder. `VITE_*` vars are inlined into the public JS bundle regardless. Should be deleted and `.env*` gitignored. **Unrelated cleanup — not in this spec.** |
-| `hotspot-droplet-backup` | Confirmed private / never-public. Excluded from the roster. |
-| `Giphy.vue` | Kept; still used by `/books` and `/blog`. |
-| UCT coursework (19 repos) | Excluded on principle, §10.2. If he wants his academic work represented, `csc2001-assignment2` and `csc2002-assignment1` are the two worth adding. Separate decision, not this spec. |
+| `/blog` landing | Still `WorkInProgress.vue`. One new page, no new content — see §1.1 |
+| `/books` + 7 genres | Still `WorkInProgress.vue`. GitHub cannot supply book opinions; needs direct input |
+| Cover images for projects | No screenshots can be sourced. Cards render image-less until files are added to the CMS, which supports it natively via `CoverImageUrl` + `Files` → R2 |
+| Automated `LastPushedAt` | §8.3 refresh script, run by hand |
+| `featured` ordering | Archive ordered by year desc; the top 3–4 per category are surfaced as cards. No new field (§8.4) |
+| Go backend deletion | Migration spec, not this one. This spec does not touch it |
+| `frontend/.env` tracked with a `VITE_CMS_AUTH0_CLIENT_SECRET` | 27 chars vs the real 64-char secret — a stale placeholder, not a live credential. But `VITE_*` vars are inlined into the public bundle. Should be deleted and `.env*` gitignored. **Unrelated cleanup** |
 
-## 13. Open items for the user
+## 12. Open items
 
-Each has a stated default, so the spec is implementable as written without an
-answer — these are reversals, not blockers.
+Each has a stated default, so this spec is implementable as written.
 
 1. **The 4 unclassifiable repos** — `pets`, `distinctstore.pos`, `papi_iot`,
-   `raspberrypi-infragram-camera`. Default excluded; recommend Graphics for the
-   last one. Name a category to include.
-2. **Roster corrections** — any project in the wrong category, or any exclusion
-   that should be reversed. Cheap now, expensive after the copy is written.
-3. **The three type-error fixes** are in shared files (`PageSearch.vue`,
-   `usePlyrAudio.ts`, `routes/index.ts`) and the store change touches shared
-   code. Flagged for explicit review.
-4. **`vue-tsc -b` in the build script** means type errors now block deploys.
-   Confirmed the 3 known errors are the complete set as of 2026-09-27; anything
-   introduced later will fail the build rather than ship.
+   `raspberrypi-infragram-camera`★1. Default excluded; recommend Graphics for the
+   last. Name a category to include.
+2. **Roster corrections** — any project in the wrong category, or an exclusion to
+   reverse. Cheap now, expensive after 53 articles are written against it.
+3. **UCT coursework (19 repos)** — default excluded on principle. Reversible.
+4. **`Project.Category` as a denormalised field** (§5.2). Kept deliberately for
+   queryability and the blog-match invariant. If it reads as redundant, delete it
+   and resolve the category from `BlogId` in the DTO mapping — the validator
+   invariant goes with it.
+5. **Build order between the two specs** — the shared CMS work
+   (`contentType`, `publishedOn`, `canonicalUrl`, anonymous reads) should be done
+   once. Whether that lands as part of the migration or as separate CMS work
+   before it is a scheduling choice, not a design one.
