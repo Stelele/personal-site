@@ -1512,15 +1512,57 @@ were wrong, because the task bodies add 6.
 | After | New | Total | Observed |
 |---|---|---|---|
 | Task 1 | 6 | 92 | ✅ confirmed |
-| Task 2 | 2 | 94 | pending |
-| Task 3 | 7 | 101 | pending |
-| Task 4 | 6 | 107 | pending |
-| Task 5 | 6 | 113 | pending |
-| Task 6 | 0 | 113 | pending |
+| Task 2 | 2 | 94 | ✅ confirmed |
+| Task 3 | 7 | 101 | ✅ confirmed |
+| Task 4 | 8 | 109 | ✅ confirmed — 2 more than planned, see below |
+| Task 5 | 7 | 116 | ✅ confirmed — 1 more than planned, see below |
+| Task 6 | 0 | 116 | pending |
 
 Task 2's two tests verify persistence of the typed fields and of `Blog.Kind`
 against a real database, even though the migration itself is verified separately
 against a throwaway copy. Task 6 adds none — it is end-to-end verification only.
+
+**Final state: 116 passing, verified with the exact CI command, on branch
+`feat/cms-project-domain` stacked on `feat/cms-public-read`.**
+
+**The EF Table-Per-Hierarchy discriminator was a live hazard, and the plan did not
+anticipate it.** The migration EF generates for `Project : Post` adds `Discriminator`
+as `NOT NULL defaultValue ""`. SQLite stamps that default onto every pre-existing
+row, and `""` matches no type, so the entire `Posts` table becomes unreadable —
+silently, with the migration reporting success and every row count unchanged. The
+symptom is:
+
+```
+InvalidOperationException: Unable to materialize entity instance of type 'Post'.
+No discriminators matched the discriminator value ''.
+```
+
+Only reading through EF against a real migrated database catches this. Row counts
+and `dotnet test` both pass while it is broken. Two things were needed:
+
+- `HasValue<Post>(null)` is **not** usable. EF Core 9.0.11's
+  `DiscriminatorLengthConvention` throws a `NullReferenceException` while inferring
+  a column length from a null root value, whether the discriminator is a
+  name-only shadow property or a real CLR property.
+- The root value is therefore **named** (`"Post"`), and the migration carries a
+  single hand edit aligning `defaultValue` with it. That is the only hand edit in
+  the file and is marked as such in the source.
+
+**Two tests were added that the plan did not call for.** The Update side of the
+post boundary had no test, and neither did "post not found must still return
+`false`" — which matters because the blog lookup sits after the post lookup, and
+only a test proves a missing post is not turned into a throw.
+
+**The plan's `Validator_RejectsACategoryThatDoesNotMatchTheBlog` was a placebo** —
+it asserted only that two slugs differ, validating nothing. Replaced with one that
+seeds a `graphics` blog, attempts a `GameDev` project, and asserts the throw.
+
+**`Blog.Kind` was settable on the entity but not through the API.** The plan's
+File Structure listed `CreateBlogCommand`/`UpdateBlogCommand` as modified but no
+task assigned the work, so a project blog could not be created over HTTP at all and
+`POST /blogs { kind: "Project" }` would have silently produced a `Standard` blog
+that no project could ever be written into. Fixed, with a rule that a `Project`
+blog must use one of the three registered slugs.
 
 **Defect found in this plan during execution, recorded so the next reader does not
 repeat it:** Task 0's `SeedProject` helper originally contained
