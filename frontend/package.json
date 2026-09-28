@@ -5,12 +5,14 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build --mode production",
+    "build": "vue-tsc --noEmit && vite build --mode production",
     "preview": "vite preview",
     "format": "prettier --write \"src/**/*.{ts,vue,css,html,json}\"",
     "format:check": "prettier --check \"src/**/*.{ts,vue,css,html,json}\"",
     "lint": "eslint src --ext .ts,.vue",
-    "lint:fix": "eslint src --ext .ts,.vue --fix"
+    "lint:fix": "eslint src --ext .ts,.vue --fix",
+    "type-check": "vue-tsc --noEmit",
+    "build-only": "vite build --mode production"
   },
   "dependencies": {
     "@giphy/js-components": "^5.13.0",

@@ -40,6 +40,14 @@ export const useArticlesStore = defineStore("ArticlesStore", () => {
 
 async function updatePosts(blogs: Ref<Blog[]>, isDownloading: Ref<boolean>) {
   isDownloading.value = true;
-  blogs.value = await getBlogFeeds();
-  isDownloading.value = false;
+  try {
+    blogs.value = await getBlogFeeds();
+  } catch (error) {
+    // Without this the flag stays true when the download fails, and every
+    // consumer renders its loading skeleton forever - which reads as a slow
+    // site rather than as a failure, and hides the error entirely.
+    console.error("Failed to load blogs", error);
+  } finally {
+    isDownloading.value = false;
+  }
 }

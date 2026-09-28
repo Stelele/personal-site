@@ -6,6 +6,9 @@ const Blog = () => import("@/pages/blog/Blog.vue");
 const AllPosts = () => import("@/pages/blog/AllPosts.vue");
 const WorkInProgress = () => import("@/pages/home/WorkInProgess.vue");
 const WhyIBlogPage = () => import("@/pages/blog/WhyIBlog.vue");
+const ProjectsIndex = () => import("@/pages/projects/ProjectsIndex.vue");
+const CategoryIndex = () => import("@/pages/projects/CategoryIndex.vue");
+const ProjectView = () => import("@/pages/projects/ProjectView.vue");
 
 const routes: RouteRecordRaw[] = [
   {
@@ -52,20 +55,31 @@ const routes: RouteRecordRaw[] = [
   {
     path: "/projects",
     name: "Projects",
-    component: WorkInProgress,
+    component: ProjectsIndex,
+    meta: { title: "Projects", scrollToTop: true },
   },
   {
+    // Must come before /projects/:type/:id or "game-dev" would match the id
+    // segment, and vue-router does not backtrack once a param route matches.
     path: "/projects/:type",
-    name: "Projects",
-    component: WorkInProgress,
+    name: "ProjectCategory",
+    component: CategoryIndex,
+    meta: { scrollToTop: true },
+  },
+  {
+    path: "/projects/:type/:id",
+    name: "Project",
+    component: ProjectView,
+    meta: { scrollToTop: true },
   },
   {
     path: "/books",
+    name: "Books",
     component: WorkInProgress,
   },
   {
     path: "/books/:genre",
-    name: "Books",
+    name: "BooksByGenre",
     component: WorkInProgress,
   },
   {
