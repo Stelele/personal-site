@@ -206,8 +206,8 @@ public class TestDbFixtureTests
 - [ ] **Step 4: Run the tests**
 
 Run: `cd backend && dotnet test`
-Expected: PASS — 2 tests. The fixture compiles as written; no later-task
-dependency has leaked into it.
+Expected: PASS — 37 total (35 pre-existing + 2 new). The fixture compiles as
+written; no later-task dependency has leaked into it.
 
 - [ ] **Step 5: Commit**
 
@@ -405,7 +405,7 @@ Expected: PASS — 8 cases (4 `Fact` + 4 `Theory` rows).
 - [ ] **Step 8: Run the full suite**
 
 Run: `cd backend && dotnet test`
-Expected: PASS — 10 tests total (2 from Task 0, 8 from Task 1).
+Expected: PASS — 45 total (35 pre-existing + 2 from Task 0 + 8 from Task 1).
 
 - [ ] **Step 9: Commit**
 
@@ -743,7 +743,7 @@ public record PostResponse(
 - [ ] **Step 8: Run the tests**
 
 Run: `cd backend && dotnet test`
-Expected: PASS — 15 tests total (2 from Task 0, 8 from Task 1, 5 from Task 2).
+Expected: PASS — 50 total (35 pre-existing + 15 added by Tasks 0-2).
 
 - [ ] **Step 9: Commit**
 
@@ -1192,7 +1192,7 @@ public class GetPublicPostBySlugQueryHandler(CmsDbContext db)
 - [ ] **Step 6: Run to verify it passes**
 
 Run: `cd backend && dotnet test --filter PublicQueryTests`
-Expected: PASS — 5 tests, including the two draft-exclusion assertions.
+Expected: PASS — 59 total, including the two draft-exclusion assertions.
 
 - [ ] **Step 7: Commit**
 
@@ -1319,7 +1319,7 @@ Expected: BUILD SUCCEEDED, 0 warnings.
 - [ ] **Step 5: Run the full test suite**
 
 Run: `cd backend && dotnet test`
-Expected: PASS, 24 tests.
+Expected: PASS, 59 total.
 
 - [ ] **Step 6: Commit**
 
@@ -1544,7 +1544,7 @@ Expected: PASS — 5 tests.
 - [ ] **Step 7: Run everything**
 
 Run: `cd backend && dotnet test`
-Expected: PASS, 29 tests.
+Expected: PASS, 64 total.
 
 - [ ] **Step 8: Commit**
 
@@ -1710,6 +1710,13 @@ git commit -m "fix: correct public read surface found during end-to-end verifica
 | CORS config + Production guard | 7 |
 | Verification | 8 |
 
-**Test count** — Task 0 (2) + Task 1 (8) + Task 2 (5) + Task 4 (4) + Task 5 (5) + Task 7 (5) = **29**. Tasks 3, 6 and 8 add no unit tests: the migration is verified end to end, and the endpoint registration is a compile-time concern. Running totals asserted in the plan: 2 after Task 0, 10 after Task 1, 15 after Task 2, 19 after Task 4, 24 after Task 5, 29 after Task 7.
+**Test count** — the suite starts at **35 pre-existing tests** (verified in the
+worktree on 2026-09-27: `Passed! - Failed: 0, Passed: 35`). This plan adds
+Task 0 (2) + Task 1 (8) + Task 2 (5) + Task 4 (4) + Task 5 (5) + Task 7 (5) =
+**29 new**, for **64 total**. Tasks 3, 6 and 8 add no unit tests: the migration is
+verified end to end, and the endpoint registration is a compile-time concern.
+
+Running totals asserted in the plan: 37 after Task 0, 45 after Task 1, 50 after
+Task 2, 54 after Task 4, 59 after Task 5, 64 after Task 7.
 
 **Type consistency** — `BlogContentType` is used by `Blog.Create`, `PublicBlogResponse`, and the `BlogEntity` config; `SetPublishedOn` is defined in `Post` and called by both handlers; `CorsOriginPolicy.PolicyName` is used by both the `AddCors` registration and the `UseCors` call.
