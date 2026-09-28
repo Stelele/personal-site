@@ -446,8 +446,6 @@ Create `backend/Tests/PostCommandFieldsTests.cs`:
 
 ```csharp
 using Application.Posts;
-using Infrastructure.Services;
-using Moq;
 
 namespace Tests;
 
@@ -460,7 +458,7 @@ public class PostCommandFieldsTests
         var blog = db.SeedBlog("Archive", "archive", "html");
         var when = new DateTimeOffset(2023, 4, 1, 0, 0, 0, TimeSpan.Zero);
 
-        var handler = new CreatePostCommandHandler(db.Db, Mock.Of<FileReferenceService>());
+        var handler = new CreatePostCommandHandler(db.Db, db.FileReferenceService());
         var id = await handler.Handle(
             new CreatePostCommand(blog.Id, "A Post", "a-post", "Body", "Brief",
                                  "general", null, isPublished: true, publishedOn: when),
@@ -478,7 +476,7 @@ public class PostCommandFieldsTests
         var blog = db.SeedBlog("Archive", "archive", "html");
         var before = DateTimeOffset.UtcNow.AddSeconds(-2);
 
-        var handler = new CreatePostCommandHandler(db.Db, Mock.Of<FileReferenceService>());
+        var handler = new CreatePostCommandHandler(db.Db, db.FileReferenceService());
         var id = await handler.Handle(
             new CreatePostCommand(blog.Id, "A Post", "a-post", "Body", "Brief",
                                  "general", null, isPublished: true, publishedOn: null),
@@ -496,7 +494,7 @@ public class PostCommandFieldsTests
         var blog = db.SeedBlog("Archive", "archive", "html");
         const string canonical = "https://hashnode.dev/@gift/post";
 
-        var handler = new CreatePostCommandHandler(db.Db, Mock.Of<FileReferenceService>());
+        var handler = new CreatePostCommandHandler(db.Db, db.FileReferenceService());
         var id = await handler.Handle(
             new CreatePostCommand(blog.Id, "A Post", "a-post", "Body", "Brief",
                                  "general", null, isPublished: true,
@@ -514,7 +512,7 @@ public class PostCommandFieldsTests
         var seeded = db.SeedPost(blog, "Old", "old", isPublished: true);
         var when = new DateTimeOffset(2020, 1, 15, 0, 0, 0, TimeSpan.Zero);
 
-        var handler = new UpdatePostCommandHandler(db.Db, Mock.Of<FileReferenceService>());
+        var handler = new UpdatePostCommandHandler(db.Db, db.FileReferenceService());
         var ok = await handler.Handle(
             new UpdatePostCommand(blog.Id, seeded.Id, "Old", "old", "Body", "Brief",
                                  "general", null, isPublished: true,
@@ -1720,3 +1718,21 @@ Running totals asserted in the plan: 37 after Task 0, 45 after Task 1, 50 after
 Task 2, 54 after Task 4, 59 after Task 5, 64 after Task 7.
 
 **Type consistency** — `BlogContentType` is used by `Blog.Create`, `PublicBlogResponse`, and the `BlogEntity` config; `SetPublishedOn` is defined in `Post` and called by both handlers; `CorsOriginPolicy.PolicyName` is used by both the `AddCors` registration and the `UseCors` call.
+
+**Correction made after a code-quality review.** The plan originally wrote
+`new CreatePostCommandHandler(db.Db, Mock.Of<FileReferenceService>())`. That throws at
+runtime: `FileReferenceService` has a primary constructor `(CmsDbContext, IR2StorageService)`
+and `ReconcilePostFilesAsync` is not `virtual`, so Moq cannot build it. All four sites now use
+`db.FileReferenceService()`, the real instance over a mocked `IR2StorageService` added to
+`TestDb` in Task 0. Its body only queries the database and reads `r2.PublicBucketUrl`, so no
+network call occurs in tests.
+
+**What the Task 0 tests do and do not prove.** Clearing the change tracker genuinely fixes a
+real vacuity — `Single()` had been returning the instance just saved, so nothing reached
+SQLite. But the suggested proof that "removing the `DateTimeOffsetToBinaryConverter` breaks the
+test" **does not hold**: it was tried and the test still passes. EF Core's SQLite provider
+stores `DateTimeOffset` as TEXT that preserves the instant, and `DateTimeOffset` equality
+compares instants rather than offsets, so converter loss is invisible to that assertion. The
+converter exists to make in-SQL *ordering and comparison* of `DateTimeOffset` work; that is
+exercised by the `OrderByDescending(p => p.PublishedOn)` in Task 5, not by a round-trip
+equality check. Do not treat Task 0 as covering converter behaviour.
