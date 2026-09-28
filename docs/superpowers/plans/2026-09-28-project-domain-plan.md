@@ -151,9 +151,11 @@ In `backend/Tests/TestDb.cs`, add these methods. Do not change the existing ones
         DateTimeOffset? lastPushedAt = null,
         bool isPublished = true)
     {
+        // NB: the blog's Kind comes from SeedBlog's `kind` parameter. There is
+        // deliberately no `project.Kind` line - Kind is a property of Blog, not
+        // of Post, and Project inherits from Post.
         var project = Project.Create(
             blog.Id, title, slug, $"# {title}\n\nBody text.", $"{title} brief", category, year);
-        project.Kind = BlogKind.Project;
         project.Stack = stack ?? [];
         project.CanonicalUrl = canonicalUrl;
         project.LastPushedAt = lastPushedAt;
@@ -406,7 +408,7 @@ Append to `backend/Tests/ProjectTests.cs`:
 - [ ] **Step 7: Run**
 
 Run: `cd backend && dotnet test --filter ProjectTests`
-Expected: PASS — 7 tests. `dotnet build` must report **0 `warning CS`**.
+Expected: PASS — 6 tests. `dotnet build` must report **0 `warning CS`**.
 
 - [ ] **Step 8: Commit**
 
@@ -1502,11 +1504,31 @@ boundary (4, 5), `ProjectBlogs` (1), `ProjectStatusRules` and both DTOs (3),
 commands/handlers/endpoints (5), `ProjectSummaryResponse` without `Content` (3),
 public reads (4). §6, the admin UI, is a separate plan by design.
 
-**Test count** — the suite enters this plan at **86** passing. It adds Task 0/1
-(9), Task 3 (7), Task 4 (6) and Task 5 (6) = **28**, for **114**. Task 2 adds no
-unit tests — the migration is verified against a throwaway database. Task 6 adds
-none. Running totals: 95 after Task 1, 102 after Task 3, 108 after Task 4, 114
-after Task 5. If a count differs, trust `dotnet test` and say so.
+**Test count** — the suite enters this plan at **86** passing, and the totals below
+were verified by execution, not by arithmetic on the task bodies. An earlier
+draft of this section claimed 9 new tests for Tasks 0+1 and a total of 114; both
+were wrong, because the task bodies add 6.
+
+| After | New | Total | Observed |
+|---|---|---|---|
+| Task 1 | 6 | 92 | ✅ confirmed |
+| Task 2 | 2 | 94 | pending |
+| Task 3 | 7 | 101 | pending |
+| Task 4 | 6 | 107 | pending |
+| Task 5 | 6 | 113 | pending |
+| Task 6 | 0 | 113 | pending |
+
+Task 2's two tests verify persistence of the typed fields and of `Blog.Kind`
+against a real database, even though the migration itself is verified separately
+against a throwaway copy. Task 6 adds none — it is end-to-end verification only.
+
+**Defect found in this plan during execution, recorded so the next reader does not
+repeat it:** Task 0's `SeedProject` helper originally contained
+`project.Kind = BlogKind.Project;`. `Kind` is a property of `Blog`, not of `Post`,
+so that line does not compile — `Project` inherits from `Post`, which has no such
+member. The blog's kind comes from `SeedBlog`'s `kind` parameter instead, which is
+what every call site already passes. Count project slugs against the *domain*
+model, not the plan's prose, before transcribing.
 
 **Type consistency** — `ProjectBlogs.SlugFor` and `.For` are defined once and used
 by `Project.Create`, `CreateProjectCommandHandler` and the tests.
