@@ -1738,8 +1738,8 @@ end over HTTP instead.
 
 Observed running totals: 37 → 51 → 56 → 66 → 71 → 76.
 
-**Eight defects in this plan's own specified code, all found by review before
-they shipped.** Recorded here because the plan is the artifact a future reader
+**Nine defects in this plan's own specified code, all found by review before
+they shipped.** The ninth was found by the final gate rather than a task review. Recorded here because the plan is the artifact a future reader
 trusts:
 
 | # | Where | Defect | Resolution |
@@ -1752,6 +1752,22 @@ trusts:
 | 6 | Task 3 Step 4 grep | Expected 2 matches for the two new column names; the `Down()` rollback references them too, so 4 is correct | Expectation corrected |
 | 7 | Task 7 test | `FakeEnvironment` as a positional `record` cannot implement `IHostEnvironment`, whose `EnvironmentName` is `{ get; set; }` not `init` — CS8854 | Explicit class with a settable property |
 | 8 | Task 7 `Config()` helper | Keys built as `Cors:AllowedOrigins[{i}]` never bind — .NET splits child sections on `:` only, so `GetSection` saw nothing. `Production_WithNoOrigins_Throws` would have passed for the wrong reason | Keys changed to `Cors:AllowedOrigins:{i}` |
+| 9 | Task 2 command records | Replacing the property-based records with positional ones silently dropped C# `required` from **`CreatePostCommand`**, whose 7 `required` members were what made System.Text.Json reject a payload missing a field. A partial POST omitting `isPublished` deserialised to `false` and created a draft the caller never asked for — and `bool` is non-nullable, so no FluentValidation rule can distinguish absent from false. The archive importer posts `isPublished: true` for 30 posts, so a dropped field would have produced posts silently invisible on the public site | `[property: JsonRequired]` on the members that were originally required, which keeps positional construction so existing call sites still compile |
+
+**A correction to defect 9, because the first account of it was wrong.** The fix was
+described as a *restoration* for both command records. That is accurate only for
+`CreatePostCommand`, which at the base commit `a84e758` had 7 `required` members.
+`UpdatePostCommand` at the same commit was **already** a plain positional record with
+no `required` members and no `[JsonPropertyName]` attributes. Adding `JsonRequired`
+to it is therefore a **new restriction**, not a restoration: a PUT omitting
+`isPublished` or `coverImageUrl` now returns 400 where it previously succeeded.
+
+That is kept, deliberately. The only caller is the CMS admin UI's
+`updatePost`, which sends a complete body including both fields, and the
+admin UI's `quickPublish` is precisely the hazard a partial PUT creates — a
+body missing `isPublished` would silently unpublish a published post. Making it
+loud is the point. But it is a behaviour change on a write endpoint, so it is
+recorded here rather than presented as a bug fix.
 
 **Two environment traps, both worth knowing independently of this plan:**
 
