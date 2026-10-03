@@ -12,13 +12,12 @@
     />
 
     <template v-else>
-      <UPageHeader
-        :title="category.label"
-        :description="category.description"
-        class="mb-8"
-      />
+      <UPageHeader :title="category.label" :description="category.description" class="mb-8" />
 
-      <div v-if="projectsStore.isLoading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div
+        v-if="projectsStore.isLoading"
+        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
+      >
         <div v-for="i in 6" :key="i" class="bg-[--ui-bg-alt] rounded-lg overflow-hidden">
           <USkeleton class="w-full h-40" />
           <div class="p-4 space-y-3">
@@ -93,7 +92,7 @@ const sidebarStore = useSideBarStore();
 const category = computed(() => projectsStore.categoryForSlug(route.params.type as string));
 
 const projects = computed(() =>
-  category.value ? projectsStore.getProjectsByCategory(category.value.category) : [],
+  category.value ? projectsStore.getProjectsByCategory(category.value.category) : []
 );
 
 onMounted(() => {

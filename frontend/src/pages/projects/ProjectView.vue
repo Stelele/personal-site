@@ -12,18 +12,17 @@
         <template #header>
           <div class="flex flex-wrap items-start justify-between gap-4">
             <div>
-              <h1 class="text-2xl md:text-3xl font-bold">{{ project.title }}</h1>
+              <h1 class="text-2xl md:text-3xl font-bold">
+                {{ project.title }}
+              </h1>
               <div class="flex flex-wrap items-center gap-2 mt-3">
                 <UBadge :color="statusColor" variant="subtle">
                   {{ project.status === "Active" ? "Active" : "Archived" }}
                 </UBadge>
-                <UBadge color="neutral" variant="subtle">{{ project.year }}</UBadge>
-                <UBadge
-                  v-for="item in project.stack"
-                  :key="item"
-                  color="neutral"
-                  variant="subtle"
-                >
+                <UBadge color="neutral" variant="subtle">
+                  {{ project.year }}
+                </UBadge>
+                <UBadge v-for="item in project.stack" :key="item" color="neutral" variant="subtle">
                   {{ item }}
                 </UBadge>
               </div>
@@ -51,7 +50,6 @@
         </template>
 
         <div ref="contentRef" class="post-body">
-          <!-- eslint-disable-next-line vue/no-v-html -->
           <article
             class="prose prose-xl prose-slate prose-invert max-w-none text-justify leading-relaxed"
             v-html="augmentedContent"
@@ -121,7 +119,10 @@ const asPost = computed<Post | undefined>(() => {
 const contentType = computed<"markdown" | "html">(() => "markdown");
 const isDataReady = computed(() => !isFetching.value);
 
-const { augmentedContent, isLoading, isNotFound, showCanonical, formatDate } = usePostRenderer({
+// showCanonical and formatDate are deliberately not destructured: the first tests
+// post.link for an https prefix, and a project's link is its slug, so it can never
+// apply here.
+const { augmentedContent, isLoading, isNotFound } = usePostRenderer({
   post: asPost,
   contentType,
   isDataReady,
@@ -132,8 +133,8 @@ usePlyrAudio({ containerRef: contentRef, contentChanged: augmentedContent });
 
 const links = computed(() =>
   (project.value?.links ?? []).filter(
-    (l): l is { label: string; url: string } => !!l.label && !!l.url,
-  ),
+    (l): l is { label: string; url: string } => !!l.label && !!l.url
+  )
 );
 
 const statusColor = computed(() => (project.value?.status === "Active" ? "success" : "neutral"));

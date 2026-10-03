@@ -1,4 +1,4 @@
-import { watch, nextTick, onScopeDispose, ref, onMounted, type ComputedRef, type Ref } from "vue";
+import { watch, nextTick, onScopeDispose, ref, type ComputedRef, type Ref } from "vue";
 import Plyr from "plyr";
 
 interface UsePlyrAudioOptions {
@@ -31,15 +31,7 @@ export function usePlyrAudio({ containerRef, contentChanged }: UsePlyrAudioOptio
 
     for (const audio of audioElements) {
       const player = new Plyr(audio, {
-        controls: [
-          "play",
-          "progress",
-          "current-time",
-          "duration",
-          "mute",
-          "volume",
-          "settings",
-        ],
+        controls: ["play", "progress", "current-time", "duration", "mute", "volume", "settings"],
       });
       players.push(player);
     }

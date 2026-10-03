@@ -42,7 +42,9 @@
           <h2 class="text-lg font-semibold group-hover:text-primary transition-colors">
             {{ category.label }}
           </h2>
-          <p class="text-sm text-muted mt-2">{{ category.description }}</p>
+          <p class="text-sm text-muted mt-2">
+            {{ category.description }}
+          </p>
           <p class="text-xs text-dimmed mt-4">
             {{ category.count }} {{ category.count === 1 ? "project" : "projects" }}
           </p>

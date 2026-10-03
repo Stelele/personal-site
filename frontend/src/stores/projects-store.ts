@@ -6,7 +6,6 @@ import {
   PROJECT_CATEGORIES,
   categoryBySlug,
   type ProjectCategory,
-  type PublicProject,
   type PublicProjectSummary,
 } from "@/services/public-cms";
 
